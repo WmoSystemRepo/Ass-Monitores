@@ -1,7 +1,9 @@
-# Artefatos locais — NUNCA copiar bin/obj entre máquinas (paths absolutos ficam em cache)
+# Artefatos locais — NUNCA copiar bin/obj entre maquinas (paths absolutos ficam em cache)
 **/[Bb]in/
 **/[Oo]bj/
 **/.vs/
+../_artifacts/
+_artifacts/
 *.user
 *.suo
 *.cache

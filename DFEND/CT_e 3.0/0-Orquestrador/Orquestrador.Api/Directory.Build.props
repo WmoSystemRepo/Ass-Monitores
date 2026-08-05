@@ -6,6 +6,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!--
+    Paths curtos para bin/obj sob 0-Orquestrador\_artifacts\
+    Evita MAX_PATH (~260) em clones profundos tipo:
+    ...\Ass-Monitores\...\CT_e 3.0\0-Orquestrador\Orquestrador.Api\src\Modules\...
+    Nunca depende de C:\Users\... — sempre relativo a este Directory.Build.props.
+  -->
+  <PropertyGroup>
+    <_OrqArtifactsRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\_artifacts'))</_OrqArtifactsRoot>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(_OrqArtifactsRoot)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(_OrqArtifactsRoot)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />

@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Aplica a libs/resgate e demais projetos sob 0-Orquestrador (fora de Orquestrador.Api/).
+    Paths curtos em _artifacts — evita MAX_PATH e cache com path de outra maquina.
+  -->
+  <PropertyGroup>
+    <_OrqArtifactsRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)_artifacts'))</_OrqArtifactsRoot>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(_OrqArtifactsRoot)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(_OrqArtifactsRoot)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+</Project>

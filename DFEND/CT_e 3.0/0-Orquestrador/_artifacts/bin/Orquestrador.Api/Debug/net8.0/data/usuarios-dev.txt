@@ -1,6 +1,0 @@
-# Usuários DEV do Resgate CT-e AN (demonstração).
-# Formato: usuario:senha  (uma linha por usuário; # = comentário)
-# NÃO usar em produção — arquivo local provisório.
-
-dev:dev
-demo:assefaz

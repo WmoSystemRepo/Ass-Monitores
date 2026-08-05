@@ -1,0 +1,4 @@
+# bin/obj nunca devem ir para o Git (cache NuGet com path de maquina + conflitos de merge)
+**/[Bb]in/
+**/[Oo]bj/
+*.user

@@ -1,0 +1,8 @@
+# Artefatos de build — nunca versionar (causam conflito <<<<<<< e paths absolutos entre maquinas)
+**/[Bb]in/
+**/[Oo]bj/
+**/.vs/
+_artifacts/
+*.user
+*.suo
+*.cache

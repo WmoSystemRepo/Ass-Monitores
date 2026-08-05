@@ -1,0 +1,31 @@
+COMO USAR (qualquer PC - Mendes ou wmoliveira)
+==============================================
+
+NAO precisa copiar caminho. NAO use o Prompt de Comando com comandos PowerShell.
+
+1) Feche o Visual Studio.
+
+2) No Explorer, abra a pasta:
+   ...\CT_e 3.0\0-Orquestrador
+
+3) Duplo clique em:
+   LIMPAR-E-BUILDAR.cmd
+   (espera terminar com "OK")
+
+4) Duplo clique em:
+   ABRIR-SOLUTION.cmd
+   (abre a solution certa no Visual Studio)
+
+SE NAO ACHAR A PASTA:
+- Copie PROCURAR-E-CONSERTAR.cmd para o Desktop
+- Duplo clique nele
+- Ele procura Orquestrador.sln no PC e conserta sozinho
+
+ERRO "Ass-Monitores\Ass-Monitores":
+- Clone errado (pasta duplicada)
+- Apague o clone interno e use so um Ass-Monitores
+- Path certo termina em: Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador
+
+NUNCA:
+- Abrir atalho antigo do VS com path wmoliveira errado
+- Copiar pastas bin / obj / _artifacts entre maquinas

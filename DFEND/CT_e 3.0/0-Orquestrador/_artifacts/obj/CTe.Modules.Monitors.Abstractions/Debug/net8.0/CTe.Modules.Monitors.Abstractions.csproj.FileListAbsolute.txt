@@ -1,0 +1,12 @@
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.sourcelink.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\refint\CTe.Modules.Monitors.Abstractions.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\CTe.Modules.Monitors.Abstractions.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\CTe.Modules.Monitors.Abstractions\Debug\net8.0\ref\CTe.Modules.Monitors.Abstractions.dll

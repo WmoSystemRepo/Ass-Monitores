@@ -1,0 +1,14 @@
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.sourcelink.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestr.9554F34A.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\refint\Orquestrador.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\Orquestrador.Infrastructure.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Infrastructure\Debug\net8.0\ref\Orquestrador.Infrastructure.dll

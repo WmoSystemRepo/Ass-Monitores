@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "QdXTj0GXbpM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\Orquestrador.Api\\src\\Modules\\Monitors\\CTe.Modules.Monitors.WindowsControl\\CTe.Modules.Monitors.WindowsControl.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget\\system.diagnostics.eventlog\\8.0.1\\system.diagnostics.eventlog.8.0.1.nupkg.sha512",
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget\\system.serviceprocess.servicecontroller\\8.0.1\\system.serviceprocess.servicecontroller.8.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

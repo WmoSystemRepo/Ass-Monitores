@@ -1,0 +1,14 @@
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\bin\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.sourcelink.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestr.AA1B5B2D.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\refint\Orquestrador.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\Orquestrador.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\_artifacts\obj\Orquestrador.Application\Debug\net8.0\ref\Orquestrador.Application.dll

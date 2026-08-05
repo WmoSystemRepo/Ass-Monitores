@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CTe.Resgate.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e2b4ea74787b1621009c427bdebf2ca98ad4023")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f8ad046b9ed7c1a64fe763df0f27820020f76b4")]
 [assembly: System.Reflection.AssemblyProductAttribute("CTe.Resgate.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CTe.Resgate.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

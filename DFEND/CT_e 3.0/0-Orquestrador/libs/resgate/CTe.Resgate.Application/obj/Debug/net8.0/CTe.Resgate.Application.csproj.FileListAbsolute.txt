@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.deps.json
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.dll
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.pdb
@@ -14,3 +15,66 @@ C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrad
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\refint\CTe.Resgate.Application.dll
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.pdb
 C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\ref\CTe.Resgate.Application.dll
+=======
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resg.2B1A0794.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\refint\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\ref\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resg.2B1A0794.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\refint\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\7-Resgate\src\CTe.Resgate.Application\obj\Debug\net8.0\ref\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resg.2B1A0794.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\refint\CTe.Resgate.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\ref\CTe.Resgate.Application.dll
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.deps.json
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\bin\Debug\net8.0\CTe.Resgate.Domain.pdb
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.AssemblyReference.cache
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfoInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.AssemblyInfo.cs
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.csproj.CoreCompileInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.sourcelink.json
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resg.2B1A0794.Up2Date
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.dll
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\refint\CTe.Resgate.Application.dll
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\CTe.Resgate.Application.pdb
+C:\Users\wmoliveira\Desktop\Clones\DFEND\Ass-Monitores\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador\libs\resgate\CTe.Resgate.Application\obj\Debug\net8.0\ref\CTe.Resgate.Application.dll
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9

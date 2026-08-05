@@ -1,6 +1,7 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD
     "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj": {}
   },
   "projects": {
@@ -12,12 +13,25 @@
         "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj",
         "packagesPath": "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget",
         "outputPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\obj\\",
+=======
+    "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj",
+        "projectName": "CTe.Resgate.Application",
+        "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj",
+        "packagesPath": "C:\\Users\\wmoliveira\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\obj\\",
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Mendes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\wmoliveira\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,16 +40,19 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
                 "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj"
+=======
+              "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
+                "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj"
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
               }
             }
           }
@@ -50,11 +67,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "ExcelDataReader": {
@@ -82,10 +98,11 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.316/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -94,12 +111,22 @@
         "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj",
         "packagesPath": "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget",
         "outputPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\obj\\",
+=======
+    "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj",
+        "projectName": "CTe.Resgate.Domain",
+        "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj",
+        "packagesPath": "C:\\Users\\wmoliveira\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\obj\\",
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Mendes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\wmoliveira\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -108,12 +135,10 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -128,11 +153,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "imports": [
             "net461",
@@ -150,10 +174,11 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.316/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -162,12 +187,22 @@
         "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget",
         "outputPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\obj\\",
+=======
+    "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj",
+        "projectName": "CTe.Resgate.Infrastructure",
+        "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\CTe.Resgate.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\wmoliveira\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Infrastructure\\obj\\",
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Mendes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\wmoliveira\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -176,19 +211,25 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj": {
                 "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj"
               },
               "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
                 "projectPath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj"
+=======
+              "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj": {
+                "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj"
+              },
+              "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj": {
+                "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj"
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
               }
             }
           }
@@ -203,11 +244,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.Data.SqlClient": {
@@ -239,7 +279,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.316/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

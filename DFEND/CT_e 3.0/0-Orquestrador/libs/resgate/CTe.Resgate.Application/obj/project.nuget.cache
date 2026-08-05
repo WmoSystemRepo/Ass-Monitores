@@ -1,11 +1,20 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "ek2RjJvjBZw=",
   "success": true,
   "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget\\exceldatareader\\3.7.0\\exceldatareader.3.7.0.nupkg.sha512",
     "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\c1c6c44d6ee3dae98ee9cfe73ba3b797\\nuget\\system.text.encoding.codepages\\8.0.0\\system.text.encoding.codepages.8.0.0.nupkg.sha512"
+=======
+  "dgSpecHash": "764UODCKMkA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Application\\CTe.Resgate.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\wmoliveira\\.nuget\\packages\\exceldatareader\\3.7.0\\exceldatareader.3.7.0.nupkg.sha512",
+    "C:\\Users\\wmoliveira\\.nuget\\packages\\system.text.encoding.codepages\\8.0.0\\system.text.encoding.codepages.8.0.0.nupkg.sha512"
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
   ],
   "logs": []
 }

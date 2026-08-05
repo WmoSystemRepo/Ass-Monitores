@@ -1,8 +1,14 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "NR/2KKR97Uw=",
   "success": true,
   "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj",
+=======
+  "dgSpecHash": "Wb1nTpRTXaI=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\DFEND\\Ass-Monitores\\Ass-Monitores\\DFEND\\CT_e 3.0\\0-Orquestrador\\libs\\resgate\\CTe.Resgate.Domain\\CTe.Resgate.Domain.csproj",
+>>>>>>> 83c2dd1ff26177023055350710843cb909cd28a9
   "expectedPackageFiles": [],
   "logs": []
 }

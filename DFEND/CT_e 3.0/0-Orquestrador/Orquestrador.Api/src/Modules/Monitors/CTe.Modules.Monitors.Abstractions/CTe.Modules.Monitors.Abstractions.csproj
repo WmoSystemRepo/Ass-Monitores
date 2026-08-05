@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Contrato dos módulos de monitor unificados (SDD). Sem dependências de infraestrutura. -->
+
+</Project>

@@ -1,0 +1,208 @@
+using System.Runtime.Versioning;
+using CTe.Modules.Monitors.Abstractions;
+using CTe.Modules.Monitors.WindowsControl;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using Orquestrador.Application.Abstractions;
+
+namespace CTe.Modules.Monitors.Infrastructure;
+
+/// <summary>
+/// Implementação in-process de <see cref="IMonitorModule"/> (W3 — SDD Monitor Unificado):
+/// start/stop/status/info/health não dependem do Monitor.Api do serviço estar de pé — falam
+/// direto com o Windows Service/DevHost (<see cref="WindowsMonitorControlAdapter"/>) e com o SQL
+/// (ping de saúde).
+/// <para>
+/// Snapshot/logs/tables: paridade completa exigiria copiar o SqlMonitorRepository/SnapshotAggregator
+/// de cada Monitor.Infrastructure (schemas diferentes por serviço) — fora do orçamento desta wave.
+/// Enquanto isso, devolvem um payload estruturado e documentam a limitação, OU (opt-in,
+/// <c>Monitors:{id}:UseHttpFallback=true</c>) delegam para o Monitor.Api via HTTP (<paramref name="httpFallback"/>),
+/// mantendo o padrão default (false) 100% independente do Monitor.Api.
+/// </para>
+/// </summary>
+[SupportedOSPlatform("windows")]
+public sealed class InProcessMonitorModule : IMonitorModule
+{
+    private readonly MonitorControlOptions _options;
+    private readonly IMonitorModule? _httpFallback;
+    private readonly WindowsMonitorControlAdapter _control;
+    private readonly ILogger<InProcessMonitorModule> _logger;
+
+    public InProcessMonitorModule(
+        MonitorControlOptions options,
+        IMonitorModule? httpFallback,
+        ILogger<InProcessMonitorModule> logger,
+        params string?[] repoRootSearchStarts)
+    {
+        _options = options;
+        _httpFallback = httpFallback;
+        _logger = logger;
+        _control = new WindowsMonitorControlAdapter(options, repoRootSearchStarts);
+    }
+
+    public string ServiceId => _options.ServiceId;
+
+    public Task<object?> GetInfoAsync(CancellationToken ct) => Task.FromResult<object?>(new
+    {
+        serviceId = _options.ServiceId,
+        displayName = _options.DisplayName,
+        domain = _options.Domain,
+        monitoredService = _options.MonitoredService,
+        mode = "in-process",
+        windowsServiceName = _options.WindowsServiceName,
+        codServico = _options.CodServico,
+        hasConnectionString = !string.IsNullOrWhiteSpace(_options.ConnectionString),
+        useHttpFallback = _options.UseHttpFallback,
+        endpoints = new[]
+        {
+            "/api/monitores/{servico}/snapshot",
+            "/api/monitores/{servico}/logs",
+            "/api/monitores/{servico}/tables/{key}",
+            "/api/monitores/{servico}/service/status",
+            "/api/monitores/{servico}/service/start",
+            "/api/monitores/{servico}/service/stop",
+            "/api/monitores/{servico}/health",
+            "/api/monitores/{servico}/info"
+        }
+    });
+
+    public Task<object?> GetServiceStatusAsync(CancellationToken ct)
+    {
+        var result = _control.GetStatus();
+        return Task.FromResult<object?>(ToStatusDto(result));
+    }
+
+    public Task<object?> StartAsync(CancellationToken ct)
+    {
+        var result = _control.Start();
+        LogResult("start", result);
+        return Task.FromResult<object?>(ToActionResult(result));
+    }
+
+    public Task<object?> StopAsync(CancellationToken ct)
+    {
+        var result = _control.Stop();
+        LogResult("stop", result);
+        return Task.FromResult<object?>(ToActionResult(result));
+    }
+
+    public async Task<object?> GetHealthAsync(CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(_options.ConnectionString))
+        {
+            var scm = _control.GetStatus();
+            return new
+            {
+                status = "ok",
+                mode = "in-process",
+                scm = scm.Status,
+                message = $"Monitors:{ServiceId}:ConnectionString vazio — health não valida SQL " +
+                          "(não bloqueia o ready global do Orquestrador)."
+            };
+        }
+
+        try
+        {
+            await using var conn = new SqlConnection(_options.ConnectionString);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            linkedCts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, _options.SqlTimeoutSeconds)));
+            await conn.OpenAsync(linkedCts.Token);
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT 1";
+            cmd.CommandTimeout = Math.Max(1, _options.SqlTimeoutSeconds);
+            await cmd.ExecuteScalarAsync(linkedCts.Token);
+            return new { status = "ready", mode = "in-process", primary = true };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Health SQL falhou para {ServiceId}", ServiceId);
+            return new { status = "unhealthy", mode = "in-process", primary = false, detail = ex.Message };
+        }
+    }
+
+    public Task<object?> GetSnapshotAsync(CancellationToken ct) =>
+        _httpFallback is not null
+            ? _httpFallback.GetSnapshotAsync(ct)
+            : Task.FromResult<object?>(BuildLimitedSnapshot());
+
+    public Task<object?> GetLogsAsync(long afterSeq, int take, CancellationToken ct) =>
+        _httpFallback is not null
+            ? _httpFallback.GetLogsAsync(afterSeq, take, ct)
+            : Task.FromResult<object?>(Array.Empty<object>());
+
+    public Task<object?> GetTableAsync(string key, int take, CancellationToken ct) =>
+        _httpFallback is not null
+            ? _httpFallback.GetTableAsync(key, take, ct)
+            : Task.FromResult<object?>(null);
+
+    /// <summary>
+    /// Fallback aceitável documentado na wave (W3): sem o SqlMonitorRepository copiado, o snapshot
+    /// não tem threads/filas/documentos — só o estado operacional (SCM/DevHost) + metadados.
+    /// </summary>
+    private object BuildLimitedSnapshot()
+    {
+        var status = _control.GetStatus();
+        return new
+        {
+            mode = "in-process-limited",
+            limitation =
+                $"Snapshot completo (threads/filas/documentos) requer o SqlMonitorRepository do {_options.Domain} " +
+                "— não copiado nesta wave (W3). Ligue Monitors:" + ServiceId +
+                ":UseHttpFallback=true para snapshot completo via Monitor.Api enquanto essa paridade não é feita.",
+            global = new
+            {
+                service = new
+                {
+                    windowsServiceName = _options.WindowsServiceName,
+                    desServico = _options.DisplayName,
+                    scmStatus = status.Status,
+                    isRunning = status.Status.Equals("Running", StringComparison.OrdinalIgnoreCase)
+                },
+                snapshotAtUtc = DateTimeOffset.UtcNow
+            },
+            connectionHealth = string.IsNullOrWhiteSpace(_options.ConnectionString) ? "Unknown" : "Unchecked",
+            codServico = _options.CodServico,
+            threads = Array.Empty<object>(),
+            recentDocuments = Array.Empty<object>(),
+            alerts = Array.Empty<object>(),
+            config = Array.Empty<object>()
+        };
+    }
+
+    private void LogResult(string operation, ServiceControlResult result)
+    {
+        if (result.Success)
+        {
+            _logger.LogInformation(
+                "Monitor {ServiceId} {Operation}: {Status} — {Message}",
+                ServiceId,
+                operation,
+                result.Status,
+                result.Message);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Monitor {ServiceId} {Operation} falhou: {Status} — {Message}",
+                ServiceId,
+                operation,
+                result.Status,
+                result.Message);
+        }
+    }
+
+    private static MonitorServiceStatusDto ToStatusDto(ServiceControlResult result) => new(
+        result.Success,
+        result.Status,
+        result.Message,
+        result.Status.Equals("Running", StringComparison.OrdinalIgnoreCase),
+        result.Status,
+        result.Status.Equals("Running", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+        result.CommandId);
+
+    private static MonitorActionResult ToActionResult(ServiceControlResult result) => new(
+        result.Success,
+        result.Status,
+        result.Message,
+        result.CommandId);
+}

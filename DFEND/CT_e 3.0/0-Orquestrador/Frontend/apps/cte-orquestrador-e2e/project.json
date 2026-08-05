@@ -1,0 +1,9 @@
+{
+  "name": "cte-orquestrador-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/cte-orquestrador-e2e/src",
+  "implicitDependencies": ["cte-orquestrador"],
+  "// targets": "to see all targets run: nx show project cte-orquestrador-e2e --web",
+  "targets": {}
+}

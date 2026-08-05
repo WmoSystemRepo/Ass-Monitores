@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- W1: todos os módulos eram HttpMonitorModule — bridge HTTP contra o Monitor.Api de cada
+       serviço, reaproveitando IMonitorClient/OrchestratorOptions do Orquestrador.
+       W3: InProcessMonitorModule passa a ser o registro padrão dos 6 monitores (zero dependência
+       funcional do Monitor.Api); HttpMonitorModule fica só como fallback opcional
+       (Monitors:{id}:UseHttpFallback=true). -->
+  <ItemGroup>
+    <ProjectReference Include="..\CTe.Modules.Monitors.Abstractions\CTe.Modules.Monitors.Abstractions.csproj" />
+    <ProjectReference Include="..\CTe.Modules.Monitors.WindowsControl\CTe.Modules.Monitors.WindowsControl.csproj" />
+    <ProjectReference Include="..\..\..\Orquestrador.Application\Orquestrador.Application.csproj" />
+    <ProjectReference Include="..\..\..\Orquestrador.Infrastructure\Orquestrador.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+  </ItemGroup>
+
+</Project>

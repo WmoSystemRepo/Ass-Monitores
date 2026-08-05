@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- W3 (SDD Monitor Unificado): controle Windows/DevHost genérico dos 6 monitores, adaptado de
+       1-Receptor/Receptor.Api/src/Monitor.Infrastructure/Windows/WindowsServiceControllerAdapter.cs
+       para atender qualquer serviço via CTe.Modules.Monitors.WindowsControl.MonitorControlOptions. -->
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.1" />
+  </ItemGroup>
+
+</Project>

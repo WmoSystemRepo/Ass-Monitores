@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Orquestrador.Api/Orquestrador.Api.csproj" />
+    <Project Path="src/Orquestrador.Application/Orquestrador.Application.csproj" />
+    <Project Path="src/Orquestrador.Domain/Orquestrador.Domain.csproj" />
+    <Project Path="src/Orquestrador.Infrastructure/Orquestrador.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/CTe.BuildingBlocks/CTe.BuildingBlocks.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Monitors/">
+    <Project Path="src/Modules/Monitors/CTe.Modules.Monitors.Abstractions/CTe.Modules.Monitors.Abstractions.csproj" />
+    <Project Path="src/Modules/Monitors/CTe.Modules.Monitors.Infrastructure/CTe.Modules.Monitors.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CTe.Architecture.Tests/CTe.Architecture.Tests.csproj" />
+  </Folder>
+</Solution>

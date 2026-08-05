@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Bloco compartilhado da cadeia CT-e (auth policies, correlation, etc).
+       Não deve depender de Orquestrador.* nem de Monitor.* — ver CTe.Architecture.Tests. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

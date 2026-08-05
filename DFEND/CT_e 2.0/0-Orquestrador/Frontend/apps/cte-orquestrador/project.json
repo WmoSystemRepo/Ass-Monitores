@@ -1,0 +1,94 @@
+{
+  "name": "cte-orquestrador",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/cte-orquestrador/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/cte-orquestrador",
+        "index": "apps/cte-orquestrador/src/index.html",
+        "browser": "apps/cte-orquestrador/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/cte-orquestrador/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/cte-orquestrador/public"
+          }
+        ],
+        "styles": ["apps/cte-orquestrador/src/styles.css"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "port": 4220
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "cte-orquestrador:build:production"
+        },
+        "development": {
+          "buildTarget": "cte-orquestrador:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "continuous": true
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "cte-orquestrador:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/cte-orquestrador/jest.config.ts",
+        "tsConfig": "apps/cte-orquestrador/tsconfig.spec.json"
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "cte-orquestrador:build",
+        "port": 4220,
+        "staticFilePath": "dist/apps/cte-orquestrador/browser",
+        "spa": true
+      }
+    }
+  }
+}

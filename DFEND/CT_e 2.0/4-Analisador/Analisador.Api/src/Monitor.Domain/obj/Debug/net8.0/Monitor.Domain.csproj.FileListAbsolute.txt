@@ -1,0 +1,22 @@
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\refint\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\ref\Monitor.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.deps.json
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfoInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfo.cs
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.csproj.CoreCompileInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\refint\Monitor.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Domain\obj\Debug\net8.0\ref\Monitor.Domain.dll

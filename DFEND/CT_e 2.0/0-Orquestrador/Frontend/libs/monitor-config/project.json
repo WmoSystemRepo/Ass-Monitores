@@ -1,0 +1,9 @@
+{
+  "name": "monitor-config",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/monitor-config/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project monitor-config --web",
+  "targets": {}
+}

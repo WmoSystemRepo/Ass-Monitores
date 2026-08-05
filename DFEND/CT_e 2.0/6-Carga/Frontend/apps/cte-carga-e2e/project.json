@@ -1,0 +1,9 @@
+{
+  "name": "cte-Carga-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/cte-Carga-e2e/src",
+  "implicitDependencies": ["cte-Carga"],
+  "// targets": "to see all targets run: nx show project cte-Carga-e2e --web",
+  "targets": {}
+}

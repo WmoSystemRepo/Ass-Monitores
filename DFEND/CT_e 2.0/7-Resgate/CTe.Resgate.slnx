@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CTe.Resgate.Api/CTe.Resgate.Api.csproj" />
+    <Project Path="src/CTe.Resgate.Application/CTe.Resgate.Application.csproj" />
+    <Project Path="src/CTe.Resgate.Domain/CTe.Resgate.Domain.csproj" />
+    <Project Path="src/CTe.Resgate.Infrastructure/CTe.Resgate.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CTe.Resgate.Domain.Tests/CTe.Resgate.Domain.Tests.csproj" />
+    <Project Path="tests/CTe.Resgate.Infrastructure.Tests/CTe.Resgate.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

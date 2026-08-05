@@ -1,0 +1,43 @@
+# Sobe BFF + Front do Monitor Carga.
+# Cadeia completa: use CT_e/docker-compose.chain.yml
+services:
+  monitor-carga-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-carga:local
+    container_name: dfend-cte-monitor-carga
+    ports:
+      - "5080:5080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5080
+      Monitor__ServiceId: dfend-cte-monitor-carga
+      Monitor__DisplayName: Monitor Carga CT-e
+      Monitor__Domain: carga
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Carga
+      Monitor__CodServicoCarga: "99"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_CARGA_CONNECTION_STRING:-Data Source=host.docker.internal;Initial Catalog=bd_cte_recepcao;Integrated Security=true;TrustServerCertificate=True;Connect Timeout=60}
+      Monitor__ConnectionStringSintetico: ${MONITOR_CARGA_CONNECTION_STRING_SINTETICO:-Data Source=host.docker.internal;Initial Catalog=bd_cte_sintetico;Integrated Security=true;TrustServerCertificate=True;Connect Timeout=60}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  monitor-carga-front:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-carga-front:local
+    container_name: dfend-cte-monitor-carga-front
+    ports:
+      - "4260:80"
+    depends_on:
+      - monitor-carga-api

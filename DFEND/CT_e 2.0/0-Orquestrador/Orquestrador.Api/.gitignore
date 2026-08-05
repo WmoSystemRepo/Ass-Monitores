@@ -1,0 +1,10 @@
+# Artefatos locais — NUNCA copiar bin/obj entre máquinas (paths absolutos ficam em cache)
+**/[Bb]in/
+**/[Oo]bj/
+**/.vs/
+*.user
+*.suo
+*.cache
+project.lock.json
+project.fragment.lock.json
+artifacts/

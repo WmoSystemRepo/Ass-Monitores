@@ -1,0 +1,213 @@
+2026-07-29 02:45:46.847 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 02:45:47.358 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 02:46:06.715 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 2571.2224 ms
+2026-07-29 02:46:06.716 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 1206.4824 ms
+2026-07-29 02:46:17.970 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger responded 301 in 1.0937 ms
+2026-07-29 02:46:18.075 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 74.2832 ms
+2026-07-29 02:46:18.136 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 0.6037 ms
+2026-07-29 02:46:18.138 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-standalone-preset.js responded 200 in 9.1468 ms
+2026-07-29 02:46:18.138 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui.css responded 200 in 24.5127 ms
+2026-07-29 02:46:18.140 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-bundle.js responded 200 in 13.3964 ms
+2026-07-29 02:46:18.160 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.css responded 200 in 0.3070 ms
+2026-07-29 02:46:19.682 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/favicon-32x32.png responded 200 in 0.2807 ms
+2026-07-29 02:46:19.804 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 190.5065 ms
+2026-07-29 02:48:57.039 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 4.4412 ms
+2026-07-29 02:48:58.577 -03:00 [INF]  Download enfileirado por dev: 1 chaves (pendentes temp=1, fila=1)
+2026-07-29 02:48:58.603 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 200 in 1557.6397 ms
+2026-07-29 02:48:58.611 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.1550 ms
+2026-07-29 02:48:58.660 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 44.6459 ms
+2026-07-29 02:48:58.667 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1338 ms
+2026-07-29 02:48:58.691 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 21.6269 ms
+2026-07-29 02:49:01.635 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 12.0966 ms
+2026-07-29 02:50:51.669 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 2.0479 ms
+2026-07-29 02:50:51.719 -03:00 [INF]  Download enfileirado por dev: 6 chaves (pendentes temp=7, fila=7)
+2026-07-29 02:50:51.719 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 200 in 46.6513 ms
+2026-07-29 02:50:51.729 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.1294 ms
+2026-07-29 02:50:51.743 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 9.1819 ms
+2026-07-29 02:50:51.755 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1347 ms
+2026-07-29 02:50:51.773 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 14.5020 ms
+2026-07-29 02:50:53.351 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 9.0929 ms
+2026-07-29 02:52:59.920 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.2151 ms
+2026-07-29 02:52:59.937 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 12.1828 ms
+2026-07-29 02:53:02.572 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 6.7797 ms
+2026-07-29 02:53:04.280 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 16.8055 ms
+2026-07-29 02:53:10.040 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 2.1449 ms
+2026-07-29 02:53:10.068 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 24.2704 ms
+2026-07-29 10:51:38.082 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 10:51:39.455 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 10:51:41.313 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 340.2640 ms
+2026-07-29 10:52:00.449 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 84.7258 ms
+2026-07-29 10:52:00.571 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 2.0659 ms
+2026-07-29 10:52:03.162 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 224.6378 ms
+2026-07-29 11:11:12.468 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 3.5342 ms
+2026-07-29 11:11:12.706 -03:00 [WRN] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 401 in 232.4639 ms
+2026-07-29 11:11:35.504 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 0.5327 ms
+2026-07-29 11:11:35.513 -03:00 [WRN] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 401 in 3.8095 ms
+2026-07-29 11:12:52.221 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 0.2018 ms
+2026-07-29 11:12:52.227 -03:00 [WRN] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 401 in 2.5812 ms
+2026-07-29 11:23:16.908 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 11:23:17.886 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 11:23:21.161 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 705.5327 ms
+2026-07-29 11:23:41.305 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 83.5249 ms
+2026-07-29 11:23:41.534 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 15.3068 ms
+2026-07-29 11:23:43.338 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 215.4669 ms
+2026-07-29 11:59:35.951 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 11:59:36.852 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 11:59:37.384 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 269.4951 ms
+2026-07-29 11:59:44.154 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger responded 301 in 4.1877 ms
+2026-07-29 11:59:44.243 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 79.0888 ms
+2026-07-29 11:59:44.264 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.css responded 200 in 8.3783 ms
+2026-07-29 11:59:44.283 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-standalone-preset.js responded 200 in 18.0561 ms
+2026-07-29 11:59:44.283 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui.css responded 200 in 28.1776 ms
+2026-07-29 11:59:44.296 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-bundle.js responded 200 in 31.9020 ms
+2026-07-29 11:59:44.337 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 0.6450 ms
+2026-07-29 11:59:46.527 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 195.7907 ms
+2026-07-29 12:08:22.148 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 2.9604 ms
+2026-07-29 12:08:22.328 -03:00 [WRN] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 401 in 175.7855 ms
+2026-07-29 12:39:06.535 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 12:39:07.521 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 12:39:08.091 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 370.1733 ms
+2026-07-29 12:39:18.404 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 76.4205 ms
+2026-07-29 12:39:18.557 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 1.6660 ms
+2026-07-29 12:39:20.482 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 251.2641 ms
+2026-07-29 13:19:06.725 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 13:19:07.320 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 13:19:08.531 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 339.0307 ms
+2026-07-29 13:19:19.966 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 76.8813 ms
+2026-07-29 13:19:20.010 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 1.5411 ms
+2026-07-29 13:19:24.022 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 151.2012 ms
+2026-07-29 13:23:30.628 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 13:23:31.117 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 13:23:33.233 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 317.5530 ms
+2026-07-29 13:24:51.411 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 92.2851 ms
+2026-07-29 13:24:51.600 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 3.1531 ms
+2026-07-29 13:24:53.337 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 211.8171 ms
+2026-07-29 13:26:35.072 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/auth/token responded 204 in 2.5501 ms
+2026-07-29 13:26:35.227 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/auth/token responded 200 in 150.5432 ms
+2026-07-29 13:26:41.591 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 0.4960 ms
+2026-07-29 13:26:42.723 -03:00 [INF]  Download enfileirado por dev: 2 chaves (pendentes temp=9, fila=2)
+2026-07-29 13:26:42.742 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 200 in 1147.3496 ms
+2026-07-29 13:26:42.748 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.1692 ms
+2026-07-29 13:26:42.796 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 45.0945 ms
+2026-07-29 13:26:42.805 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1281 ms
+2026-07-29 13:26:42.823 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 16.0406 ms
+2026-07-29 13:27:11.952 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.2492 ms
+2026-07-29 13:27:11.971 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 15.3556 ms
+2026-07-29 13:27:13.897 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1543 ms
+2026-07-29 13:27:13.909 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 9.1528 ms
+2026-07-29 13:34:20.562 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 13:34:21.206 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 13:34:26.987 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 617.7548 ms
+2026-07-29 13:34:30.249 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 5.7435 ms
+2026-07-29 13:34:34.241 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 141.2948 ms
+2026-07-29 13:34:34.354 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 0.6422 ms
+2026-07-29 13:34:35.976 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 247.1580 ms
+2026-07-29 13:42:35.209 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 13:42:35.753 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 13:42:38.077 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 571.2489 ms
+2026-07-29 13:42:47.597 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 71.8059 ms
+2026-07-29 13:42:47.825 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 1.9610 ms
+2026-07-29 13:42:49.833 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 136.9509 ms
+2026-07-29 13:56:24.416 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 13:56:25.307 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 13:56:39.674 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 327.3959 ms
+2026-07-29 13:56:47.366 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 82.8624 ms
+2026-07-29 13:56:47.419 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 9.5558 ms
+2026-07-29 13:56:49.161 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 209.4039 ms
+2026-07-29 13:59:45.884 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 3.0159 ms
+2026-07-29 13:59:47.962 -03:00 [INF]  Download enfileirado por dev: 3 chaves (pendentes temp=12, fila=5)
+2026-07-29 13:59:47.985 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 200 in 2094.3835 ms
+2026-07-29 13:59:48.073 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.1560 ms
+2026-07-29 13:59:48.167 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 90.4119 ms
+2026-07-29 13:59:48.292 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1338 ms
+2026-07-29 13:59:48.323 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 27.6548 ms
+2026-07-29 14:13:14.105 -03:00 [INF]  Resgate file logging → C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\Logs
+2026-07-29 14:13:15.119 -03:00 [FTL] Microsoft.AspNetCore.Hosting.Diagnostics Hosting startup assembly exception
+System.InvalidOperationException: Startup assembly Microsoft.WebTools.ApiEndpointDiscovery failed to execute. See the inner exception for more details.
+ ---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'. O sistema não pode encontrar o arquivo especificado.
+File name: 'Microsoft.WebTools.ApiEndpointDiscovery, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostBuilder.ExecuteHostingStartups()
+   --- End of inner exception stack trace ---
+2026-07-29 14:13:20.751 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /health/ready responded 200 in 715.9741 ms
+2026-07-29 14:13:28.040 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 97.2180 ms
+2026-07-29 14:13:28.077 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 15.9820 ms
+2026-07-29 14:13:29.727 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 233.1468 ms
+2026-07-29 14:21:06.009 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/lotes responded 204 in 3.2359 ms
+2026-07-29 14:21:07.442 -03:00 [INF]  Download enfileirado por dev: 3 chaves (pendentes temp=15, fila=8)
+2026-07-29 14:21:07.469 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/lotes responded 200 in 1455.1612 ms
+2026-07-29 14:21:07.479 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/fila-download responded 204 in 0.1943 ms
+2026-07-29 14:21:07.538 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/resgate/fila-download responded 200 in 56.5845 ms
+2026-07-29 14:21:07.545 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/resgate/status-chaves responded 204 in 0.1539 ms
+2026-07-29 14:21:07.599 -03:00 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/resgate/status-chaves responded 200 in 51.3385 ms

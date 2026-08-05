@@ -1,0 +1,30 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@receptor/monitor-config": ["libs/monitor-config/src/index.ts"],
+      "@receptor/monitor-core": ["libs/monitor-core/src/index.ts"],
+      "@receptor/monitor-dashboard": ["libs/monitor-dashboard/src/index.ts"],
+      "@receptor/monitor-logs": ["libs/monitor-logs/src/index.ts"],
+      "@receptor/monitor-tables": ["libs/monitor-tables/src/index.ts"],
+      "@receptor/monitor-threads": ["libs/monitor-threads/src/index.ts"],
+      "@receptor/shared-data": ["libs/shared-data/src/index.ts"],
+      "@receptor/shared-ui": ["libs/shared-ui/src/index.ts"],
+      "@receptor/shared-utils": ["libs/shared-utils/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

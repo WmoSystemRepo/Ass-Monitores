@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Orquestrador.Api/Orquestrador.Api.csproj" />
+    <Project Path="src/Orquestrador.Application/Orquestrador.Application.csproj" />
+    <Project Path="src/Orquestrador.Domain/Orquestrador.Domain.csproj" />
+    <Project Path="src/Orquestrador.Infrastructure/Orquestrador.Infrastructure.csproj" />
+  </Folder>
+</Solution>

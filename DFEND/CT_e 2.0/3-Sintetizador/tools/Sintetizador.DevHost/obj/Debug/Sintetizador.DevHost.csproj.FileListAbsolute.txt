@@ -1,0 +1,11 @@
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\Sintetizador.DevHost.exe.config
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\Sintetizador.DevHost.exe
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\Sintetizador.DevHost.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\DFEND_CTe_Sintetizador.exe
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\DFEND_CTe_Sintetizador.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\bin\Debug\DFEND_CTe_Sintetizador.exe.config
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\obj\Debug\Sintetizador.DevHost.csproj.AssemblyReference.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\obj\Debug\Sintetizador.DevHost.csproj.CoreCompileInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\obj\Debug\Sintetiz.64554DB9.Up2Date
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\obj\Debug\Sintetizador.DevHost.exe
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\3-Sintetizador\tools\Sintetizador.DevHost\obj\Debug\Sintetizador.DevHost.pdb

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "ZhQmQLC0IXo=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\CT_e\\3-Sintetizador\\Sintetizador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\d01a1dda0e51e440a798b579e58d0d4e\\nuget\\microsoft.extensions.dependencyinjection.abstractions\\10.0.10\\microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512",
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\d01a1dda0e51e440a798b579e58d0d4e\\nuget\\microsoft.extensions.options\\10.0.10\\microsoft.extensions.options.10.0.10.nupkg.sha512",
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\d01a1dda0e51e440a798b579e58d0d4e\\nuget\\microsoft.extensions.primitives\\10.0.10\\microsoft.extensions.primitives.10.0.10.nupkg.sha512"
+  ],
+  "logs": []
+}

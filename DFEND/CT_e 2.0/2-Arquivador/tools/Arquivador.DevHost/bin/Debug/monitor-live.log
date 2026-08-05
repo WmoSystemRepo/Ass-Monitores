@@ -1,0 +1,10 @@
+﻿[2026-07-29 14:24:39.938] [DEVHOST] Arquivador.DevHost iniciando (host POC do monitor)
+[2026-07-29 14:24:39.938] [DEVHOST] Arquivador.DevHost iniciando (host POC do monitor)
+[2026-07-29 14:24:39.942] [BOOTSTRAP] Carregando serviço e configurações…
+[2026-07-29 14:24:39.942] [BOOTSTRAP] Carregando serviço e configurações…
+[2026-07-29 14:24:39.952] [BOOTSTRAP] StartDebug concluído — workers em loop (aguarde Intervalo entre ciclos)
+[2026-07-29 14:24:39.952] [BOOTSTRAP] StartDebug concluído — workers em loop (aguarde Intervalo entre ciclos)
+DFEND_CTe_Arquivador conexao iniciando. Recepcao=Data Source=DDFEREC\BDD_DFE_RECEPCAO;Initial Catalog=bd_cte_recepcao;Integrated Security=SSPI;Connect Timeout=60 Sintetico=Data Source=DDFESIN\BDD_DFE_SINTETIC;Initial Catalog=bd_cte_sintetico;Integrated Security=SSPI;Connect Timeout=60
+DFEND_CTe_Arquivador conexao iniciando. Recepcao=Data Source=DDFEREC\BDD_DFE_RECEPCAO;Initial Catalog=bd_cte_recepcao;Integrated Security=SSPI;Connect Timeout=60 Sintetico=Data Source=DDFESIN\BDD_DFE_SINTETIC;Initial Catalog=bd_cte_sintetico;Integrated Security=SSPI;Connect Timeout=60
+DFEND_CTe_Arquivador config banco OK. Threads=1 Intervalo=60000
+DFEND_CTe_Arquivador config banco OK. Threads=1 Intervalo=60000

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A8C3B2D1-4E5F-6789-ABCD-EF0123456789}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Integrador.DevHost</RootNamespace>
+    <AssemblyName>Integrador.DevHost</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\dfend-cte-integrador-windowsservices\DFEND_CTe_Integrador\DFEND_CTe_Integrador.csproj">
+      <Project>{1BF79216-4CF9-416B-9769-97476698A198}</Project>
+      <Name>DFEND_CTe_Integrador</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Garante config DEV ao lado do host (mesma fonte do AppConfig/Desenvolvimento). -->
+  <Target Name="CopyDevConfig" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(ProjectDir)..\..\dfend-cte-integrador-windowsservices\DFEND_CTe_Integrador\AppConfig\Desenvolvimento\DFEND_CTe_Integrador.exe.config"
+      DestinationFiles="$(OutputPath)$(AssemblyName).exe.config"
+      SkipUnchangedFiles="true"
+      Condition="Exists('$(ProjectDir)..\..\dfend-cte-integrador-windowsservices\DFEND_CTe_Integrador\AppConfig\Desenvolvimento\DFEND_CTe_Integrador.exe.config')" />
+  </Target>
+</Project>

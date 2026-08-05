@@ -1,0 +1,9 @@
+{
+  "name": "monitor-logs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/monitor-logs/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project monitor-logs --web",
+  "targets": {}
+}

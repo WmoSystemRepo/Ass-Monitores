@@ -1,0 +1,9 @@
+{
+  "name": "cte-arquivador-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/cte-arquivador-e2e/src",
+  "implicitDependencies": ["cte-arquivador"],
+  "// targets": "to see all targets run: nx show project cte-arquivador-e2e --web",
+  "targets": {}
+}

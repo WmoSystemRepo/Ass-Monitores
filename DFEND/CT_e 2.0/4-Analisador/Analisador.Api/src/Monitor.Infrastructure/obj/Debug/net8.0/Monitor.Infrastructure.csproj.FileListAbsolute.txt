@@ -1,0 +1,34 @@
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor..F6A96091.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\refint\Monitor.Infrastructure.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\ref\Monitor.Infrastructure.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.deps.json
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Infrastructure.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Application.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Application.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.AssemblyInfo.cs
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor..F6A96091.Up2Date
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\refint\Monitor.Infrastructure.dll
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\Monitor.Infrastructure.pdb
+C:\Users\wmoliveira\Desktop\Clones\CT_e 2.0\4-Analisador\Analisador.Api\src\Monitor.Infrastructure\obj\Debug\net8.0\ref\Monitor.Infrastructure.dll

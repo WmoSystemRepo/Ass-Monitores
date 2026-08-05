@@ -1,0 +1,8 @@
+{
+  "name": "resgate-cte",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/resgate-cte/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {}
+}

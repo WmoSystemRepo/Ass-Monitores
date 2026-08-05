@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "dgSpecHash": "pYqbuUF7hp8=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\CT_e 2.0\\4-Analisador\\Analisador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\wmoliveira\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.10\\microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512",
+    "C:\\Users\\wmoliveira\\.nuget\\packages\\microsoft.extensions.options\\10.0.10\\microsoft.extensions.options.10.0.10.nupkg.sha512",
+    "C:\\Users\\wmoliveira\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.10\\microsoft.extensions.primitives.10.0.10.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Ocorreu um erro ao obter os dados de vulnerabilidade do pacote: Não é possível carregar o índice de serviço para a origem https://api.nuget.org/v3/index.json.",
+      "projectPath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\CT_e 2.0\\4-Analisador\\Analisador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\wmoliveira\\Desktop\\Clones\\CT_e 2.0\\4-Analisador\\Analisador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

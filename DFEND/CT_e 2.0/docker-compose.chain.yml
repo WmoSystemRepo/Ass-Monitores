@@ -1,0 +1,519 @@
+# Cadeia CT-e — Orquestrador + monitores (API + Front) + gateway
+#
+# Uso (a partir da pasta CT_e):
+#   $env:CTE_INTERNAL_API_KEY = "dev-cte-chain-key"
+#   docker compose -f docker-compose.chain.yml up --build
+#
+# Bootstrap = Compose (API + Front). Ligar = só contrato HTTP (service/start).
+# Worker fiscal permanece no host Windows (PreferLocalProcess=false).
+# SQL DEV: host.docker.internal (ajuste a connection string ao seu servidor).
+
+name: cte-chain
+
+services:
+  monitor-receptor-api:
+    build:
+      context: ./1-Receptor
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-receptor:local
+    container_name: dfend-cte-monitor-receptor
+    ports:
+      - "5010:5010"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5010
+      Monitor__ServiceId: dfend-cte-monitor-receptor
+      Monitor__DisplayName: Monitor Receptor CT-e
+      Monitor__Domain: receptor
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Receptor
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      # Linux container: use SQL auth (Integrated Security não funciona). Ex.:
+      # $env:MONITOR_RECEPTOR_CONNECTION_STRING = "Server=host.docker.internal;Database=bd_cte_recepcao;User Id=...;Password=...;TrustServerCertificate=True"
+      Monitor__ConnectionString: ${MONITOR_RECEPTOR_CONNECTION_STRING:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5010/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-receptor-front:
+    build:
+      context: ./1-Receptor
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-receptor-front:local
+    container_name: dfend-cte-monitor-receptor-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - monitor-receptor-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  monitor-arquivador-api:
+    build:
+      context: ./2-Arquivador
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-arquivador:local
+    container_name: dfend-cte-monitor-arquivador
+    ports:
+      - "5020:5020"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5020
+      Monitor__ServiceId: dfend-cte-monitor-arquivador
+      Monitor__DisplayName: Monitor Arquivador CT-e
+      Monitor__Domain: arquivador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Arquivador
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_ARQUIVADOR_CONNECTION_STRING:-}
+      Monitor__ConnectionStringSintetico: ${MONITOR_ARQUIVADOR_CONNECTION_STRING_SINTETICO:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5020/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-arquivador-front:
+    build:
+      context: ./2-Arquivador
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-arquivador-front:local
+    container_name: dfend-cte-monitor-arquivador-front
+    ports:
+      - "4210:80"
+    depends_on:
+      - monitor-arquivador-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  monitor-sintetizador-api:
+    build:
+      context: ./3-Sintetizador
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-sintetizador:local
+    container_name: dfend-cte-monitor-sintetizador
+    ports:
+      - "5030:5030"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5030
+      Monitor__ServiceId: dfend-cte-monitor-sintetizador
+      Monitor__DisplayName: Monitor Sintetizador CT-e
+      Monitor__Domain: sintetizador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Sintetizador
+      Monitor__CodServicoSintetizador: "8"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_SINTETIZADOR_CONNECTION_STRING:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5030/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-sintetizador-front:
+    build:
+      context: ./3-Sintetizador
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-sintetizador-front:local
+    container_name: dfend-cte-monitor-sintetizador-front
+    ports:
+      - "4230:80"
+    depends_on:
+      - monitor-sintetizador-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  monitor-analisador-api:
+    build:
+      context: ./4-Analisador
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-analisador:local
+    container_name: dfend-cte-monitor-analisador
+    ports:
+      - "5040:5040"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5040
+      Monitor__ServiceId: dfend-cte-monitor-analisador
+      Monitor__DisplayName: Monitor Analisador CT-e
+      Monitor__Domain: analisador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Analisador
+      Monitor__CodServicoAnalisador: "6"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_ANALISADOR_CONNECTION_STRING:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5040/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-analisador-front:
+    build:
+      context: ./4-Analisador
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-analisador-front:local
+    container_name: dfend-cte-monitor-analisador-front
+    ports:
+      - "4240:80"
+    depends_on:
+      - monitor-analisador-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  monitor-integrador-api:
+    build:
+      context: ./5-Integrador
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-integrador:local
+    container_name: dfend-cte-monitor-integrador
+    ports:
+      - "5050:5050"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5050
+      Monitor__ServiceId: dfend-cte-monitor-integrador
+      Monitor__DisplayName: Monitor Integrador CT-e
+      Monitor__Domain: integrador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Integrador
+      Monitor__CodServicoIntegrador: "7"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_INTEGRADOR_CONNECTION_STRING:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-integrador-front:
+    build:
+      context: ./5-Integrador
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-integrador-front:local
+    container_name: dfend-cte-monitor-integrador-front
+    ports:
+      - "4250:80"
+    depends_on:
+      - monitor-integrador-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  monitor-carga-api:
+    build:
+      context: ./6-Carga
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-carga:local
+    container_name: dfend-cte-monitor-carga
+    ports:
+      - "5080:5080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5080
+      Monitor__ServiceId: dfend-cte-monitor-carga
+      Monitor__DisplayName: Monitor Carga CT-e
+      Monitor__Domain: carga
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Carga
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_CARGA_CONNECTION_STRING:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cte-chain
+
+  monitor-carga-front:
+    build:
+      context: ./6-Carga
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-carga-front:local
+    container_name: dfend-cte-monitor-carga-front
+    ports:
+      - "4260:80"
+    depends_on:
+      - monitor-carga-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  orquestrador-api:
+    build:
+      context: ./0-Orquestrador
+      dockerfile: Dockerfile
+    image: dfend-cte-orquestrador:local
+    container_name: dfend-cte-orquestrador
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+      Orchestrator__ServiceId: dfend-cte-orchestrator
+      Orchestrator__RegistrySchemaVersion: "1.0"
+      Orchestrator__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Orchestrator__LocalDev__AutoStartMonitors: "false"
+      Orchestrator__LocalDev__EnsureBeforeCascade: "false"
+      Orchestrator__PollIntervalMs: "2000"
+      Orchestrator__PollUntilSettledSeconds: "60"
+      Orchestrator__HttpTimeoutSeconds: "5"
+      Orchestrator__HealthTimeoutSeconds: "3"
+      Orchestrator__StartStopHttpTimeoutSeconds: "10"
+      Orchestrator__CircuitBreakerMinimumThroughput: "5"
+      Orchestrator__CircuitBreakerBreakDurationSeconds: "30"
+      Orchestrator__Systems__0__Id: receptor
+      Orchestrator__Systems__0__DisplayName: Receptor
+      Orchestrator__Systems__0__Symbol: R
+      Orchestrator__Systems__0__Version: "1.0"
+      Orchestrator__Systems__0__Order: "1"
+      Orchestrator__Systems__0__BaseUrl: http://monitor-receptor-api:5010
+      Orchestrator__Systems__0__FrontendUrl: http://localhost:4200
+      Orchestrator__Systems__0__Enabled: "true"
+      Orchestrator__Systems__0__Endpoints__Api: http://monitor-receptor-api:5010
+      Orchestrator__Systems__0__Endpoints__Frontend: http://localhost:4200
+      Orchestrator__Systems__0__Endpoints__HealthLive: /health
+      Orchestrator__Systems__0__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__0__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__0__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__0__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__0__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__0__Instances__Mode: active
+      Orchestrator__Systems__1__Id: arquivador
+      Orchestrator__Systems__1__DisplayName: Arquivador
+      Orchestrator__Systems__1__Symbol: A
+      Orchestrator__Systems__1__Version: "1.0"
+      Orchestrator__Systems__1__Order: "2"
+      Orchestrator__Systems__1__DependsOn__0: receptor
+      Orchestrator__Systems__1__BaseUrl: http://monitor-arquivador-api:5020
+      Orchestrator__Systems__1__FrontendUrl: http://localhost:4210
+      Orchestrator__Systems__1__Enabled: "true"
+      Orchestrator__Systems__1__Endpoints__Api: http://monitor-arquivador-api:5020
+      Orchestrator__Systems__1__Endpoints__Frontend: http://localhost:4210
+      Orchestrator__Systems__1__Endpoints__HealthLive: /health
+      Orchestrator__Systems__1__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__1__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__1__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__1__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__1__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__1__Instances__Mode: active
+      Orchestrator__Systems__2__Id: sintetizador
+      Orchestrator__Systems__2__DisplayName: Sintetizador
+      Orchestrator__Systems__2__Symbol: S
+      Orchestrator__Systems__2__Version: "1.0"
+      Orchestrator__Systems__2__Order: "3"
+      Orchestrator__Systems__2__DependsOn__0: arquivador
+      Orchestrator__Systems__2__BaseUrl: http://monitor-sintetizador-api:5030
+      Orchestrator__Systems__2__FrontendUrl: http://localhost:4230
+      Orchestrator__Systems__2__Enabled: "true"
+      Orchestrator__Systems__2__Endpoints__Api: http://monitor-sintetizador-api:5030
+      Orchestrator__Systems__2__Endpoints__Frontend: http://localhost:4230
+      Orchestrator__Systems__2__Endpoints__HealthLive: /health
+      Orchestrator__Systems__2__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__2__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__2__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__2__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__2__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__2__Ui__Icon: layers
+      Orchestrator__Systems__2__Ui__Color: "#7c3aed"
+      Orchestrator__Systems__2__Instances__Mode: active
+      Orchestrator__Systems__3__Id: analisador
+      Orchestrator__Systems__3__DisplayName: Analisador
+      Orchestrator__Systems__3__Symbol: An
+      Orchestrator__Systems__3__Version: "1.0"
+      Orchestrator__Systems__3__Order: "4"
+      Orchestrator__Systems__3__DependsOn__0: sintetizador
+      Orchestrator__Systems__3__BaseUrl: http://monitor-analisador-api:5040
+      Orchestrator__Systems__3__FrontendUrl: http://localhost:4240
+      Orchestrator__Systems__3__Enabled: "true"
+      Orchestrator__Systems__3__Endpoints__Api: http://monitor-analisador-api:5040
+      Orchestrator__Systems__3__Endpoints__Frontend: http://localhost:4240
+      Orchestrator__Systems__3__Endpoints__HealthLive: /health
+      Orchestrator__Systems__3__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__3__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__3__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__3__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__3__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__3__Ui__Icon: search
+      Orchestrator__Systems__3__Ui__Color: "#0891b2"
+      Orchestrator__Systems__3__Instances__Mode: active
+      Orchestrator__Systems__4__Id: integrador
+      Orchestrator__Systems__4__DisplayName: Integrador
+      Orchestrator__Systems__4__Symbol: I
+      Orchestrator__Systems__4__Version: "1.0"
+      Orchestrator__Systems__4__Order: "5"
+      Orchestrator__Systems__4__DependsOn__0: analisador
+      Orchestrator__Systems__4__BaseUrl: http://monitor-integrador-api:5050
+      Orchestrator__Systems__4__FrontendUrl: http://localhost:4250
+      Orchestrator__Systems__4__Enabled: "true"
+      Orchestrator__Systems__4__Endpoints__Api: http://monitor-integrador-api:5050
+      Orchestrator__Systems__4__Endpoints__Frontend: http://localhost:4250
+      Orchestrator__Systems__4__Endpoints__HealthLive: /health
+      Orchestrator__Systems__4__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__4__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__4__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__4__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__4__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__4__Ui__Icon: share-2
+      Orchestrator__Systems__4__Ui__Color: "#ea580c"
+      Orchestrator__Systems__4__Instances__Mode: active
+      Orchestrator__Systems__5__Id: carga
+      Orchestrator__Systems__5__DisplayName: Carga
+      Orchestrator__Systems__5__Symbol: C
+      Orchestrator__Systems__5__Version: "1.0"
+      Orchestrator__Systems__5__Order: "6"
+      Orchestrator__Systems__5__DependsOn__0: integrador
+      Orchestrator__Systems__5__BaseUrl: http://monitor-carga-api:5080
+      Orchestrator__Systems__5__FrontendUrl: http://localhost:4260
+      Orchestrator__Systems__5__Enabled: "true"
+      Orchestrator__Systems__5__Endpoints__Api: http://monitor-carga-api:5080
+      Orchestrator__Systems__5__Endpoints__Frontend: http://localhost:4260
+      Orchestrator__Systems__5__Endpoints__HealthLive: /health
+      Orchestrator__Systems__5__Endpoints__HealthReady: /health/ready
+      Orchestrator__Systems__5__Endpoints__Status: /api/monitor/service/status
+      Orchestrator__Systems__5__Endpoints__Start: /api/monitor/service/start
+      Orchestrator__Systems__5__Endpoints__Stop: /api/monitor/service/stop
+      Orchestrator__Systems__5__Endpoints__Metrics: /api/monitor/snapshot
+      Orchestrator__Systems__5__Ui__Icon: database
+      Orchestrator__Systems__5__Ui__Color: "#dc2626"
+      Orchestrator__Systems__5__Instances__Mode: active
+    depends_on:
+      - monitor-receptor-api
+      - monitor-arquivador-api
+      - monitor-sintetizador-api
+      - monitor-analisador-api
+      - monitor-integrador-api
+      - monitor-carga-api
+      - monitor-receptor-front
+      - monitor-arquivador-front
+      - monitor-sintetizador-front
+      - monitor-analisador-front
+      - monitor-integrador-front
+      - monitor-carga-front
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    networks:
+      - cte-chain
+
+  orquestrador-front:
+    build:
+      context: ./0-Orquestrador
+      dockerfile: Dockerfile.front
+    image: dfend-cte-orquestrador-front:local
+    container_name: dfend-cte-orquestrador-front
+    ports:
+      - "4220:80"
+    depends_on:
+      - orquestrador-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    image: dfend-cte-gateway:local
+    container_name: dfend-cte-gateway
+    ports:
+      - "8080:80"
+    depends_on:
+      - orquestrador-api
+      - orquestrador-front
+      - monitor-receptor-api
+      - monitor-receptor-front
+      - monitor-arquivador-api
+      - monitor-arquivador-front
+      - monitor-sintetizador-api
+      - monitor-sintetizador-front
+      - monitor-analisador-api
+      - monitor-analisador-front
+      - monitor-integrador-api
+      - monitor-integrador-front
+      - monitor-carga-api
+      - monitor-carga-front
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cte-chain
+
+networks:
+  cte-chain:
+    driver: bridge

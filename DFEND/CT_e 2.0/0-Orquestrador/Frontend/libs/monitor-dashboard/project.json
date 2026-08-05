@@ -1,0 +1,9 @@
+{
+  "name": "monitor-dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/monitor-dashboard/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project monitor-dashboard --web",
+  "targets": {}
+}

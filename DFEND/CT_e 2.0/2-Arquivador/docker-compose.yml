@@ -1,0 +1,43 @@
+# Sobe BFF + Front do Monitor Arquivador.
+# Cadeia completa: use CT_e/docker-compose.chain.yml
+services:
+  monitor-arquivador-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-arquivador:local
+    container_name: dfend-cte-monitor-arquivador
+    ports:
+      - "5020:5020"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5020
+      Monitor__ServiceId: dfend-cte-monitor-arquivador
+      Monitor__DisplayName: Monitor Arquivador CT-e
+      Monitor__Domain: arquivador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Arquivador
+      Monitor__CodServicoArquivador: "3"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_ARQUIVADOR_CONNECTION_STRING:-Data Source=host.docker.internal;Initial Catalog=bd_cte_arquivamento;Integrated Security=true;TrustServerCertificate=True;Connect Timeout=60}
+      Monitor__ConnectionStringSintetico: ${MONITOR_ARQUIVADOR_CONNECTION_STRING_SINTETICO:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5020/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  monitor-arquivador-front:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-arquivador-front:local
+    container_name: dfend-cte-monitor-arquivador-front
+    ports:
+      - "4210:80"
+    depends_on:
+      - monitor-arquivador-api

@@ -1,0 +1,43 @@
+# Sobe BFF + Front do Monitor Sintetizador.
+# Cadeia completa: use CT_e/docker-compose.chain.yml
+services:
+  monitor-sintetizador-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dfend-cte-monitor-sintetizador:local
+    container_name: dfend-cte-monitor-sintetizador
+    ports:
+      - "5030:5030"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5030
+      Monitor__ServiceId: dfend-cte-monitor-sintetizador
+      Monitor__DisplayName: Monitor Sintetizador CT-e
+      Monitor__Domain: sintetizador
+      Monitor__ApiVersion: "1.0"
+      Monitor__MonitoredService: DFEND_CTe_Sintetizador
+      Monitor__CodServicoSintetizador: "8"
+      Monitor__PreferLocalProcess: "false"
+      Monitor__InternalApiKey: ${CTE_INTERNAL_API_KEY:-dev-cte-chain-key}
+      Monitor__ConnectionString: ${MONITOR_SINTETIZADOR_CONNECTION_STRING:-Data Source=host.docker.internal;Initial Catalog=bd_cte_sintetico;Integrated Security=true;TrustServerCertificate=True;Connect Timeout=60}
+      Monitor__ConnectionStringSintetico: ${MONITOR_SINTETIZADOR_CONNECTION_STRING_SINTETICO:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5030/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  monitor-sintetizador-front:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    image: dfend-cte-monitor-sintetizador-front:local
+    container_name: dfend-cte-monitor-sintetizador-front
+    ports:
+      - "4230:80"
+    depends_on:
+      - monitor-sintetizador-api

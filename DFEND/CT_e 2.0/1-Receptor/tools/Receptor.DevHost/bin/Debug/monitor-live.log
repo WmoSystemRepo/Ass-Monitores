@@ -1,0 +1,10 @@
+﻿[2026-07-29 14:24:35.810] [DEVHOST] Receptor.DevHost iniciando (host POC do monitor)
+[2026-07-29 14:24:35.810] [DEVHOST] Receptor.DevHost iniciando (host POC do monitor)
+[2026-07-29 14:24:35.810] [BOOTSTRAP] Carregando serviço e configurações…
+[2026-07-29 14:24:35.810] [BOOTSTRAP] Carregando serviço e configurações…
+[2026-07-29 14:24:35.834] [BOOTSTRAP] StartDebug concluído — workers em loop (aguarde Intervalo entre ciclos)
+[2026-07-29 14:24:35.834] [BOOTSTRAP] StartDebug concluído — workers em loop (aguarde Intervalo entre ciclos)
+DFEND_CTe_Receptor conexao iniciando. Conn=Data Source=DDFEREC\BDD_DFE_RECEPCAO;Initial Catalog=bd_cte_recepcao;Integrated Security=SSPI;Connect Timeout=60 Certificado=BAHIA SECRETARIA DA FAZENDA
+DFEND_CTe_Receptor conexao iniciando. Conn=Data Source=DDFEREC\BDD_DFE_RECEPCAO;Initial Catalog=bd_cte_recepcao;Integrated Security=SSPI;Connect Timeout=60 Certificado=BAHIA SECRETARIA DA FAZENDA
+DFEND_CTe_Receptor config banco OK. Threads=1 Intervalo=60000
+DFEND_CTe_Receptor config banco OK. Threads=1 Intervalo=60000

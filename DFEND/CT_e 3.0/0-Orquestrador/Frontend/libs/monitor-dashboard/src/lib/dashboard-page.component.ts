@@ -158,7 +158,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
       }
 
       <div class="min-h-0 flex-1 overflow-hidden">
-        <lib-chain-anatomy class="block h-full" (startRequested)="confirmStart()" />
+        <lib-chain-anatomy class="block h-full" />
       </div>
     </section>
   `,

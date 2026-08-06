@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  output,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -161,17 +160,10 @@ import {
                 Nenhuma fila ligada
               </p>
               <p class="mt-1 text-[12px] leading-relaxed text-slate-400">
-                Ligue as filas para ver AGORA, profundidade visual e documentos em
-                trânsito na cadeia.
+                Use <span class="font-medium text-lime-300">Ligar as filas</span> no
+                topo para iniciar a cadeia e ver AGORA, profundidade e documentos em
+                trânsito.
               </p>
-              <button
-                type="button"
-                class="chain-idle-cta mt-3"
-                [disabled]="!canRequestStart()"
-                (click)="startRequested.emit()"
-              >
-                Ligar as filas
-              </button>
             </div>
           }
 
@@ -237,9 +229,6 @@ export class ChainAnatomyComponent {
   readonly store = inject(ChainOrchestratorStore);
   private readonly router = inject(Router);
 
-  /** Idle CTA — o dashboard confirma e chama startChain. */
-  readonly startRequested = output<void>();
-
   readonly systems = this.store.systems;
   readonly lastLote = this.store.lastLote;
   readonly beltMoving = this.store.beltMoving;
@@ -253,11 +242,6 @@ export class ChainAnatomyComponent {
   readonly isStarting = computed(
     () => normalizePhase(this.store.cascadePhase()) === 'starting'
   );
-
-  readonly canRequestStart = computed(() => {
-    const phase = normalizePhase(this.store.cascadePhase());
-    return phase !== 'starting' && phase !== 'stopping' && !this.store.actionBusy();
-  });
 
   readonly isIdlePoster = computed(() => {
     const phase = normalizePhase(this.store.cascadePhase());

@@ -6,6 +6,8 @@ _artifacts/
 # Espelho gerado por tools/sync-devhosts-from-cte2.ps1 (não versionar)
 legado-CT_e-2.0/
 !legado-CT_e-2.0/README.md
+# Cópia duplicada dos Windows Services — usar só legado-CT_e-2.0
+Sistema de FIlas/
 *.user
 *.suo
 *.cache

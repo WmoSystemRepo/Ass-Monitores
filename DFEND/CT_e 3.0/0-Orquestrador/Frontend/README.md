@@ -82,8 +82,9 @@ CSS de anatomia/animações:
 
 ### Receptor — Mais informações
 
-Grid 2×2 sem scroll da página. Em eventos SQL de **erro**, botão **Ver erro** abre o texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
-Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API).
+Grid 2×2 sem scroll da página: atividade · eventos · **Saúde dos bancos** (conexão SQL + `tableHealth`) · avisos.  
+Em eventos SQL de **erro**, botão **Ver erro** abre explicação leiga + texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
+Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API). Links **Tabelas →** / **Config →** no card de saúde.
 
 ### Padrão nos 6 monitores
 

@@ -11,20 +11,23 @@ import { LogEntry } from '@orquestrador/shared-data';
 import { ServiceMonitorStore } from './service-monitor.store';
 import {
   classifyLogKind,
+  connectionHealthLabel,
   describeLogActivity,
   explainLogError,
   extractStatusCode,
+  formatDataAgeSeconds,
   formatLogErrorCopyPayload,
   formatLogErrorPlainMessage,
   logKindLabel,
   severityLabel,
   summarizeLogMessage,
+  tableHealthStatusLabel,
 } from '@orquestrador/shared-utils';
 
 const FEED_CAP = 12;
 const EVENT_CAP = 12;
 const ALERT_CAP = 8;
-const LOTE_CAP = 6;
+const TABLE_HEALTH_CAP = 8;
 
 interface ServiceDetailsMeta {
   label: string;
@@ -32,8 +35,6 @@ interface ServiceDetailsMeta {
   accentLink: string;
   emptyFeed: string;
   emptyEvents: string;
-  emptyLotesIdle: string;
-  configHint: string;
 }
 
 const META: Record<string, ServiceDetailsMeta> = {
@@ -45,9 +46,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel do Receptor para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando o Receptor consulta a SEFAZ ou grava lotes.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando o Receptor está parado ou sem CT-e novos.',
-    configHint: 'Como o Receptor está configurado e CT-e recentes na temporária',
   },
   arquivador: {
     label: 'Arquivador',
@@ -57,9 +55,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel do Arquivador para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando o Arquivador retira da fila ou grava lotes.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando o Arquivador está parado ou sem CT-e na fila.',
-    configHint: 'Como o Arquivador está configurado e CT-e recentes na temporária',
   },
   sintetizador: {
     label: 'Sintetizador',
@@ -69,9 +64,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel do Sintetizador para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando o Sintetizador processa lotes da fila.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando o Sintetizador está parado ou sem trabalho.',
-    configHint: 'Como o Sintetizador está configurado e CT-e recentes na temporária',
   },
   analisador: {
     label: 'Analisador',
@@ -81,9 +73,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel do Analisador para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando o Analisador processa lotes da fila.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando o Analisador está parado ou sem trabalho.',
-    configHint: 'Como o Analisador está configurado e CT-e recentes na temporária',
   },
   integrador: {
     label: 'Integrador',
@@ -93,9 +82,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel do Integrador para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando o Integrador processa lotes da fila.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando o Integrador está parado ou sem trabalho.',
-    configHint: 'Como o Integrador está configurado e CT-e recentes na temporária',
   },
   carga: {
     label: 'Carga',
@@ -105,9 +91,6 @@ const META: Record<string, ServiceDetailsMeta> = {
       'Ainda sem atividade. Ligue o fluxo no painel da Carga para ver os passos aparecerem aqui.',
     emptyEvents:
       'Sem eventos no banco ainda. Eles aparecem quando a Carga processa downloads/lotes.',
-    emptyLotesIdle:
-      'Nenhum lote recente na temporária — normal quando a Carga está parada ou sem trabalho.',
-    configHint: 'Como a Carga está configurada e CT-e recentes na temporária',
   },
 };
 
@@ -232,63 +215,65 @@ const META: Record<string, ServiceDetailsMeta> = {
         <section class="details-card flex min-h-0 flex-col">
           <div class="mb-1.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="text-sm font-semibold text-slate-100">Configuração e lotes</h2>
-              <p class="text-[11px] text-slate-500">{{ meta().configHint }}</p>
-            </div>
-            <a
-              [routerLink]="'/monitores/' + serviceId() + '/config'"
-              class="text-[10px] hover:underline"
-              [ngClass]="meta().accentLink"
-              >Config →</a
-            >
-          </div>
-          <div class="flex shrink-0 flex-wrap gap-x-3 gap-y-1 text-[11px]">
-            <span class="rounded bg-slate-900/80 px-1.5 py-0.5 text-slate-500"
-              >NSU
-              <span class="font-mono text-slate-100">{{
-                store.global()?.mainNsu || '—'
-              }}</span></span
-            >
-            <span class="rounded bg-slate-900/80 px-1.5 py-0.5 text-slate-500"
-              >A cada <span class="text-slate-100">{{ intervaloLabel() }}</span></span
-            >
-            <span class="rounded bg-slate-900/80 px-1.5 py-0.5 text-slate-500"
-              >Na temporária
-              <span class="font-mono text-sky-300">{{
-                store.queues()?.tempBacklog ?? 0
-              }}</span></span
-            >
-            <span class="rounded bg-slate-900/80 px-1.5 py-0.5 text-slate-500"
-              >Na fila
-              <span class="font-mono text-amber-300">{{
-                store.queues()?.serviceBrokerDepth ?? 0
-              }}</span></span
-            >
-          </div>
-          <div
-            class="mt-2 min-h-0 flex-1 space-y-1 overflow-hidden border-t border-slate-800/80 pt-2"
-          >
-            @for (lote of recentLotes(); track lote.nsu + (lote.dtcAtualizacao ?? '')) {
-              <p class="truncate text-[11px] text-slate-400">
-                <span class="font-mono text-slate-200"
-                  >{{ lote.nsu }} → {{ lote.nsuFinal ?? lote.nsu }}</span
-                >
-                · {{ lote.qtdDocumento }} CT-e ·
-                @if (lote.dtcAtualizacao) {
-                  {{ lote.dtcAtualizacao | date: 'dd/MM HH:mm:ss' }}
-                } @else {
-                  —
-                }
+              <h2 class="text-sm font-semibold text-slate-100">Saúde dos bancos</h2>
+              <p class="text-[11px] text-slate-500">
+                Conexão SQL e tabelas usadas por este serviço
               </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <a
+                [routerLink]="'/monitores/' + serviceId() + '/tabelas'"
+                class="text-[10px] hover:underline"
+                [ngClass]="meta().accentLink"
+                >Tabelas →</a
+              >
+              <a
+                [routerLink]="'/monitores/' + serviceId() + '/config'"
+                class="text-[10px] hover:underline"
+                [ngClass]="meta().accentLink"
+                >Config →</a
+              >
+            </div>
+          </div>
+          <div class="mb-1.5 flex shrink-0 flex-wrap items-center gap-2 text-[11px]">
+            <span class="text-slate-500">Conexão</span>
+            <span
+              class="rounded px-1.5 py-0.5 text-[10px] font-semibold"
+              [ngClass]="connectionBadgeClass()"
+            >
+              {{ connectionLabel() }}
+            </span>
+          </div>
+          <div class="min-h-0 flex-1 space-y-1 overflow-hidden border-t border-slate-800/80 pt-2">
+            @for (card of tableHealthRows(); track card.key) {
+              <a
+                [routerLink]="['/monitores', serviceId(), 'tabelas', card.key]"
+                class="flex items-start gap-2 rounded-md border border-transparent px-1.5 py-1 text-[11px] leading-snug transition hover:border-slate-600/80 hover:bg-slate-900/50"
+                [attr.title]="card.hint"
+              >
+                <span
+                  class="mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold uppercase"
+                  [ngClass]="tableStatusBadge(card.status)"
+                >
+                  {{ tableStatusLabel(card.status) }}
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate font-medium text-slate-100">{{
+                    card.label
+                  }}</span>
+                  <span class="block truncate text-slate-400">{{
+                    card.primaryValue
+                  }}</span>
+                  <span class="text-slate-600"
+                    >Idade {{ formatAge(card.dataAgeSeconds) }} · Consulta
+                    {{ card.queryMs }}ms</span
+                  >
+                </span>
+              </a>
             } @empty {
               <p class="text-[11px] leading-relaxed text-slate-500">
-                @if ((store.queues()?.tempBacklog ?? 0) > 0) {
-                  Há {{ store.queues()?.tempBacklog }} na temporária, mas a lista
-                  detalhada de lotes ainda não veio. Tente Ligar o fluxo ou aguarde o
-                  próximo ciclo.
-                } @else {
-                  {{ meta().emptyLotesIdle }}
-                }
+                Sem telemetria de tabelas ainda — confira connection string / SQL do
+                monitor.
               </p>
             }
           </div>
@@ -346,6 +331,8 @@ export class SharedServiceDetailsPageComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
   readonly severityLabel = severityLabel;
   readonly summarize = summarizeLogMessage;
+  readonly tableStatusLabel = tableHealthStatusLabel;
+  readonly formatAge = formatDataAgeSeconds;
 
   readonly serviceId = computed(() => this.store.serviceId());
 
@@ -353,13 +340,13 @@ export class SharedServiceDetailsPageComponent {
     () => META[this.serviceId()] ?? META['receptor']
   );
 
-  readonly recentLotes = computed(() => this.store.documents().slice(0, LOTE_CAP));
+  readonly connectionLabel = computed(() =>
+    connectionHealthLabel(this.store.connectionHealth() ?? 'Down')
+  );
 
-  readonly intervaloLabel = computed(() => {
-    const raw = this.store.global()?.intervaloSeconds ?? 0;
-    const sec = raw >= 1000 ? Math.round(raw / 1000) : raw;
-    return `${sec}s`;
-  });
+  readonly tableHealthRows = computed(() =>
+    this.store.tableHealth().slice(0, TABLE_HEALTH_CAP)
+  );
 
   readonly recentActivity = computed(() =>
     [...this.store.logs()].slice(-EVENT_CAP).reverse()
@@ -464,6 +451,37 @@ export class SharedServiceDetailsPageComponent {
       confirmLabel: 'Fechar',
       tone: 'danger',
     });
+  }
+
+  connectionBadgeClass(): string {
+    const raw = String(this.store.connectionHealth() ?? 'Down');
+    const n = Number(raw);
+    const key = Number.isFinite(n)
+      ? (['Healthy', 'Degraded', 'Down'][n] ?? raw)
+      : raw;
+    switch (key) {
+      case 'Healthy':
+        return 'bg-emerald-950 text-emerald-300';
+      case 'Degraded':
+        return 'bg-amber-950 text-amber-300';
+      case 'Down':
+        return 'bg-rose-950 text-rose-300';
+      default:
+        return 'bg-slate-800 text-slate-300';
+    }
+  }
+
+  tableStatusBadge(status: string): string {
+    switch ((status ?? '').toLowerCase()) {
+      case 'critico':
+        return 'bg-rose-950 text-rose-300';
+      case 'atencao':
+        return 'bg-amber-950 text-amber-300';
+      case 'ok':
+        return 'bg-emerald-950 text-emerald-300';
+      default:
+        return 'bg-slate-800 text-slate-300';
+    }
   }
 
   activityLabel(hint?: string | null, cStat?: string | null): string {

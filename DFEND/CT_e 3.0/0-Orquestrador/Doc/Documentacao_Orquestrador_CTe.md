@@ -293,7 +293,7 @@ O **Receptor** definiu o padrão; os outros 5 (Arquivador, Sintetizador, Analisa
 | Título do painel | `{Serviço} CT-e` + uma frase de negócio (sem “Monitor do…”) |
 | Anatomia | Copy leiga; fila/temp sobe/desce; boot em cascata ao Ligar; chips na profundidade |
 | Mais informações | **Uma** implementação: `SharedServiceDetailsPageComponent` (meta por `serviceId`) |
-| Layout detalhes | Grid 2×2 na viewport, sem scroll da página |
+| Layout detalhes | Grid 2×2 na viewport, sem scroll da página: atividade · eventos · **Saúde dos bancos** · avisos |
 | Erro SQL | Botão **Ver erro** → `ConfirmDialog` `mode: 'info'` + texto original |
 | Avisos | `snapshot.alerts` via `BuildHealthAlerts` (mensagens genéricas da fila) |
 | Desligar | `ConfirmDialog` (sem `window.confirm`) |
@@ -442,6 +442,7 @@ Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 | 06/08/2026 | Receptor: copy para leigo; Mais informações 2×2; **Ver erro** original; `BuildHealthAlerts` |
 | 06/08/2026 | Animação fila sobe/desce + boot ao Ligar (cadeia e Receptor); `ConfirmDialog` compartilhado |
 | 06/08/2026 | Padrão Receptor replicado nos 6 monitores: shared Mais informações, animações fila/boot, copy leiga, docs |
+| 06/08/2026 | Mais informações: card **Saúde dos bancos** (conexão + `tableHealth`) no lugar de Configuração e lotes |
 | 06/08/2026 | Doc + UX: após **Desligar**, Fase Parada com **NA FILA** / backlog pendente é esperado (não limpa fila) |
 
 ## 14. Dúvidas frequentes (operação)

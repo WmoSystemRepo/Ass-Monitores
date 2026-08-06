@@ -1,30 +1,31 @@
 # Passo a passo — Orquestrador CT-e
 
-Cobre **Development**, smoke **Homologacao** e **Docker**. Detalhes de contrato: [Documentacao_Orquestrador_CTe.md](Documentacao_Orquestrador_CTe.md).
+Cobre **Development**, smoke **Homologacao** e **Docker**. Detalhes de contrato: [Documentacao_Orquestrador_CTe.md](Documentacao_Orquestrador_CTe.md).  
+Paths / one-click / troca de PC: [DEV_PORTATIL.md](DEV_PORTATIL.md).
 
 ## Pré-requisitos
 
 - .NET 8 SDK + Visual Studio 2022
 - Node.js **20 ou 22** LTS (não usar Node 24 com Nx 20)
-- Para Ligar/Desligar real: Receptor (`:5010`) e Arquivador (`:5020`) no ar
-- Mesma API key nos três lados (DEV padrão: `dev-cte-chain-key`)
+- Clone válido em `...\DFEND\CT_e 3.0\0-Orquestrador` (sem `Ass-Monitores` duplicado, sem Lixeira)
+- Mesma API key nos lados que usarem monitor HTTP (DEV padrão: `dev-cte-chain-key`)
+
+## A0) Limpar e abrir (recomendado — qualquer PC)
+
+1. Feche o Visual Studio.  
+2. No Explorer, pasta `0-Orquestrador`:  
+   - Duplo clique **`LIMPAR-E-BUILDAR.cmd`** → espere OK  
+   - Duplo clique **`ABRIR-SOLUTION.cmd`**  
+3. Se não achar a pasta: **`PROCURAR-E-CONSERTAR.cmd`** (Desktop ou raiz Ass-Monitores).
+
+Instruções curtas: [../COMO-USAR.txt](../COMO-USAR.txt).
 
 ## A) Development — Visual Studio
 
-### 1) Monitores (obrigatório para cascata real)
+### 1) Orquestrador.Api
 
-1. Abrir e F5 **Receptor.Api** (perfil http/https → `:5010`)  
-   Confirmar `Monitor:InternalApiKey` = `dev-cte-chain-key` no `appsettings.Development.json`
-2. Abrir e F5 **Arquivador.Api** → `:5020`  
-   Confirmar a mesma key
-3. Checagem rápida no browser:
-   - `http://localhost:5010/health/ready`
-   - `http://localhost:5020/health/ready`
-
-### 2) Orquestrador.Api
-
-1. Abrir `Orquestrador.Api/Orquestrador.sln`
-2. Startup: **Orquestrador.Api** · perfil **https** (ou **http**)
+1. Abrir **apenas** via `ABRIR-SOLUTION.cmd` ou `Orquestrador.Api/Orquestrador.sln` do clone válido  
+2. Startup: **Orquestrador.Api** · perfil **https** (ou **http**)  
 3. **F5** → Swagger `https://localhost:7100/swagger` · HTTP `http://localhost:5000`
 
 Checagens:
@@ -33,16 +34,18 @@ Checagens:
 |----------|----------|
 | `GET /health/ready` | `status: ready`, `hasInternalApiKey: true` |
 | `GET /api/orchestrator/info` | `domain: orquestrador`, systems com BaseUrl |
-| `GET /api/chain/health` | receptor/arquivador `online` (se monitores up) |
-| `GET /api/orchestrator/snapshot` | 6 sistemas; R/A enabled; demais `disabled` |
+| `GET /api/chain/health` | sistemas enabled com status coerente |
+| `GET /api/orchestrator/snapshot` | 6 sistemas da cadeia (+ resgate fora da cascata) |
 
-Se aparecer `unauthorized`: key do Orquestrador ≠ key do monitor.  
-Se aparecer `offline`: monitor não está rodando na BaseUrl.
+Se aparecer `unauthorized`: key do Orquestrador ≠ key do monitor (quando HTTP fallback).  
+Se aparecer `offline`: serviço/engine não está no ar na BaseUrl.
 
-### 3) Front
+> Layout unificado: monitores ricos ficam em `/monitores/{id}` no mesmo front `:4220`; engines sobem via DevHost em `engines\` no Ligar (DEV).
+
+### 2) Front
 
 ```powershell
-cd Frontend   # pasta: CT_e\0-Orquestrador\Frontend (prefixo da máquina irrelevante)
+cd Frontend   # pasta: ...\0-Orquestrador\Frontend (prefixo da máquina irrelevante)
 npm.cmd install
 npm.cmd start
 ```
@@ -50,7 +53,7 @@ npm.cmd start
 Abrir `http://localhost:4220` (Ctrl+F5).  
 API base: `public/config.json` → `http://localhost:5000`.
 
-### 4) Fluxo operacional
+### 3) Fluxo operacional
 
 1. UI indigo/violet (visão da cadeia)
 2. Seis símbolos **R A S An I C**
@@ -60,8 +63,7 @@ API base: `public/config.json` → `http://localhost:5000`.
 6. **Desligar cadeia** → para na ordem inversa
 
 > Se engines não ficarem online no Ligar, a barra mostra a falha e **o serviço daquele sistema não liga**.  
-> Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  
-> SDD: `Assefaz\CT_e\.cursor\SDD\Monitor Unificado CT-e`.
+> Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).
 
 ## B) Homologacao (smoke local)
 
@@ -70,7 +72,7 @@ Perfil VS **Homologacao** no Orquestrador:
 - `ASPNETCORE_ENVIRONMENT=Homologacao`
 - injeta key placeholder + BaseUrl localhost (ver `launchSettings.json`)
 
-Nos monitores, alinhar:
+Nos monitores (se HTTP), alinhar:
 
 ```text
 ASPNETCORE_ENVIRONMENT=Homologacao
@@ -81,7 +83,7 @@ Em Homolog real: keys e BaseUrl **só** via secret/pipeline (não git).
 
 ## C) Docker — cadeia completa (API + Front + gateway)
 
-Na raiz `CT_e`:
+Na raiz do monorepo (quando o compose existir):
 
 ```powershell
 $env:CTE_INTERNAL_API_KEY = "dev-cte-chain-key"
@@ -89,23 +91,19 @@ docker compose -f docker-compose.chain.yml up --build
 ```
 
 - Orquestrador: API `:5000` · Front `:4220`
-- Receptor: API `:5010` · Front `:4200`
-- Arquivador: API `:5020` · Front `:4210`
-- Gateway: `http://localhost:8080`
-- Entre containers: DNS `monitor-receptor-api` / `monitor-arquivador-api`
+- Gateway (se houver): `http://localhost:8080`
 - Ligar **não** chama Docker — só `/health/ready` + `service/start`
 - `PreferLocalProcess=false`; worker no host Windows
-- Injete `MONITOR_*_CONNECTION_STRING` (SQL auth) para `/health/ready` verde
 
 Plugar sistema / Registry: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).
 
 ## Aceite
 
-- [ ] Pacote em `0-Orquestrador`
+- [ ] Pacote em `0-Orquestrador` (clone válido; não Lixeira)
+- [ ] `LIMPAR-E-BUILDAR.cmd` concluiu OK neste PC
 - [ ] UI `:4220` · API `:5000`
-- [ ] Key DEV alinhada Orquestrador ↔ engines
 - [ ] `/health/ready` e `/api/chain/health` OK
 - [ ] Cascade Ligar / Desligar na ordem da cadeia
 - [ ] Clique no estágio → `/monitores/{servico}` com anatomia (não tela JSON)
 - [ ] Start/Stop e threads/logs no monitor do serviço
-- [ ] Snapshot sem `unauthorized` com monitores no ar
+- [ ] Snapshot sem `unauthorized` com monitores/engines no ar

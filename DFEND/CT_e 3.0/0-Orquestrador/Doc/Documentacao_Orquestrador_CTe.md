@@ -1,7 +1,7 @@
 # Documentação — Orquestrador CT-e
 
 > Dashboard central da cadeia DFEND CT-e · registry, autenticação interna e multiambiente  
-> Atualizado: 05/08/2026
+> Atualizado: 05/08/2026 (dev portátil / one-click / `_artifacts`)
 
 ## 1. Objetivo
 
@@ -20,7 +20,7 @@ No dashboard (`:4220`):
 Quem garante engines/DevHosts online antes do worker é o **Ligar** (cascata) ou o **container** em Docker.
 
 Para plugar um sistema novo quando quiser: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  
-SDD / gates: `Assefaz\CT_e\.cursor\SDD\Monitor Unificado CT-e`.
+Dev em qualquer PC (paths, one-click, troubleshooting): [DEV_PORTATIL.md](DEV_PORTATIL.md).
 
 ## 2. Princípio definitivo (todos os ambientes)
 
@@ -195,10 +195,14 @@ Em `Orchestrator:LocalDev`:
 
 | Flag | Efeito |
 |------|--------|
-| `AutoStartMonitors` | no boot, sobe **API + Angular** de todos `Enabled` no registry (N sistemas; hoje R+A) |
-| `EnsureBeforeCascade` | no Ligar: (1) sobe **em paralelo** API+Angular de todos `Enabled` (2) só depois `service/start` na ordem `Order`/`DependsOn` |
+| `AutoStartMonitors` | no boot, sobe stacks de sistemas `Enabled` (quando configurado) |
+| `EnsureBeforeCascade` | no Ligar: garante engines/API ready antes do `service/start` na ordem `Order`/`DependsOn` |
+| `RepoRoot` | **deixar vazio** — descoberta automática da pasta `0-Orquestrador` (não use path absoluto de outra máquina) |
 
-Se API ou Angular não ficarem online: mensagem explícita e o serviço daquele sistema **não** é ligado.
+Engines DevHost ficam em `0-Orquestrador\engines\{servico}\` (`PackageFolder`: `engines\receptor`, …).  
+Saída de build: `0-Orquestrador\_artifacts\` (gitignored). Ver [DEV_PORTATIL.md](DEV_PORTATIL.md).
+
+Se API ou engine não ficarem online: mensagem explícita e o serviço daquele sistema **não** é ligado.
 
 Não se aplica em Homolog/Prod (process spawn desligado — use deploy/container).
 
@@ -222,12 +226,14 @@ Homolog/Prod: publicar `config.json` (ou script inline) com a URL do Orquestrado
 
 ### 9.1 Development (Visual Studio)
 
-1. Subir **Receptor.Api** (`:5010`) e **Arquivador.Api** (`:5020`) — mesma key DEV
-2. Abrir `0-Orquestrador/Orquestrador.Api/Orquestrador.sln` · perfil **https** ou **http** · F5
-3. Front:
+**Preferencial:** `LIMPAR-E-BUILDAR.cmd` → `ABRIR-SOLUTION.cmd` ([DEV_PORTATIL.md](DEV_PORTATIL.md)).
+
+1. Abrir `0-Orquestrador/Orquestrador.Api/Orquestrador.sln` · perfil **https** ou **http** · F5  
+   (layout unificado: monitores em `/monitores/{id}`; engines em `engines\`)
+2. Front:
 
 ```powershell
-cd Frontend   # CT_e\0-Orquestrador\Frontend
+cd Frontend   # ...\0-Orquestrador\Frontend
 npm.cmd install
 npm.cmd start
 # http://localhost:4220
@@ -287,17 +293,21 @@ SQL worker↔Monitor = integração **transitória**.
 
 ```text
 0-Orquestrador/
-  Frontend/                 # Nx cte-orquestrador :4220
-  Orquestrador.Api/         # BFF :5000 / Swagger :7100
-  Dockerfile
+  LIMPAR-E-BUILDAR.cmd / ABRIR-SOLUTION.cmd / PROCURAR-E-CONSERTAR.cmd
+  COMO-USAR.txt
+  Directory.Build.props / .gitignore   # _artifacts (paths curtos; nao versionar)
+  Frontend/                            # Nx cte-orquestrador :4220
+  Orquestrador.Api/                    # BFF :5000 / Swagger :7100
+  engines/                             # DevHosts (receptor…carga)
+  libs/resgate/
+  tools/                               # fix-dev.ps1, verify-structure.ps1
   Doc/
+    DEV_PORTATIL.md                    # one-click / paths / troca de PC
     Documentacao_Orquestrador_CTe.md   # este arquivo
-    ONBOARDING_MICROSERVICO.md         # plugar sistema novo + Docker
+    ONBOARDING_MICROSERVICO.md
     Passo a passo execução Orquestrador.md
   README.md
 ```
-
-Compose da cadeia (raiz CT_e): `docker-compose.chain.yml`
 
 ## 12. Paleta UI
 
@@ -305,7 +315,8 @@ Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador
 
 ## 13. Documentos relacionados
 
+- [Dev portátil (one-click, paths, troubleshooting)](DEV_PORTATIL.md)
 - [Onboarding microserviço (plugar + Docker)](ONBOARDING_MICROSERVICO.md)
 - [Passo a passo execução](Passo%20a%20passo%20execução%20Orquestrador.md)
 - [README do pacote](../README.md)
-- Monitores: `1-Receptor/Doc/`, `2-Arquivador/Doc/` (contrato `/api/monitor/*` + `Monitor:InternalApiKey`)
+- [COMO-USAR.txt](../COMO-USAR.txt)

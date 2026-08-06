@@ -2,24 +2,56 @@
 
 Dashboard da cadeia CT-e (Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga).
 
-**Local canônico (relativo ao clone):** `CT_e/0-Orquestrador` — o prefixo da máquina é irrelevante.
+**Clone canônico (relativo):** `...\DFEND\CT_e 3.0\0-Orquestrador`  
+O prefixo da máquina (`C:\Users\...`) é irrelevante. **Não** use `Ass-Monitores\Ass-Monitores` (pasta duplicada) nem projeto só na Lixeira.
 
 Contrato único em **Development**, **Homologacao** e **Production**: registry por `Id`, `BaseUrl` por config/env, header `X-Cte-Internal-Api-Key`, resiliência HTTP.
+
+## Início rápido (qualquer PC — sem copiar caminho)
+
+1. Feche o Visual Studio.
+2. No Explorer, abra a pasta `0-Orquestrador`.
+3. Duplo clique em **`LIMPAR-E-BUILDAR.cmd`** (limpa cache + restore + build).
+4. Duplo clique em **`ABRIR-SOLUTION.cmd`** (abre a `.sln` certa).
+
+| Arquivo | Função |
+|---------|--------|
+| `LIMPAR-E-BUILDAR.cmd` | Limpa `bin`/`obj`/`.vs`/`_artifacts`, valida estrutura, `dotnet restore` + `build` |
+| `ABRIR-SOLUTION.cmd` | Abre `Orquestrador.Api\Orquestrador.sln` no Visual Studio |
+| `PROCURAR-E-CONSERTAR.cmd` | Procura clone **válido** no disco (ignora Lixeira/Temp; exige `LIMPAR-E-BUILDAR.cmd`) |
+| `COMO-USAR.txt` | Instruções curtas em texto |
+
+Detalhes: [Doc/DEV_PORTATIL.md](Doc/DEV_PORTATIL.md) · [COMO-USAR.txt](COMO-USAR.txt)
 
 ## Estrutura
 
 ```text
 0-Orquestrador/
-  Frontend/            # Nx cte-orquestrador :4220
-  Orquestrador.Api/    # BFF :5000 / Swagger :7100
-  Dockerfile
-  Dockerfile.front
-  docker/
+  LIMPAR-E-BUILDAR.cmd     # one-click limpar + build
+  ABRIR-SOLUTION.cmd       # one-click abrir .sln
+  PROCURAR-E-CONSERTAR.cmd # one-click achar clone válido
+  COMO-USAR.txt
+  Directory.Build.props    # bin/obj curtos em _artifacts (evita MAX_PATH)
+  .gitignore               # nunca versionar bin/obj/_artifacts
+  Frontend/                # Nx cte-orquestrador :4220
+  Orquestrador.Api/        # BFF :5000 / Swagger :7100
+  engines/                 # DevHosts Windows (receptor…carga)
+  libs/resgate/            # Resgate CT-e AN
+  tools/                   # fix-dev.ps1, verify-structure.ps1, build-devhosts.ps1
+  _artifacts/              # gerado local (gitignored)
   Doc/
   README.md
 ```
 
-Compose da cadeia (raiz CT_e): `../docker-compose.chain.yml` (APIs + Fronts + gateway :8080)
+Compose da cadeia (quando existir na raiz do monorepo): `docker-compose.chain.yml` (APIs + Fronts + gateway :8080).
+
+## Paths portáteis (regra de ouro)
+
+- Referências de projeto são **relativas** (`.csproj` / `.sln`).
+- Build gera saída em `0-Orquestrador\_artifacts\` (paths curtos; evita limite ~260 do Windows).
+- **Nunca** configure `LocalDev:RepoRoot` com caminho absoluto de outra máquina.
+- **Nunca** copie `bin` / `obj` / `_artifacts` entre PCs.
+- Discovery de engines: pasta `0-Orquestrador` (tem `engines` + `Orquestrador.Api`), independente do nome `CT_e` / `CT_e 3.0`.
 
 ## Ambientes
 
@@ -33,21 +65,20 @@ Nos monitores: a **mesma** key em `Monitor__InternalApiKey`.
 
 ## Como rodar (Development)
 
-Limpar cache e compilar (qualquer clone; prefixo da maquina irrelevante):
+### Recomendado — one-click
+
+Ver seção **Início rápido** acima.
+
+### Manual (PowerShell)
 
 ```powershell
-cd Orquestrador.Api
-# Se .\reset-build.ps1 falhar por ExecutionPolicy, use:
-.\reset-build.cmd
-# ou:
-powershell -NoProfile -ExecutionPolicy Bypass -File .\reset-build.ps1
+# a partir de 0-Orquestrador (nao use Prompt de Comando com sintaxe PowerShell)
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\fix-dev.ps1
+# depois abra Orquestrador.Api\Orquestrador.sln
 ```
 
-Depois abra `Orquestrador.sln` no Visual Studio.
-
-1. Receptor.Api `:5010` e Arquivador.Api `:5020` (key DEV alinhada)
-2. `Orquestrador.Api/Orquestrador.sln` → F5 (perfil **https** / **http**)
-3. Front:
+1. `Orquestrador.Api/Orquestrador.sln` → F5 (perfil **https** / **http**)
+2. Front:
 
 ```powershell
 cd Frontend
@@ -66,9 +97,8 @@ $env:CTE_INTERNAL_API_KEY = "dev-cte-chain-key"
 docker compose -f docker-compose.chain.yml up --build
 ```
 
-Sobe Orquestrador + Receptor + Arquivador (**API e Front**) e gateway `:8080`.  
-Entre containers: DNS (`http://monitor-receptor-api:5010`).  
-`LocalDev.EnsureBeforeCascade=false` no container — Ligar só fala HTTP.  
+Sobe Orquestrador (+ monitores no compose) e gateway `:8080`.  
+Entre containers: DNS. `LocalDev.EnsureBeforeCascade=false` no container — Ligar só fala HTTP.  
 Worker fiscal no host Windows (`PreferLocalProcess=false`).
 
 ## Homolog / Produção (resumo)
@@ -119,6 +149,8 @@ Indigo / violet / lime / fuchsia (distinta de Receptor cyan e Arquivador âmbar)
 
 ## Documentação
 
+- [Dev portátil / one-click / troubleshooting de path](Doc/DEV_PORTATIL.md)
 - [Onboarding microserviço (plugar sistema + Docker)](Doc/ONBOARDING_MICROSERVICO.md)
 - [Documentação técnica (contrato, ambientes, go-live)](Doc/Documentacao_Orquestrador_CTe.md)
 - [Passo a passo](Doc/Passo%20a%20passo%20execução%20Orquestrador.md)
+- [COMO-USAR.txt](COMO-USAR.txt)

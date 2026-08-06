@@ -335,15 +335,57 @@ public sealed class WindowsMonitorControlAdapter
         }
 
         var full = Path.GetFullPath(Path.Combine(root, _options.ExeRelativePath));
-        if (!File.Exists(full))
+        if (File.Exists(full))
         {
-            var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
-            error = HostMissingMessage(full, null);
-            return false;
+            exePath = full;
+            return true;
         }
 
-        exePath = full;
-        return true;
+        // Fallback: builds antigos sob _artifacts (Directory.Build.props) antes da correção.
+        foreach (var candidate in EnumerateDevHostExeFallbacks(root, full))
+        {
+            if (File.Exists(candidate))
+            {
+                exePath = candidate;
+                return true;
+            }
+        }
+
+        var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
+        error = HostMissingMessage(full, null);
+        return false;
+    }
+
+    private IEnumerable<string> EnumerateDevHostExeFallbacks(string packageRoot, string primaryExe)
+    {
+        var fileName = Path.GetFileName(primaryExe);
+        var projectName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(primaryExe);
+        if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(projectName))
+        {
+            yield break;
+        }
+
+        var repoRoot = RepoRootResolver.FindRepoRoot(null, packageRoot);
+        if (repoRoot is null)
+        {
+            foreach (var start in _searchStarts)
+            {
+                repoRoot = RepoRootResolver.FindRepoRoot(null, start);
+                if (repoRoot is not null)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (repoRoot is null)
+        {
+            yield break;
+        }
+
+        yield return Path.Combine(repoRoot, "_artifacts", "bin", projectName, "Debug", fileName);
+        yield return Path.Combine(repoRoot, "_artifacts", "obj", projectName, "Debug", fileName);
+        yield return Path.Combine(repoRoot, "_artifacts", "bin", projectName, "Debug", "net47", fileName);
     }
 
     /// <summary>Localiza o .exe; se faltar, tenta compilar o DevHost (somente no Start).</summary>

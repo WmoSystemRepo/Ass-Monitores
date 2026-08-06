@@ -52,10 +52,22 @@ Texto curto: [../COMO-USAR.txt](../COMO-USAR.txt).
 
 | Item | Onde | Git |
 |------|------|-----|
-| Saída MSBuild | `0-Orquestrador\_artifacts\` | **ignorado** (`.gitignore`) |
-| `bin` / `obj` antigos sob `src` / `libs` | limpos pelo script | **não versionar** |
+| Saída MSBuild (API/.NET) | `0-Orquestrador\_artifacts\` | **ignorado** |
+| DevHost + DFEND_CTe_* | `engines\...\bin\Debug\` (local) | **ignorado** (`bin`/`obj`) |
+| Espelho CT_e 2.0 | `legado-CT_e-2.0\` (via `tools\sync-devhosts-from-cte2.ps1`) | **ignorado** |
 
-`Directory.Build.props` (raiz e `Orquestrador.Api`) redireciona `BaseIntermediateOutputPath` / `BaseOutputPath` para `_artifacts`, reduzindo o comprimento do path (MAX_PATH ~260).
+`Directory.Build.props` redireciona API/libs para `_artifacts`, mas **mantém** DevHosts/`DFEND_CTe_*` em `bin\Debug` — é o path que a API LocalDev procura.
+
+Se aparecer `Host POC não encontrado`:
+
+```powershell
+cd <pasta>\0-Orquestrador
+powershell -File .\tools\sync-devhosts-from-cte2.ps1   # copia do CT_e 2.0
+powershell -File .\tools\build-devhosts.ps1             # recompila bin\Debug
+# reinicie Orquestrador.Api
+```
+
+`Directory.Build.props` (raiz e `Orquestrador.Api`) redireciona `BaseIntermediateOutputPath` / `BaseOutputPath` para `_artifacts` **exceto** projetos `*.DevHost` e `DFEND_CTe_*`.
 
 ## 5. Path certo vs errado
 

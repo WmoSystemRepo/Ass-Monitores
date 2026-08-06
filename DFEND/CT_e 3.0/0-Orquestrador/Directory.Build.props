@@ -3,12 +3,25 @@
     Aplica a libs/resgate e demais projetos sob 0-Orquestrador (fora de Orquestrador.Api/).
     Paths curtos em _artifacts — evita MAX_PATH e cache com path de outra maquina.
   -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' != '' And $([System.String]::Copy('$(MSBuildProjectName)').Contains('.DevHost')) == false And $([System.String]::Copy('$(MSBuildProjectName)').StartsWith('DFEND_CTe_')) == false">
     <_OrqArtifactsRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)_artifacts'))</_OrqArtifactsRoot>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(_OrqArtifactsRoot)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
     <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(_OrqArtifactsRoot)\bin\$(MSBuildProjectName)\</BaseOutputPath>
     <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <!--
+    DevHost (net47) + DFEND_CTe_* windowsservices: SAÍDA LOCAL bin\Debug.
+    A API LocalDev procura ExeRelativePath = tools\*.DevHost\bin\Debug\*.exe —
+    NÃO pode ir para _artifacts (senão Host POC não encontrado).
+  -->
+  <PropertyGroup Condition="$([System.String]::Copy('$(MSBuildProjectName)').Contains('.DevHost')) Or $([System.String]::Copy('$(MSBuildProjectName)').StartsWith('DFEND_CTe_'))">
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <BaseOutputPath>bin\</BaseOutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 </Project>

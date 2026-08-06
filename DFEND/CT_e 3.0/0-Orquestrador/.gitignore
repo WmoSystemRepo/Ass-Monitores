@@ -3,6 +3,9 @@
 **/[Oo]bj/
 **/.vs/
 _artifacts/
+# Espelho gerado por tools/sync-devhosts-from-cte2.ps1 (não versionar)
+legado-CT_e-2.0/
+!legado-CT_e-2.0/README.md
 *.user
 *.suo
 *.cache

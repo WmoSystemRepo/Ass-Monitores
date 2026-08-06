@@ -1,7 +1,7 @@
 # Documentação — Orquestrador CT-e
 
 > Dashboard central da cadeia DFEND CT-e · registry, autenticação interna e multiambiente  
-> Atualizado: 05/08/2026 (dev portátil / one-click / `_artifacts`)
+> Atualizado: 06/08/2026 (SignalR · UX cadeia · FAQ Desligar + NA FILA)
 
 ## 1. Objetivo
 
@@ -21,11 +21,24 @@ O Orquestrador é um **BFF**: não processa CT-e. Agrega saúde/telemetria dos m
 Não há estado **“pausado”** na cascata: processo no ar com filas ligadas = **Ativo**; desligado = **Parado**.  
 `service/start` e `service/stop` do módulo in-process seguem a mesma regra.
 
+**Desligar não esvazia as filas.** Os documentos/itens que já estavam aguardando continuam no backlog (SQL / Service Broker / temp). A tela pode mostrar **Fase: Parada** com **Com fila > 0** e estágios em laranja **NA FILA** — isso é esperado. Ao **Ligar as filas** de novo, a cadeia retoma e consome esse backlog.
+
+| Depois de Desligar (esperado) | Significado |
+|-------------------------------|-------------|
+| Fase **Parada** · Serviços ativos **0** · Processos no ar **0** | Cascata encerrada; ninguém processa |
+| **Ligar as filas** habilitado · **Desligar** desabilitado | Pronto para religar |
+| **Com fila** / **Arquivos** > 0 · badge **NA FILA** (âmbar) | Backlog pendente — **não** foi apagado |
+| Estágios sem backlog em cinza **PARADO** | Sem processo e sem fila naquele ponto |
+
+Ver também §14 (dúvidas frequentes).
+
 No dashboard (`:4220`):
 
+- Menu lateral: **Dashboard** (cadeia) e **Resgate CT-e**.
 - **Clique em um estágio** → navega **in-app** para `/monitores/{servico}` (monitor rico com anatomia/animações, paridade CT_e 2.0).
-- Dados do monitor vêm de `/api/monitores/{servico}/*` no mesmo host `:5000`.
+- Dados do monitor: **SignalR** `/hubs/monitor` (push ~1s) com **fallback REST** `/api/monitores/{servico}/*` no mesmo host `:5000`.
 - `FrontendUrl` / “front legado” é opcional; a operação principal é o Angular único.
+- Confirmações (Ligar/Desligar e “Ver erro”) usam o modal compartilhado `ConfirmDialog` — não `window.confirm`.
 
 Quem garante engines/DevHosts online antes do worker é o **Ligar as filas** (cascata) ou o **container** em Docker.
 
@@ -140,8 +153,21 @@ Arquivador em DEV: API `:5020` · UI `:4210`. Orquestrador UI: `:4220`.
 | GET | `/api/orchestrator/info` | meta + registry (`BaseUrl`, `FrontendUrl`, `Enabled`) |
 | POST | `/api/orchestrator/systems/{id}/ensure-open` | Clique no estágio: sobe/valida API+front; só abre URL se `frontendReachable` |
 | GET | `/api/chain/health` | por sistema: `online` \| `offline` \| `disabled` \| `unauthorized` |
+| WS/HTTP | `/hubs/monitor` | **SignalR** — monitores ricos: `JoinService(servico)` → eventos `snapshot` / `logsAppend` (~1s) |
+| GET | `/api/monitores/{servico}/*` | REST do monitor unificado (snapshot, logs, start/stop, …) — fallback se SignalR cair |
 | GET | `/health` | liveness |
 | GET | `/health/ready` | readiness do BFF (config OK; monitores offline **não** derrubam) |
+
+### SignalR — monitores ricos (paridade CT_e 2.0)
+
+| Item | Detalhe |
+|------|---------|
+| Hub | `/hubs/monitor` (`MonitorHub`) |
+| Cliente | `ServiceMonitorStore` → `getHubUrl()` = `{apiBaseUrl}/hubs/monitor` |
+| Entrada | `JoinService("receptor" \| "arquivador" \| …)` |
+| Push | `snapshot` (telemetria completa) e `logsAppend` (logs novos) |
+| Hosted service | `MonitorPushHostedService` — intervalo ~1s para serviços com assinantes |
+| Fallback | se o hub cair, o store volta a poll REST (~2s) e o badge de conexão indica SignalR vs REST |
 
 ### Status no snapshot (`MetricPill` / reachability)
 
@@ -225,13 +251,85 @@ Não se aplica em Homolog/Prod (process spawn desligado — use deploy/container
 | Runtime config | `public/config.json` → `{ "apiBaseUrl": "..." }` |
 | Override deploy | `window.__CTE_ORQ_API_BASE__` no `index.html` |
 | Bootstrap | `loadRuntimeApiConfig()`; UI fala com Orquestrador `:5000` |
+| Menu | **Dashboard** (`/`) · **Resgate CT-e** (`/resgate`) |
 | Clique no estágio | navega para `/monitores/{servico}` (anatomia CT_e 2.0, lib `service-monitors`) |
-| Dados do monitor | poll REST `/api/monitores/{servico}/*` |
-| Ligar as filas | garante engines online (DEV) → `service/start` (= processo + `Executar=1`) |
-| Desligar filas | `service/stop` (= `Executar=0` + parar processo), ordem inversa |
+| Dados do monitor | SignalR `/hubs/monitor` + fallback REST `/api/monitores/{servico}/*` |
+| Ligar as filas | CTA **só no header** (evita duplicata no idle) → engines (DEV) → `service/start` |
+| Desligar filas | `ConfirmDialog` → `service/stop` (= `Executar=0` + parar processo), ordem inversa; **não limpa backlog** |
+| Modal | `ConfirmDialogService` / `ConfirmDialogComponent` (`shared-ui`) — confirm + modo `info` (erro original) |
 
 Homolog/Prod: publicar `config.json` (ou script inline) com a URL do Orquestrador daquele ambiente — **não** embutir host no build.  
 `FrontendUrl` no registry permanece só como link legado opcional.
+
+### 8.1 Dashboard da cadeia — UX
+
+Hierarquia visual (lib `monitor-dashboard`):
+
+1. **AGORA** — serviço com trabalho ativo / telemetria “quente”
+2. **Fila** — profundidade de arquivos (`QueueMeterComponent`: chips sobem ao encher, encolhem ao drenar)
+3. **Ativo** — processo + `Executar=1`, sem fila
+4. **Parado** / ligando / desligando
+
+Componentes-chave:
+
+| Componente | Papel |
+|------------|-------|
+| `ChainAnatomyComponent` | 6 estações + idle hero + boot em cascata ao Ligar |
+| `StationCardComponent` | card clicável (badge AGORA / NA FILA / … + medidor) |
+| `QueueMeterComponent` | profundidade visual; animação `rising` / `draining` |
+| `StatusLegendComponent` | legenda Agora / Feito / Parado |
+
+Ao **Ligar as filas**, cada estação anima com atraso (`--boot-delay`) enquanto `cascadePhase === starting`.  
+CTA “Ligar” fica **apenas no header** — o idle hero só orienta o usuário (sem segundo botão).
+
+O idle hero (“Nenhuma fila ligada”) só aparece quando a fase está idle **e** não há backlog nem erros. Se a cadeia está **Parada** mas ainda há arquivos na fila, o rail **Foco agora** continua listando os estágios com badge **FILA** (âmbar) e o rodapé mostra **Com fila** / **Arquivos na cadeia** — estado normal após Desligar com trabalho pendente.
+
+### 8.2 Monitores de serviço — UX padrão (todos)
+
+O **Receptor** definiu o padrão; os outros 5 (Arquivador, Sintetizador, Analisador, Integrador, Carga) seguem o mesmo.
+
+| Área | Comportamento unificado |
+|------|-------------------------|
+| Título do painel | `{Serviço} CT-e` + uma frase de negócio (sem “Monitor do…”) |
+| Anatomia | Copy leiga; fila/temp sobe/desce; boot em cascata ao Ligar; chips na profundidade |
+| Mais informações | **Uma** implementação: `SharedServiceDetailsPageComponent` (meta por `serviceId`) |
+| Layout detalhes | Grid 2×2 na viewport, sem scroll da página: atividade · eventos · **Saúde dos bancos** · avisos |
+| Erro SQL | Botão **Ver erro** → `ConfirmDialog` `mode: 'info'` + texto original |
+| Avisos | `snapshot.alerts` via `BuildHealthAlerts` (mensagens genéricas da fila) |
+| Desligar | `ConfirmDialog` (sem `window.confirm`) |
+
+Rotas: `/monitores/{servico}` e `/monitores/{servico}/mais-informacoes`.
+
+Aliases finos (`ReceptorDetailsPageComponent`, …) só reexportam o shared — **não** duplicar layout por serviço.
+
+Script de sync de anatomia (dev): `Frontend/tools/sync-receptor-anatomy-ux.py` + `fix-anatomy-motion-body.py`.
+
+### 8.3 Alertas de saúde (API)
+
+`InProcessMonitorModule` **não** devolve mais `alerts = []`.  
+`BuildHealthAlerts(...)` sintetiza avisos a partir da telemetria:
+
+| Código (ex.) | Quando |
+|--------------|--------|
+| `SQL_CFG` | sem connection string |
+| `PROC_OFF` | processo parado |
+| `EXEC_0` | processo no ar com `Executar=0` |
+| `SVC_STALE` | batida (`DtcExecucao`) atrasada (>2h) |
+| `TEMP_BACKLOG` / `FILA_BACKLOG` | profundidade > 0 |
+| `OK` | serviço ligado e sem outros alertas |
+
+Mensagens são **genéricas** (qualquer serviço da cadeia). O card “Avisos e saúde” consome `snapshot.alerts`. **Reinicie a API** após deploy.
+
+### 8.4 Animações — o que existe (e o que não)
+
+Não há toggle `demoMode` / “fluxo de demonstração” no 2.0 nem no 3.0.  
+As animações de documento são a **jornada do lote** (`playLoteJourney` + chips CT-e voando + esteira), acionadas pela telemetria quando o serviço está ligado.
+
+Extras de UX recentes:
+
+- Medidor / plataforma **sobe** quando a fila enche e **diminui** quando drena
+- Cascata visual ao **Ligar** (cadeia e Receptor)
+- `prefers-reduced-motion` respeitado nos CSS (`styles.css`, `service-monitor-extras.css`)
 
 ## 9. Como subir
 
@@ -298,7 +396,7 @@ SQL worker↔Monitor = integração **transitória**.
 5. CORS restrito ao host do front  
 6. Rotação da API key no runbook  
 7. Front com URL de API do ambiente (não localhost)  
-8. Smoke: snapshot sem `unauthorized` / `offline` inesperado; cascade start/stop OK; clique no estágio abre o monitor  
+8. Smoke: snapshot sem `unauthorized` / `offline` inesperado; cascade start/stop OK; clique no estágio abre o monitor; SignalR conecta (ou REST fallback); Receptor Mais informações + alertas OK  
 
 ## 11. Estrutura do pacote
 
@@ -308,12 +406,22 @@ SQL worker↔Monitor = integração **transitória**.
   COMO-USAR.txt
   Directory.Build.props / .gitignore   # _artifacts (paths curtos; nao versionar)
   Frontend/                            # Nx cte-orquestrador :4220
+    apps/cte-orquestrador/
+      src/styles.css                   # tokens + queue-meter + reduced-motion
+      src/service-monitor-extras.css   # anatomia Receptor / plataformas / fila
+    libs/
+      monitor-dashboard/               # Dashboard cadeia (station-card, queue-meter)
+      service-monitors/                # Monitores ricos (receptor…carga)
+      shared-ui/                       # ConfirmDialog (+ severity helpers)
+      monitor-core/                    # ChainOrchestratorStore, getHubUrl()
   Orquestrador.Api/                    # BFF :5000 / Swagger :7100
+    …/Realtime/                        # MonitorHub + push ~1s
+    …/Monitors/.../InProcessMonitorModule.cs  # BuildHealthAlerts
   engines/                             # DevHosts (receptor…carga)
   libs/resgate/
-  tools/                               # fix-dev.ps1, verify-structure.ps1
+  tools/                               # fix-dev.ps1, verify-structure.ps1, start-chain-fronts.cjs
   Doc/
-    DEV_PORTATIL.md                    # one-click / paths / troca de PC
+    DEV_PORTATIL.md
     Documentacao_Orquestrador_CTe.md   # este arquivo
     ONBOARDING_MICROSERVICO.md
     Passo a passo execução Orquestrador.md
@@ -322,12 +430,50 @@ SQL worker↔Monitor = integração **transitória**.
 
 ## 12. Paleta UI
 
-Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador (âmbar).
+Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador (âmbar).  
+Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 
-## 13. Documentos relacionados
+## 13. Histórico recente (UX / realtime)
+
+| Quando | Entrega |
+|--------|---------|
+| 06/08/2026 | SignalR `/hubs/monitor` + fallback REST; layout anatomia alinhado ao 2.0 |
+| 06/08/2026 | Redesign da cadeia: AGORA > fila > `QueueMeter` / `StationCard`; idle hero; CTA Ligar só no header |
+| 06/08/2026 | Receptor: copy para leigo; Mais informações 2×2; **Ver erro** original; `BuildHealthAlerts` |
+| 06/08/2026 | Animação fila sobe/desce + boot ao Ligar (cadeia e Receptor); `ConfirmDialog` compartilhado |
+| 06/08/2026 | Padrão Receptor replicado nos 6 monitores: shared Mais informações, animações fila/boot, copy leiga, docs |
+| 06/08/2026 | Mais informações: card **Saúde dos bancos** (conexão + `tableHealth`) no lugar de Configuração e lotes |
+| 06/08/2026 | Doc + UX: após **Desligar**, Fase Parada com **NA FILA** / backlog pendente é esperado (não limpa fila) |
+
+## 14. Dúvidas frequentes (operação)
+
+### Depois de Desligar, a tela ficou “Parada” mas ainda mostra NA FILA / Com fila — está quebrado?
+
+**Não.** É o comportamento correto.
+
+1. **Desligar filas** só para processos e grava `Executar=0`. **Não apaga** documentos já enfileirados.
+2. Badge **NA FILA** (âmbar) = `queueDepth > 0` naquele estágio (`HasQueueWork`), independente de a cascata estar ligada.
+3. **Fase: Parada** + **Serviços ativos 0** + **Processos no ar 0** = ninguém está consumindo a fila agora.
+4. **Com fila** / **Arquivos na cadeia** no rodapé contam esse backlog parado.
+5. Para retomar: **Ligar as filas** — a cadeia sobe e drena o que ficou pendente.
+
+Se a fase for Parada **e** Com fila = 0 **e** todos os estágios cinza PARADO, aí sim a cadeia está vazia e parada (idle completo; idle hero “Nenhuma fila ligada”).
+
+### Ligar / Desligar apaga ou cria lotes?
+
+Não. Ligar/Desligar controla **processo + flag Executar**. Lotes, NSU e profundidade de fila vêm da telemetria SQL/broker de cada serviço.
+
+### O que significa Status 215 / “Falha no esquema XML”?
+
+É rejeição da **SEFAZ**: o XML enviado na chamada (ex.: `retDistCTeSVD` / Carga `ProcessarDownload`) não passou na validação do schema oficial.  
+No monitor, **Mais informações → Ver erro** mostra a **frase clara** (catálogo) + o **texto original** do banco.  
+Histórico de traduções: `Frontend/libs/shared-utils/src/lib/log-error-catalog.ts` — acrescentar novas entradas quando aparecerem casos novos.
+
+## 15. Documentos relacionados
 
 - [Dev portátil (one-click, paths, troubleshooting)](DEV_PORTATIL.md)
 - [Onboarding microserviço (plugar + Docker)](ONBOARDING_MICROSERVICO.md)
 - [Passo a passo execução](Passo%20a%20passo%20execução%20Orquestrador.md)
 - [README do pacote](../README.md)
+- [README do Frontend](../Frontend/README.md)
 - [COMO-USAR.txt](../COMO-USAR.txt)

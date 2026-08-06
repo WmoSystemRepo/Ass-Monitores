@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -34,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-slate-50">
-            Monitor do Receptor CT-e
+            Receptor CT-e
           </h1>
           <p class="text-[11px] text-slate-400">
-            Acompanhe se o sistema está recebendo documentos agora.
+            Busca documentos novos na SEFAZ e envia para o próximo serviço da fila.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -197,6 +198,7 @@ import {
 })
 export class ReceptorDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
   readonly queues = this.store.queues;
@@ -322,10 +324,10 @@ export class ReceptorDashboardPageComponent {
       if (this.processUp()) {
         return 'Processo no ar, mas a recepção está pausada (Executar≠1). Ative a recepção para ver o pipeline.';
       }
-      return 'Ligue o Receptor para ver o fluxo SEFAZ → consulta → temporária → fila → Arquivador.';
+      return 'Use Ligar o fluxo no topo — o Receptor busca CT-e novos e envia para a fila.';
     }
     if (!stage) {
-      return 'Receptor ligado — aguardando próxima consulta à SEFAZ.';
+      return 'Receptor ligado — aguardando a próxima consulta à SEFAZ.';
     }
 
     const nsuBit =
@@ -649,8 +651,15 @@ export class ReceptorDashboardPageComponent {
     this.flyingPackets.set(items);
   }
 
-  confirmStop(): void {
-    if (confirm('Desligar filas do Receptor CT-e? Ele para de buscar novos documentos.')) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar filas do Receptor CT-e?',
+      message: 'Ele para de buscar novos documentos na SEFAZ.',
+      confirmLabel: 'Desligar',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopService();
     }
   }

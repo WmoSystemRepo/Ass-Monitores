@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -34,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Arquivador CT-e
+            Arquivador CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe o ciclo de arquivamento em tempo real.
+            Pega CT-e da fila, arquiva e encaminha para os próximos serviços.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -216,6 +217,7 @@ import {
 })
 export class ArquivadorDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
   readonly queues = this.store.queues;
@@ -824,8 +826,15 @@ export class ArquivadorDashboardPageComponent {
     this.flyingPackets.set(items);
   }
 
-  confirmStop(): void {
-    if (confirm('Desligar filas do Arquivador CT-e? Ele para o ciclo de arquivamento.')) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar filas do Arquivador CT-e?',
+      message: 'Ele para o ciclo de arquivamento.',
+      confirmLabel: 'Desligar',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopService();
     }
   }

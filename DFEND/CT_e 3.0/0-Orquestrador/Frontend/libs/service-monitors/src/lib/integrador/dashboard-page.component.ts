@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -34,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Integrador CT-e
+            Integrador CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe o ciclo de integração em tempo real.
+            Integra o resultado e limpa a temporária.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -216,6 +217,7 @@ import {
 })
 export class IntegradorDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
   readonly queues = this.store.queues;
@@ -823,8 +825,15 @@ export class IntegradorDashboardPageComponent {
     this.flyingPackets.set(items);
   }
 
-  confirmStop(): void {
-    if (confirm('Desligar filas do Integrador CT-e? Ele para o ciclo de integração.')) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar filas do Integrador CT-e?',
+      message: 'Ele para o ciclo de integração.',
+      confirmLabel: 'Desligar',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopService();
     }
   }

@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -34,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Carga CT-e
+            Carga CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe Download pontual · Carga em tempo real.
+            Download pontual e carga de CT-e sob demanda.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -216,6 +217,7 @@ import {
 })
 export class CargaDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
   readonly queues = this.store.queues;
@@ -823,8 +825,15 @@ export class CargaDashboardPageComponent {
     this.flyingPackets.set(items);
   }
 
-  confirmStop(): void {
-    if (confirm('Desligar filas do Carga CT-e? Ele para Download pontual · Carga.')) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar filas do Carga CT-e?',
+      message: 'Ele para Download pontual · Carga.',
+      confirmLabel: 'Desligar',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopService();
     }
   }

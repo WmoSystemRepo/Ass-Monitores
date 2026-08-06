@@ -9,6 +9,7 @@ import {
   ChainOrchestratorStore,
   normalizePhase,
 } from '@orquestrador/monitor-core';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ChainAnatomyComponent } from './chain-anatomy.component';
 
 @Component({
@@ -52,7 +53,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
           </span>
           <button
             type="button"
-            class="rounded bg-lime-600 px-2.5 py-1.5 text-xs font-medium text-indigo-950 transition hover:bg-lime-500 disabled:opacity-40"
+            class="cta-start rounded-md bg-lime-500 px-3.5 py-2 text-sm font-semibold text-indigo-950 shadow-md shadow-lime-900/30 transition hover:bg-lime-400 disabled:opacity-40"
             [disabled]="store.actionBusy() || !canStart()"
             (click)="confirmStart()"
           >
@@ -60,7 +61,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
           </button>
           <button
             type="button"
-            class="rounded border border-rose-500/60 px-2.5 py-1.5 text-xs text-rose-300 transition hover:bg-rose-950/40 disabled:opacity-40"
+            class="rounded-md border border-rose-500/60 px-2.5 py-2 text-xs font-medium text-rose-300 transition hover:bg-rose-950/40 disabled:opacity-40"
             [disabled]="store.actionBusy() || !canStop()"
             (click)="confirmStop()"
           >
@@ -132,6 +133,18 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
             {{ phaseLabel() }}
           </span>
         </span>
+        @if (store.anyRunning() || queueBusyCount() > 0) {
+          <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
+          <span class="inline-flex items-baseline gap-1.5">
+            <span class="text-slate-400">Com fila</span>
+            <span class="font-medium text-amber-300">{{ queueBusyCount() }}</span>
+          </span>
+          <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
+          <span class="inline-flex items-baseline gap-1.5">
+            <span class="text-slate-400">Arquivos</span>
+            <span class="font-medium text-sky-300">{{ totalQueueFiles() }}</span>
+          </span>
+        }
       </div>
 
       @if (store.alerts().length) {
@@ -153,6 +166,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
 })
 export class DashboardPageComponent {
   readonly store = inject(ChainOrchestratorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly connectionLabel = computed(() =>
     this.store.live() ? 'Orquestrador online' : 'Orquestrador offline'
@@ -170,6 +184,15 @@ export class DashboardPageComponent {
         return 'Parada';
     }
   });
+
+  readonly queueBusyCount = computed(
+    () =>
+      this.store.systems().filter((s) => s.agora || !!s.hasQueueWork).length
+  );
+
+  readonly totalQueueFiles = computed(() =>
+    this.store.systems().reduce((sum, s) => sum + (Number(s.queueDepth) || 0), 0)
+  );
 
   readonly canStart = computed(() => {
     const phase = normalizePhase(this.store.cascadePhase());
@@ -241,22 +264,30 @@ export class DashboardPageComponent {
     );
   }
 
-  confirmStart(): void {
-    if (
-      confirm(
-        'Ligar as filas CT-e? O Orquestrador sobe os processos e ativa Executar=1 na ordem (Receptor → Arquivador → …).'
-      )
-    ) {
+  async confirmStart(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Ligar as filas CT-e?',
+      message:
+        'O Orquestrador sobe os 6 serviços na ordem Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga e começa a processar documentos.',
+      confirmLabel: 'Ligar filas',
+      cancelLabel: 'Cancelar',
+      tone: 'primary',
+    });
+    if (ok) {
       void this.store.startChain();
     }
   }
 
-  confirmStop(): void {
-    if (
-      confirm(
-        'Desligar filas CT-e? Os serviços param na ordem inversa (Executar=0 + processo).'
-      )
-    ) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar as filas CT-e?',
+      message:
+        'Os serviços param na ordem inversa e deixam de processar até você ligar novamente. Documentos já na fila permanecem (a tela pode mostrar Fase Parada com NA FILA) — isso é normal; não apaga o backlog.',
+      confirmLabel: 'Desligar filas',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopChain();
     }
   }

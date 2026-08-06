@@ -257,6 +257,16 @@ function startNpm(front) {
 
 async function main() {
   console.log(`[chain-fronts] CT_e: ${cteRoot}`);
+
+  // npm start roda este script no prestart e depois chama node_modules/nx.
+  // Sem deps do Orquestrador, o start quebra com MODULE_NOT_FOUND em nx.js.
+  if (!ensureNpmInstall({ id: '0-Orquestrador', dir: frontendRoot })) {
+    console.error(
+      '[chain-fronts] dependências do Orquestrador ausentes — abortando start'
+    );
+    process.exit(1);
+  }
+
   const fronts = discoverMonitorFronts();
   if (fronts.length === 0) {
     console.warn('[chain-fronts] nenhum Frontend de monitor encontrado');

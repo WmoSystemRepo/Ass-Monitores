@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
+import { ConfirmDialogComponent } from '@orquestrador/shared-ui';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
   template: `
@@ -56,6 +57,7 @@ import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
         <router-outlet />
       </main>
     </div>
+    <lib-confirm-dialog />
   `,
 })
 export class AppComponent {
@@ -81,7 +83,7 @@ export class AppComponent {
   });
 
   readonly links = [
-    { path: '/', label: 'Monitor', hint: 'Visão da cadeia' },
+    { path: '/', label: 'Dashboard', hint: 'Ligar e acompanhar as filas CT-e' },
     { path: '/resgate', label: 'Resgate CT-e', hint: 'Recuperar do AN' },
   ];
 }

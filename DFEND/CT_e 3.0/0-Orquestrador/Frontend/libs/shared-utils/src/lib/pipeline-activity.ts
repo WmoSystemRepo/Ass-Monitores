@@ -379,8 +379,17 @@ function parseThreadFromMessage(raw: string): number | null {
 }
 
 function extractCStat(raw: string): string | null {
-  const explicit = raw.match(/cstat[^0-9]*(\d{3})/i);
-  return explicit?.[1] ?? null;
+  const patterns = [
+    /cstat[^0-9]*(\d{3})/i,
+    /status\s*:\s*(\d{3})/i,
+    /status[=:\s]+(\d{3})/i,
+    /rejei[cç][aã]o[^0-9]*(\d{3})/i,
+  ];
+  for (const re of patterns) {
+    const m = raw.match(re);
+    if (m?.[1]) return m[1];
+  }
+  return null;
 }
 
 export function resolvePipelineActivity(

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   OnDestroy,
@@ -38,17 +39,18 @@ export interface FlyingPacket {
       class="pipeline-anatomy anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-600/60 shadow-md"
       [class.anatomy-poster-live]="running()"
       [class.anatomy-poster-busy]="!!activeStage()"
+      [class.anatomy-poster-starting]="isBooting()"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-300/90">
-            Pipeline interno do Sintetizador
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
+            Como o documento anda
           </p>
           <h2
             class="text-base font-semibold leading-tight text-slate-50"
             title="DFEND_CTe_Sintetizador — ciclo fila → temp → classificar → persistir → limpar"
           >
-            Fluxo do Sintetizador CT-e
+            Caminho do CT-e no Sintetizador
           </h2>
           <p class="text-[11px] text-zinc-400">
             {{ caption() }}
@@ -109,7 +111,7 @@ export interface FlyingPacket {
           class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 rounded-md border border-slate-600/40 bg-slate-900/50 px-3 py-1.5 text-center text-[11px] font-medium text-slate-300"
           title="Aguardando próximo ciclo de síntese"
         >
-          Sem CT-e em trânsito
+          Nenhum documento passando agora — o Sintetizador processa a fila de tempos em tempos
         </p>
       }
 
@@ -117,7 +119,7 @@ export interface FlyingPacket {
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
         <div class="anatomy-fill-board relative flex h-full min-w-[880px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
-            <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running()" aria-hidden="true"></div>
+            <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running() || isBooting()" aria-hidden="true"></div>
 
             @for (pkt of packets(); track pkt.id; let pi = $index) {
               <div
@@ -137,6 +139,8 @@ export interface FlyingPacket {
                   class="anatomy-stage"
                   [class.anatomy-stage-active]="activeStage() === step.id"
                   [class.anatomy-stage-done]="isDone(step.id)"
+                  [class.anatomy-stage-booting]="isBooting()"
+                  [style.--boot-delay]="i * 0.12 + 's'"
                 >
                   @if (activeStage() === step.id) {
                     <span class="anatomy-now">AGORA</span>
@@ -145,14 +149,36 @@ export interface FlyingPacket {
                     class="anatomy-platform"
                     [class.anatomy-platform-active]="activeStage() === step.id"
                     [class.anatomy-platform-done]="isDone(step.id)"
-                    [class.anatomy-platform-waiting]="running() && !activeStage() && step.id === 'fila'"
+                    [class.anatomy-platform-waiting]="
+                      running() && !activeStage() && step.id === 'fila'
+                    "
+                    [class.anatomy-platform-rising]="queueMotion(step.id) === 'rising'"
+                    [class.anatomy-platform-draining]="queueMotion(step.id) === 'draining'"
+                    [class.anatomy-platform-booting]="isBooting()"
                     [attr.title]="step.techHint"
                   >
                     <div class="anatomy-iso" [attr.data-icon]="step.id"></div>
+                    @if (queueChips(step.id); as chips) {
+                      @if (chips.length > 0) {
+                        <div class="anatomy-queue-stack" aria-hidden="true">
+                          @for (c of chips; track c) {
+                            <span
+                              class="anatomy-queue-block"
+                              [style.--chip-i]="c"
+                            ></span>
+                          }
+                        </div>
+                      }
+                    }
                   </div>
                   <p class="anatomy-stage-title">{{ step.title }}</p>
                   <p class="anatomy-stage-tag">{{ step.tag }}</p>
-                  <p class="anatomy-stage-count">{{ count(step.id) }}</p>
+                  <p
+                    class="anatomy-stage-count"
+                    [class.anatomy-stage-count-hot]="depthOf(step.id) > 0"
+                  >
+                    {{ count(step.id) }}
+                  </p>
                   <p class="anatomy-stage-blurb">{{ step.blurb }}</p>
                 </div>
                 @if (i < steps.length - 1) {
@@ -200,11 +226,26 @@ export class SintetizadorAnatomyFlowComponent implements OnDestroy {
 
   readonly running = input(false);
   readonly activeStage = input<AnatomyStage | null>(null);
-  readonly caption = input('Ligue o Sintetizador para ver o fluxo.');
+  readonly caption = input(
+    'Use Ligar o fluxo no topo para o Sintetizador começar a processar a fila.'
+  );
   readonly latest = input<RecentDocument | null>(null);
   readonly packets = input<FlyingPacket[]>([]);
   /** true enquanto fila/temp estão diminuindo (processamento real). */
   readonly consuming = input(false);
+
+  /** Ligar: anima as plataformas em cascata enquanto o start está em andamento. */
+  readonly isBooting = computed(
+    () => this.store.actionBusy() && !this.running()
+  );
+
+  private readonly prevTemp = signal(0);
+  private readonly prevBroker = signal(0);
+  readonly tempMotion = signal<'idle' | 'rising' | 'draining'>('idle');
+  readonly brokerMotion = signal<'idle' | 'rising' | 'draining'>('idle');
+  private tempMotionTimer?: ReturnType<typeof setTimeout>;
+  private brokerMotionTimer?: ReturnType<typeof setTimeout>;
+
 
   /**
    * Esteira anda com NSU em trânsito OU enquanto as filas estão caindo.
@@ -241,35 +282,35 @@ export class SintetizadorAnatomyFlowComponent implements OnDestroy {
       id: 'fila',
       title: 'Fila',
       tag: 'Entrada',
-      blurb: 'RECEIVE na fila do sintetizador.',
+      blurb: 'Retira o lote da fila.',
       techHint: 'fila_alvo_cte_sintetizador · RECEIVE / chave retirada',
     },
     {
       id: 'temp',
       title: 'Temporária',
-      tag: 'Leitura',
-      blurb: 'Obtém o lote em tmp_sintetizador.',
+      tag: 'Guarda rápido',
+      blurb: 'Lê o lote na temporária.',
       techHint: 'tmp_sintetizador_* · lote obtido no banco',
     },
     {
       id: 'classificar',
       title: 'Classificar',
-      tag: 'Schema',
-      blurb: 'Roteia por schema (aut / evento / inut).',
+      tag: 'Organiza',
+      blurb: 'Separa por tipo de documento.',
       techHint: 'NegCTeSintetico.SintetizarLote · schema routing',
     },
     {
       id: 'persistir',
       title: 'Persistir',
-      tag: 'INSERT',
-      blurb: 'Grava documento_* sintético.',
+      tag: 'Grava',
+      blurb: 'Salva o resultado sintético.',
       techHint: 'INSERT documento_* (+ NSU faltante)',
     },
     {
       id: 'limpar',
       title: 'Limpar',
-      tag: 'Saída',
-      blurb: 'DELETE temp ou AtualizarErro.',
+      tag: 'Limpa',
+      blurb: 'Remove o temporário ou registra erro.',
       techHint: 'ExcluirLote / AtualizarErro · documento excluído',
     },
   ];
@@ -288,14 +329,64 @@ export class SintetizadorAnatomyFlowComponent implements OnDestroy {
   constructor() {
     // Mantém OnPush fresco para counts de fila/tmp via store pushes; tick leve.
     this.clock = setInterval(() => this.nowMs.set(Date.now()), 1000);
+
+    effect(() => {
+      const temp = Math.max(0, Math.floor(this.store.queues()?.tempBacklog ?? 0));
+      const prev = this.prevTemp();
+      if (temp !== prev) {
+        if (this.tempMotionTimer) clearTimeout(this.tempMotionTimer);
+        this.tempMotion.set(temp > prev ? 'rising' : 'draining');
+        this.prevTemp.set(temp);
+        this.tempMotionTimer = setTimeout(() => this.tempMotion.set('idle'), 700);
+      }
+    });
+
+    effect(() => {
+      const broker = Math.max(
+        0,
+        Math.floor(this.store.queues()?.serviceBrokerDepth ?? 0)
+      );
+      const prev = this.prevBroker();
+      if (broker !== prev) {
+        if (this.brokerMotionTimer) clearTimeout(this.brokerMotionTimer);
+        this.brokerMotion.set(broker > prev ? 'rising' : 'draining');
+        this.prevBroker.set(broker);
+        this.brokerMotionTimer = setTimeout(
+          () => this.brokerMotion.set('idle'),
+          700
+        );
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.clock) clearInterval(this.clock);
+    if (this.tempMotionTimer) clearTimeout(this.tempMotionTimer);
+    if (this.brokerMotionTimer) clearTimeout(this.brokerMotionTimer);
   }
 
   lanePercent(lane: number): number {
     return 10 + lane * 20;
+  }
+
+  depthOf(id: AnatomyStage): number {
+    this.nowMs();
+    if (id === 'temp') return this.store.queues()?.tempBacklog ?? 0;
+    if (id === 'fila') return this.store.queues()?.serviceBrokerDepth ?? 0;
+    return 0;
+  }
+
+  queueChips(id: AnatomyStage): number[] {
+    const d = Math.max(0, Math.floor(this.depthOf(id)));
+    if (d <= 0) return [];
+    const n = Math.min(8, Math.max(1, d));
+    return Array.from({ length: n }, (_, i) => i);
+  }
+
+  queueMotion(id: AnatomyStage): 'idle' | 'rising' | 'draining' {
+    if (id === 'temp') return this.tempMotion();
+    if (id === 'fila') return this.brokerMotion();
+    return 'idle';
   }
 
   count(id: AnatomyStage): string {
@@ -303,11 +394,11 @@ export class SintetizadorAnatomyFlowComponent implements OnDestroy {
     switch (id) {
       case 'fila': {
         const n = this.store.queues()?.serviceBrokerDepth ?? 0;
-        return n > 0 ? `${n} na fila` : '0 na fila';
+        return n > 0 ? `${n} na fila` : 'vazia';
       }
       case 'temp': {
         const n = this.store.queues()?.tempBacklog ?? 0;
-        return n > 0 ? `${n} aguardando` : '0 aguardando';
+        return n > 0 ? `${n} aguardando` : 'vazia';
       }
       case 'classificar':
         return 'schema';

@@ -11,6 +11,9 @@
   --monitor-queue: #fbbf24; /* amber — fila */
   --monitor-error: #f87171; /* rose — erro */
   --monitor-idle: #64748b; /* slate — parado */
+  --motion-fast: 0.22s;
+  --motion-pulse: 1.4s;
+  --station-dim: 0.55;
 }
 
 body {
@@ -201,13 +204,13 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.35rem;
-  height: 1.25rem;
+  min-width: 2.65rem;
+  height: 1.4rem;
   border-radius: 0.3rem;
   border: 1px solid #60a5fa;
   background: linear-gradient(180deg, #1e3a8a, #2563eb);
   color: #eff6ff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.04em;
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
@@ -395,8 +398,8 @@ body {
     0 0 0 3px rgba(96, 165, 250, 0.35),
     0 9px 0 #1d4ed8,
     0 14px 22px rgba(37, 99, 235, 0.3);
-  transform: translateY(-4px) scale(1.04);
-  animation: active-stage-pulse 1.4s ease-in-out infinite;
+  transform: translateY(-4px) scale(1.06);
+  animation: active-stage-pulse var(--motion-pulse) ease-in-out infinite;
 }
 
 .chain-anatomy .anatomy-platform-queued {
@@ -417,8 +420,8 @@ body {
 }
 
 .chain-anatomy .anatomy-platform-muted {
-  opacity: 0.5;
-  filter: saturate(0.5);
+  opacity: var(--station-dim);
+  filter: saturate(0.45);
 }
 
 .chain-anatomy .anatomy-poster-starting .anatomy-stage-booting .anatomy-platform {
@@ -882,3 +885,382 @@ body {
   padding: 0;
   list-style: none;
 }
+
+/* —— Station card + queue meter (cadeia UX) —— */
+.station-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+  padding: 1.35rem 0.2rem 0.35rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+  transition: opacity var(--motion-fast) ease, transform var(--motion-fast) ease,
+    filter var(--motion-fast) ease;
+}
+
+.station-card-muted {
+  opacity: var(--station-dim);
+  filter: saturate(0.45);
+}
+
+.station-card-agora {
+  z-index: 2;
+  transform: scale(1.06);
+}
+
+.station-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.18rem 0.55rem;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.station-badge-agora {
+  border-color: var(--monitor-accent);
+  background: linear-gradient(180deg, #1e3a8a, #1d4ed8);
+  color: #dbeafe;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.4);
+  animation: badge-blink var(--motion-pulse) ease-in-out infinite;
+}
+
+.station-badge-fila {
+  border-color: var(--monitor-queue);
+  background: linear-gradient(180deg, #78350f, #92400e);
+  color: #fef3c7;
+  box-shadow: 0 3px 10px rgba(251, 191, 36, 0.35);
+}
+
+.station-badge-erro {
+  border-color: var(--monitor-error);
+  background: linear-gradient(180deg, #7f1d1d, #991b1b);
+  color: #fecaca;
+  animation: badge-blink 0.9s ease-in-out infinite;
+}
+
+.station-badge-ativo {
+  border-color: rgba(163, 230, 53, 0.55);
+  background: rgba(54, 83, 20, 0.75);
+  color: #ecfccb;
+}
+
+.station-badge-parado {
+  border-color: rgba(100, 116, 139, 0.55);
+  background: rgba(30, 41, 59, 0.85);
+  color: #94a3b8;
+}
+
+.station-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  max-width: 7.25rem;
+  padding: 0.65rem 0.45rem 0.55rem;
+  border-radius: 0.95rem 0.95rem 1.15rem 1.15rem;
+  border: 2px solid #1e3a8a;
+  background: linear-gradient(165deg, #0c2340 0%, #081526 55%, #0a1a30 100%);
+  box-shadow:
+    0 8px 0 #0c2340,
+    0 10px 18px rgba(15, 10, 46, 0.5);
+  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.station-card-agora .station-body {
+  border-color: var(--monitor-accent);
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.35),
+    0 8px 0 #1d4ed8,
+    0 12px 22px rgba(37, 99, 235, 0.35);
+  animation: active-stage-pulse var(--motion-pulse) ease-in-out infinite;
+}
+
+.station-card-fila .station-body {
+  border-color: var(--monitor-queue);
+  box-shadow:
+    0 0 0 2px rgba(251, 191, 36, 0.28),
+    0 8px 0 #b45309,
+    0 12px 18px rgba(245, 158, 11, 0.25);
+  animation: queued-stage-pulse 1.6s ease-in-out infinite;
+}
+
+.station-card-erro .station-body {
+  border-color: var(--monitor-error);
+  animation: error-stage-pulse 1.1s ease-in-out infinite;
+}
+
+.station-card-ativo .station-body {
+  border-color: rgba(163, 230, 53, 0.55);
+}
+
+.station-card:hover .station-body {
+  border-color: rgba(148, 163, 184, 0.85);
+  transform: translateY(-2px);
+}
+
+.station-symbol {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #93c5fd;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.station-card-agora .station-symbol {
+  color: #bfdbfe;
+  font-size: 1.05rem;
+}
+
+.station-title {
+  margin-top: 0.55rem !important;
+  font-size: 0.78rem !important;
+}
+
+.station-metric {
+  margin: 0.15rem 0 0;
+  max-width: 8.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.station-card-agora .station-metric,
+.station-card-fila .station-metric {
+  color: #e2e8f0;
+}
+
+.station-process {
+  margin: 0.2rem 0 0;
+  max-width: 8.5rem;
+  font-size: 9px;
+  line-height: 1.25;
+  color: #7dd3fc;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Queue meter — pilha visual de CT-e */
+.queue-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  width: 100%;
+}
+
+.queue-meter-track {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: 2.75rem;
+  max-height: 3.6rem;
+  padding: 0.2rem;
+  border-radius: 0.4rem;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  overflow: hidden;
+}
+
+.queue-meter-chip {
+  display: block;
+  height: 0.28rem;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #1e40af, #3b82f6);
+  opacity: calc(0.45 + (var(--chip-i, 0) * 0.04));
+  animation: queue-chip-in 0.35s ease-out both;
+  animation-delay: calc(var(--chip-i, 0) * 28ms);
+}
+
+.queue-meter-agora .queue-meter-chip {
+  background: linear-gradient(90deg, #1d4ed8, #60a5fa);
+}
+
+.queue-meter-fila .queue-meter-chip {
+  background: linear-gradient(90deg, #b45309, #fbbf24);
+}
+
+.queue-meter-error .queue-meter-chip {
+  background: linear-gradient(90deg, #991b1b, #f87171);
+}
+
+.queue-meter-running .queue-meter-chip {
+  background: linear-gradient(90deg, #3f6212, #a3e635);
+}
+
+.queue-meter-idle .queue-meter-track {
+  min-height: 1.6rem;
+  opacity: 0.55;
+}
+
+.queue-meter-idle .queue-meter-track::after {
+  content: '';
+  display: block;
+  height: 0.22rem;
+  border-radius: 9999px;
+  background: rgba(100, 116, 139, 0.45);
+  margin-top: auto;
+}
+
+.queue-meter-depth {
+  font-size: 11px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.02em;
+}
+
+.queue-meter-idle .queue-meter-depth {
+  color: #64748b;
+}
+
+.queue-meter-agora .queue-meter-depth {
+  color: #bfdbfe;
+}
+
+.queue-meter-fila .queue-meter-depth {
+  color: #fde68a;
+}
+
+@keyframes queue-chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scaleY(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* Idle hero + live rail sticky */
+.chain-idle-hero-icon {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px dashed rgba(96, 165, 250, 0.35);
+  background: rgba(8, 21, 38, 0.65);
+}
+
+.chain-idle-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 0;
+  background: #84cc16;
+  color: #0f172a;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.55rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(132, 204, 22, 0.25);
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+
+.chain-idle-cta:hover:not(:disabled) {
+  background: #a3e635;
+  transform: translateY(-1px);
+}
+
+.chain-idle-cta:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.anatomy-live-rail-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
+}
+
+.anatomy-live-card {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+}
+
+.anatomy-live-card:hover {
+  filter: brightness(1.08);
+}
+
+.anatomy-error-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.55rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  text-align: left;
+}
+
+.anatomy-summary-bar-queue {
+  justify-content: flex-start;
+  gap: 1.5rem;
+}
+
+.chain-anatomy.anatomy-poster-idle .anatomy-path-line {
+  opacity: 0.18;
+}
+
+.chain-board-idle .anatomy-stages {
+  opacity: 0.92;
+}
+
+.status-legend .anatomy-legend-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot,
+  .pulse-banner,
+  .anatomy-poster-live .anatomy-belt-move,
+  .chain-anatomy.anatomy-poster-live .anatomy-path-line,
+  .station-badge-agora,
+  .station-badge-erro,
+  .station-card-agora .station-body,
+  .station-card-fila .station-body,
+  .station-card-erro .station-body,
+  .anatomy-live-card,
+  .queue-meter-chip,
+  .chain-anatomy .anatomy-platform-active,
+  .chain-anatomy .anatomy-platform-queued,
+  .chain-anatomy .anatomy-now,
+  .chain-anatomy .anatomy-step-arrow-hot {
+    animation: none !important;
+  }
+}
+

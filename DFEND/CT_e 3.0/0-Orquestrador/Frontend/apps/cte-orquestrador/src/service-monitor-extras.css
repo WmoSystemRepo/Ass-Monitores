@@ -1,10 +1,10 @@
 /* CT_e 2.0 Receptor baseline, followed by service-specific icon skins. */
 
-/* Tokens / live-dot / pulse-banner: definidos em styles.css (fonte Ãºnica).
-   Regras de anatomia abaixo sÃ£o escopadas em .pipeline-anatomy para
-   nÃ£o colidir com a grade de 6 colunas da cadeia (.chain-anatomy). */
+/* Tokens / live-dot / pulse-banner: definidos em styles.css (fonte única).
+   Regras de anatomia abaixo são escopadas em .pipeline-anatomy para
+   não colidir com a grade de 6 colunas da cadeia (.chain-anatomy). */
 
-/* â€”â€” CronÃ´metro decrescente (banner) â€”â€” */
+/* ?? Cronômetro decrescente (banner) ?? */
 .cycle-chrono {
   display: inline-flex;
   align-items: baseline;
@@ -60,7 +60,7 @@
   animation: chrono-blink 0.7s steps(1) infinite;
 }
 
-/* Tempo sem achar CT-e novo (crescente desde o Ãºltimo lote) */
+/* Tempo sem achar CT-e novo (crescente desde o último lote) */
 .cycle-chrono-wait {
   border-color: rgba(56, 189, 248, 0.45);
   background: linear-gradient(180deg, rgba(12, 74, 110, 0.55), rgba(7, 40, 64, 0.75));
@@ -102,7 +102,7 @@
   right: 5.5%;
 }
 
-/* 5 colunas + setas â€” sÃ³ no pipeline interno do serviÃ§o */
+/* 5 colunas + setas ? só no pipeline interno do serviço */
 .pipeline-anatomy .anatomy-stages {
   display: grid;
   grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
@@ -123,13 +123,13 @@
 
 .pipeline-anatomy .anatomy-platform {
   position: relative;
-  width: 5.75rem;
-  height: 5.75rem;
+  width: 4.75rem;
+  height: 4.75rem;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.95rem 0.95rem 1.35rem 1.35rem;
+  border-radius: 0.85rem 0.85rem 1.15rem 1.15rem;
   border: 2px solid #334155;
   background: linear-gradient(165deg, #1e293b 0%, #0f172a 55%, #1e3a5f 100%);
   box-shadow:
@@ -298,11 +298,11 @@
 }
 
 .pipeline-anatomy .anatomy-iso {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.85rem;
+  height: 2.85rem;
   position: relative;
   z-index: 1;
-  transform: scale(1.22);
+  transform: scale(1.1);
   transform-origin: center center;
 }
 
@@ -336,7 +336,7 @@
   background: transparent;
 }
 
-/* Consulta baseada em NSU â€” laptop + lupa (estilo diagrama) */
+/* Consulta baseada em NSU ? laptop + lupa (estilo diagrama) */
 .pipeline-anatomy .anatomy-iso[data-icon='consulta']::before {
   width: 2.1rem;
   height: 1.35rem;
@@ -1007,7 +1007,7 @@
 
 
 
-/* —— Status hero + empty state (Receptor UX) —— */
+/* ?? Status hero + empty state (Receptor UX) ?? */
 .status-hero {
   display: inline-flex;
   align-items: center;
@@ -1033,7 +1033,7 @@
 }
 
 .status-hero-detail::before {
-  content: '·';
+  content: '?';
   margin-right: 0.35rem;
   color: #64748b;
 }
@@ -1076,4 +1076,41 @@
 
 .receptor-empty {
   min-height: 12rem;
+}
+
+/* —— Fit monitores na viewport (sem scroll) —— */
+.pipeline-anatomy.anatomy-poster-fill {
+  min-height: 0;
+}
+
+.pipeline-anatomy .anatomy-poster-head {
+  padding-top: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.pipeline-anatomy .anatomy-stage-title {
+  margin-top: 0.55rem;
+  font-size: 0.72rem;
+}
+
+.pipeline-anatomy .anatomy-stage-blurb {
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.3rem;
+  font-size: 9px;
+  max-width: 8.5rem;
+}
+
+.pipeline-anatomy .anatomy-stage {
+  padding-top: 1rem;
+}
+
+.pipeline-anatomy .anatomy-step-arrow {
+  margin-top: 2.4rem;
+}
+
+.pipeline-anatomy .anatomy-fill-board {
+  min-width: 760px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }

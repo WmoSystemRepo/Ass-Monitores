@@ -18,7 +18,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section
-      class="dashboard-fit flex h-[calc(100vh-3rem)] max-h-[calc(100vh-3rem)] flex-col gap-2 overflow-hidden"
+      class="dashboard-fit flex h-full max-h-full flex-col gap-1.5 overflow-hidden"
     >
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">

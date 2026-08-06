@@ -8,55 +8,53 @@ import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
   template: `
-    <div class="min-h-screen bg-indigo-950 text-indigo-50">
-      <div class="flex min-h-screen">
-        <aside class="w-60 shrink-0 border-r border-indigo-900 bg-indigo-950/90 p-4">
-          <p class="text-sm font-semibold tracking-wide text-indigo-50">
-            Orquestrador CT-e
-          </p>
-          <p class="mt-1 text-[10px] uppercase tracking-widest text-indigo-400">
-            Ambiente de testes
-          </p>
-          <nav class="mt-6 flex flex-col gap-1 text-sm">
-            @for (l of links; track l.path) {
-              <a
-                [routerLink]="l.path"
-                routerLinkActive="bg-indigo-900 text-violet-300"
-                [routerLinkActiveOptions]="{ exact: l.path === '/' }"
-                class="rounded px-3 py-2 text-indigo-200 hover:bg-indigo-900/70"
-                [attr.title]="l.hint"
-              >
-                <span class="block">{{ l.label }}</span>
-                <span class="block text-[10px] text-indigo-500">{{ l.hint }}</span>
-              </a>
+    <div class="flex h-screen overflow-hidden bg-indigo-950 text-indigo-50">
+      <aside class="flex w-56 shrink-0 flex-col border-r border-indigo-900 bg-indigo-950/90 p-3">
+        <p class="text-sm font-semibold tracking-wide text-indigo-50">
+          Orquestrador CT-e
+        </p>
+        <p class="mt-0.5 text-[10px] uppercase tracking-widest text-indigo-400">
+          Ambiente de testes
+        </p>
+        <nav class="mt-4 flex flex-col gap-0.5 text-sm">
+          @for (l of links; track l.path) {
+            <a
+              [routerLink]="l.path"
+              routerLinkActive="bg-indigo-900 text-violet-300"
+              [routerLinkActiveOptions]="{ exact: l.path === '/' }"
+              class="rounded px-2.5 py-1.5 text-indigo-200 hover:bg-indigo-900/70"
+              [attr.title]="l.hint"
+            >
+              <span class="block">{{ l.label }}</span>
+              <span class="block text-[10px] text-indigo-500">{{ l.hint }}</span>
+            </a>
+          }
+        </nav>
+        <div class="mt-auto pt-4 text-xs text-indigo-400">
+          <p
+            class="inline-flex items-center gap-1.5"
+            [attr.title]="
+              store.live()
+                ? 'Orquestrador recebendo snapshot'
+                : 'Orquestrador sem push recente'
+            "
+          >
+            @if (store.live()) {
+              <span class="live-dot"></span>
             }
-          </nav>
-          <div class="mt-8 text-xs text-indigo-400">
-            <p
-              class="inline-flex items-center gap-1.5"
-              [attr.title]="
-                store.live()
-                  ? 'Orquestrador recebendo snapshot'
-                  : 'Orquestrador sem push recente'
-              "
-            >
-              @if (store.live()) {
-                <span class="live-dot"></span>
-              }
-              {{ connectionLabel() }}
-            </p>
-            <p
-              class="mt-2 text-sm text-indigo-200"
-              [attr.title]="systemsSummaryTitle()"
-            >
-              {{ systemsSummary() }}
-            </p>
-          </div>
-        </aside>
-        <main class="min-w-0 flex-1 overflow-y-auto p-6">
-          <router-outlet />
-        </main>
-      </div>
+            {{ connectionLabel() }}
+          </p>
+          <p
+            class="mt-1.5 text-sm text-indigo-200"
+            [attr.title]="systemsSummaryTitle()"
+          >
+            {{ systemsSummary() }}
+          </p>
+        </div>
+      </aside>
+      <main class="min-h-0 min-w-0 flex-1 overflow-hidden p-3">
+        <router-outlet />
+      </main>
     </div>
   `,
 })

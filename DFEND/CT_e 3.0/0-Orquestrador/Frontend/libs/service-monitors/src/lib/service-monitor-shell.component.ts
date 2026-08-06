@@ -20,14 +20,16 @@ export type ServiceMonitorId = keyof typeof SERVICE_MONITORS;
   imports: [RouterLink, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="mx-auto max-w-[1440px] px-4 py-3">
-      <header class="mb-3 flex items-center gap-3">
-        <a routerLink="/" class="text-sm text-sky-300 hover:text-sky-100">← Voltar ao painel</a>
+    <div class="flex h-full min-h-0 flex-col overflow-hidden">
+      <header class="mb-1.5 flex shrink-0 items-center gap-2">
+        <a routerLink="/" class="text-xs text-sky-300 hover:text-sky-100">← Voltar ao painel</a>
         <span class="text-slate-700">|</span>
-        <h1 class="text-sm font-semibold text-slate-100">Monitor do {{ label() }}</h1>
+        <h1 class="text-xs font-semibold text-slate-100">Monitor do {{ label() }}</h1>
       </header>
-      <router-outlet />
-    </main>
+      <div class="min-h-0 flex-1 overflow-hidden">
+        <router-outlet />
+      </div>
+    </div>
   `,
 })
 export class ServiceMonitorShellComponent {

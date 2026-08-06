@@ -110,7 +110,7 @@ export interface FlyingPacket {
 
       <!-- Diagrama principal — uma composição centrada -->
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
-        <div class="anatomy-fill-board relative flex h-full min-w-[880px] flex-col items-stretch px-2 py-2">
+        <div class="anatomy-fill-board relative flex h-full min-w-[760px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
             <div class="anatomy-path-line anatomy-path-line-5" aria-hidden="true"></div>
 

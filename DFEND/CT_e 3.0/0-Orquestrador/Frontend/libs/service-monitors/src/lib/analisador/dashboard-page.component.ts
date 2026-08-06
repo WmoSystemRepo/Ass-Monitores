@@ -30,7 +30,7 @@ import {
   imports: [DatePipe, AnalisadorAnatomyFlowComponent, TableHealthCardsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="dashboard-fit flex h-[calc(100vh-3rem)] max-h-[calc(100vh-3rem)] flex-col gap-2 overflow-hidden">
+    <section class="dashboard-fit flex h-full max-h-full flex-col gap-1.5 overflow-hidden">
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
@@ -390,7 +390,7 @@ export class AnalisadorDashboardPageComponent {
       return {
         mode: 'busy' as const,
         caption: 'próx. ciclo',
-        display: '--:--',
+        display: 'em andamento',
         secondsLeft: 0,
         hint: `Ciclo em andamento agora · intervalo configurado ${intervalo}s`,
       };

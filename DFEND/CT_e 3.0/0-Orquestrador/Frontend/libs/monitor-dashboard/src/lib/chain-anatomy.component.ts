@@ -54,7 +54,11 @@ import {
             </li>
             <li class="anatomy-legend-item">
               <span class="anatomy-legend-swatch anatomy-legend-running"></span>
-              Ligado
+              Ativo
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-queue"></span>
+              Pausado
             </li>
             <li class="anatomy-legend-item">
               <span class="anatomy-legend-swatch anatomy-legend-stopped"></span>
@@ -211,21 +215,19 @@ import {
                   <p class="anatomy-stage-title">{{ shortLabel(sys.label) }}</p>
                   <span
                     class="anatomy-status-chip"
-                    [class.anatomy-status-chip-running]="
-                      isRunning(sys.status) && !isError(sys)
+                    [class.anatomy-status-chip-running]="isWorkActive(sys)"
+                    [class.anatomy-status-chip-wait]="
+                      isProcessUp(sys) && !isWorkActive(sys) && !isError(sys)
                     "
                     [class.anatomy-status-chip-error]="isError(sys)"
-                    [class.anatomy-status-chip-wait]="
-                      isStartingStatus(sys.status) || isStoppingStatus(sys.status)
-                    "
                     [class.anatomy-status-chip-stopped]="
-                      !isRunning(sys.status) &&
+                      !isProcessUp(sys) &&
                       !isError(sys) &&
                       !isStartingStatus(sys.status) &&
                       !isStoppingStatus(sys.status)
                     "
                   >
-                    {{ statusLabel(sys.status) }}
+                    {{ statusChipLabel(sys) }}
                   </span>
                   <p
                     class="anatomy-stage-count"
@@ -255,8 +257,12 @@ import {
 
             <div class="anatomy-summary-bar mt-3 shrink-0">
               <div>
-                <span class="anatomy-summary-label">Sistemas ligados</span>
+                <span class="anatomy-summary-label">Ativos</span>
                 <span class="anatomy-summary-value">{{ runningCount() }}</span>
+              </div>
+              <div>
+                <span class="anatomy-summary-label">Processos no ar</span>
+                <span class="anatomy-summary-value">{{ processUpCount() }}</span>
               </div>
               <div>
                 <span class="anatomy-summary-label">Com fila</span>
@@ -285,6 +291,7 @@ export class ChainAnatomyComponent {
   readonly lastLote = this.store.lastLote;
   readonly beltMoving = this.store.beltMoving;
   readonly runningCount = this.store.runningCount;
+  readonly processUpCount = this.store.processUpCount;
   readonly anyRunning = this.store.anyRunning;
 
   readonly hasAgora = computed(() => this.systems().some((s) => s.agora));
@@ -347,6 +354,28 @@ export class ChainAnatomyComponent {
 
   isRunning(status: string | number): boolean {
     return normalizeStatus(status) === 'running';
+  }
+
+  isProcessUp(sys: { status: string | number }): boolean {
+    return this.isRunning(sys.status);
+  }
+
+  isWorkActive(sys: { status: string | number; executar?: number | null }): boolean {
+    return this.isProcessUp(sys) && Number(sys.executar) === 1;
+  }
+
+  statusChipLabel(sys: {
+    status: string | number;
+    executar?: number | null;
+  }): string {
+    if (this.isError(sys as { status: string | number; lastError?: string | null })) {
+      return 'Falha';
+    }
+    if (this.isStartingStatus(sys.status)) return 'Ligando…';
+    if (this.isStoppingStatus(sys.status)) return 'Desligando…';
+    if (this.isWorkActive(sys)) return 'Ativo';
+    if (this.isProcessUp(sys)) return 'Pausado';
+    return this.statusLabel(sys.status);
   }
 
   isStartingStatus(status: string | number): boolean {
@@ -453,7 +482,7 @@ export class ChainAnatomyComponent {
   statusLabel(status: string | number): string {
     switch (normalizeStatus(status)) {
       case 'running':
-        return 'Ligado';
+        return 'Processo no ar';
       case 'starting':
         return 'Ligando…';
       case 'stopping':

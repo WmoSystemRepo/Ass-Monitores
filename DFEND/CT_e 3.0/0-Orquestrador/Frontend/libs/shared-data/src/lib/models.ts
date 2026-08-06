@@ -104,7 +104,9 @@ export interface ServiceStatusView {
   windowsServiceName: string;
   scmStatus: string;
   isRunning: boolean;
-  executar: number;
+  /** Flag de trabalho. null/undefined = sem telemetria (snapshot limitado). */
+  executar: number | null;
+  executarKnown?: boolean | null;
   nomServidor?: string | null;
   dtcExecucao?: string | null;
   desServico?: string | null;
@@ -175,11 +177,14 @@ export interface MonitorSnapshot {
   recentDocuments: RecentDocument[];
   alerts: MonitorAlert[];
   config: ConfigItem[];
-  connectionHealth: ConnectionHealth | number;
+  connectionHealth: ConnectionHealth | number | string;
   connectionError?: string | null;
   liveTrace?: LiveTraceLine[];
   sessionStartUtc?: string | null;
   tableHealth?: TableHealthView[];
+  /** Presente no snapshot in-process limitado (W3). */
+  mode?: string | null;
+  limitation?: string | null;
 }
 
 export type TableHealthStatus = 'Ok' | 'Atencao' | 'Critico' | string;

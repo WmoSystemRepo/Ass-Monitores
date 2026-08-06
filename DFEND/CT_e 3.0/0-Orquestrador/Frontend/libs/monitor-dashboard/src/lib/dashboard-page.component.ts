@@ -112,8 +112,13 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
         </span>
         <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
         <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-slate-400">Sistemas ligados</span>
+          <span class="text-slate-400">Serviços ativos</span>
           <span class="font-medium text-slate-50">{{ store.runningCount() }}</span>
+        </span>
+        <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
+        <span class="inline-flex items-baseline gap-1.5">
+          <span class="text-slate-400">Processos no ar</span>
+          <span class="font-medium text-slate-50">{{ store.processUpCount() }}</span>
         </span>
         <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
         <span class="inline-flex items-baseline gap-1.5">

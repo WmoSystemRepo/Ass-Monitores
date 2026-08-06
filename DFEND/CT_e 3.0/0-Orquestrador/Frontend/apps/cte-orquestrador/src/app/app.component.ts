@@ -45,8 +45,11 @@ import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
               }
               {{ connectionLabel() }}
             </p>
-            <p class="mt-2 text-sm text-indigo-200">
-              {{ store.runningCount() }} sistema(s) ligado(s)
+            <p
+              class="mt-2 text-sm text-indigo-200"
+              [attr.title]="systemsSummaryTitle()"
+            >
+              {{ systemsSummary() }}
             </p>
           </div>
         </aside>
@@ -62,6 +65,30 @@ export class AppComponent {
   readonly connectionLabel = computed(() =>
     this.store.live() ? 'Orquestrador online' : 'Orquestrador offline'
   );
+
+  /** Ativos = processo no ar + Executar=1. Não confundir com DevHost só ligado. */
+  readonly systemsSummary = computed(() => {
+    const ativos = this.store.runningCount();
+    const noAr = this.store.processUpCount();
+    const pausados = this.store.pausedCount();
+    if (ativos === 0 && noAr === 0) {
+      return 'Nenhum serviço ativo';
+    }
+    if (pausados > 0 && ativos === 0) {
+      return `${noAr} processo(s) no ar · 0 ativos`;
+    }
+    if (pausados > 0) {
+      return `${ativos} ativo(s) · ${pausados} pausado(s)`;
+    }
+    return `${ativos} serviço(s) ativo(s)`;
+  });
+
+  readonly systemsSummaryTitle = computed(() => {
+    const ativos = this.store.runningCount();
+    const noAr = this.store.processUpCount();
+    return `Ativos (trabalho): ${ativos} · Processos no ar: ${noAr}. Ativo = processo Running + Executar=1.`;
+  });
+
   readonly links = [
     { path: '/', label: 'Monitor', hint: 'Visão da cadeia' },
     { path: '/resgate', label: 'Resgate CT-e', hint: 'Recuperar do AN' },

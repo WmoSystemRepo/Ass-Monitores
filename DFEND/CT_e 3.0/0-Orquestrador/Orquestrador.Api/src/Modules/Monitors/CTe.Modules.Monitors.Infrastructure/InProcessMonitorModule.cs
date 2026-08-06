@@ -142,11 +142,12 @@ public sealed class InProcessMonitorModule : IMonitorModule
     private object BuildLimitedSnapshot()
     {
         var status = _control.GetStatus();
+        var processUp = status.Status.Equals("Running", StringComparison.OrdinalIgnoreCase);
         return new
         {
             mode = "in-process-limited",
             limitation =
-                $"Snapshot completo (threads/filas/documentos) requer o SqlMonitorRepository do {_options.Domain} " +
+                $"Snapshot completo (threads/filas/documentos/Executar) requer o SqlMonitorRepository do {_options.Domain} " +
                 "— não copiado nesta wave (W3). Ligue Monitors:" + ServiceId +
                 ":UseHttpFallback=true para snapshot completo via Monitor.Api enquanto essa paridade não é feita.",
             global = new
@@ -156,11 +157,16 @@ public sealed class InProcessMonitorModule : IMonitorModule
                     windowsServiceName = _options.WindowsServiceName,
                     desServico = _options.DisplayName,
                     scmStatus = status.Status,
-                    isRunning = status.Status.Equals("Running", StringComparison.OrdinalIgnoreCase)
+                    isRunning = processUp,
+                    // Sem SQL: não afirmamos Executar. UI deve mostrar "sem telemetria", não "pausado".
+                    executar = (int?)null,
+                    executarKnown = false
                 },
                 snapshotAtUtc = DateTimeOffset.UtcNow
             },
-            connectionHealth = string.IsNullOrWhiteSpace(_options.ConnectionString) ? "Unknown" : "Unchecked",
+            connectionHealth = string.IsNullOrWhiteSpace(_options.ConnectionString)
+                ? "SemDados"
+                : "SemTelemetria",
             codServico = _options.CodServico,
             threads = Array.Empty<object>(),
             recentDocuments = Array.Empty<object>(),
@@ -191,14 +197,21 @@ public sealed class InProcessMonitorModule : IMonitorModule
         }
     }
 
-    private static MonitorServiceStatusDto ToStatusDto(ServiceControlResult result) => new(
-        result.Success,
-        result.Status,
-        result.Message,
-        result.Status.Equals("Running", StringComparison.OrdinalIgnoreCase),
-        result.Status,
-        result.Status.Equals("Running", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
-        result.CommandId);
+    private static MonitorServiceStatusDto ToStatusDto(ServiceControlResult result)
+    {
+        var running = result.Status.Equals("Running", StringComparison.OrdinalIgnoreCase);
+        // Não inventar Executar=1 a partir do SCM/DevHost — isso fazia o Orquestrador
+        // contar "sistema ligado" enquanto o monitor mostrava "recepção pausada".
+        // Sem telemetria de banco, Executar fica null (desconhecido).
+        return new(
+            result.Success,
+            result.Status,
+            result.Message,
+            running,
+            result.Status,
+            Executar: null,
+            result.CommandId);
+    }
 
     private static MonitorActionResult ToActionResult(ServiceControlResult result) => new(
         result.Success,

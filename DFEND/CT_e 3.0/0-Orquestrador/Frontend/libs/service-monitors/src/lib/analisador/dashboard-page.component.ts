@@ -67,7 +67,7 @@ import {
             [disabled]="store.actionBusy() || canStart() === false"
             (click)="store.startService()"
           >
-            Ligar Analisador CT-e
+            {{ primaryActionLabel() }}
           </button>
           <button
             type="button"
@@ -124,23 +124,42 @@ import {
         </div>
       }
 
+      @if (isLimitedTelemetry()) {
+        <div
+          class="shrink-0 rounded border border-amber-500/40 bg-amber-950/35 px-3 py-1.5 text-[11px] text-amber-100"
+          role="status"
+        >
+          Snapshot limitado — processo (DevHost) visível; filas/Executar ainda sem telemetria completa do banco.
+          @if (processUp()) {
+            <span class="font-medium"> Processo no ar; análise sem telemetria completa.</span>
+          }
+        </div>
+      }
+
       <div
         class="health-strip flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-zinc-700/80 bg-zinc-900/50 px-3 py-1.5 text-[11px]"
         [class.health-strip-live]="isRunning()"
       >
         <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-zinc-500">Analisador</span>
-          <span class="font-medium text-zinc-100">{{ statusLabel() }}</span>
+          <span class="text-zinc-500">Processo</span>
+          <span
+            class="font-medium"
+            [class.text-lime-300]="processUp()"
+            [class.text-zinc-100]="!processUp()"
+          >
+            {{ processUp() ? 'No ar' : 'Parado' }}
+          </span>
         </span>
         <span class="hidden text-zinc-700 sm:inline" aria-hidden="true">·</span>
         <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-zinc-500">Ciclo</span>
+          <span class="text-zinc-500">Análise</span>
           <span
             class="font-medium"
-            [class.text-teal-300]="service()?.executar === 1"
-            [class.text-zinc-300]="service()?.executar !== 1"
+            [class.text-teal-300]="isRunning()"
+            [class.text-amber-300]="processUp() && !isRunning()"
+            [class.text-zinc-300]="!processUp()"
           >
-            {{ service()?.executar === 1 ? 'Ativo' : 'Ocioso' }}
+            {{ workLabel() }}
           </span>
         </span>
         <span class="hidden text-zinc-700 sm:inline" aria-hidden="true">·</span>
@@ -237,16 +256,38 @@ export class AnalisadorDashboardPageComponent {
     analisadorStatusLabel(this.service()?.scmStatus, this.service()?.executar)
   );
 
+  readonly processUp = computed(() => !!this.service()?.isRunning);
+
+  readonly isLimitedTelemetry = computed(
+    () => this.store.snapshot()?.mode === 'in-process-limited'
+  );
+
   readonly isRunning = computed(() => {
     const s = this.service();
     return !!s?.isRunning && s.executar === 1;
+  });
+
+  readonly workLabel = computed(() => {
+    if (this.isRunning()) return 'Ativo';
+    if (this.processUp() && this.isLimitedTelemetry()) return 'Sem telemetria';
+    if (this.processUp()) return 'Pausado';
+    return 'Parado';
+  });
+
+  readonly primaryActionLabel = computed(() => {
+    if (this.processUp() && !this.isRunning()) {
+      return this.isLimitedTelemetry()
+        ? 'Reiniciar Analisador'
+        : 'Ativar an�lise';
+    }
+    return 'Ligar Analisador CT-e';
   });
 
   readonly heartbeat = computed(() => {
     this.nowMs();
     return formatHeartbeatAge(this.service()?.dtcExecucao, {
       intervaloSec: this.resolveIntervaloSec(),
-      processRunning: this.isRunning(),
+      processRunning: this.processUp(),
     });
   });
 
@@ -295,6 +336,12 @@ export class AnalisadorDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
+      if (this.processUp() && this.isLimitedTelemetry()) {
+        return 'Processo no ar — telemetria de filas/Executar indisponível neste modo (snapshot limitado).';
+      }
+      if (this.processUp()) {
+        return 'Processo no ar, mas a análise está pausada (Executar≠1). Ative o trabalho para ver o pipeline.';
+      }
       return 'Ligue o Analisador para ver o pipeline interno (fila → temp → classificar → detalhar → limpar).';
     }
     if (this.queuesConsuming()) {

@@ -56,7 +56,22 @@ export class ChainOrchestratorStore {
 
   readonly runningCount = computed(
     () =>
+      this.systems().filter(
+        (s) => normalizeStatus(s.status) === 'running' && Number(s.executar) === 1
+      ).length
+  );
+
+  /** Processo/DevHost no ar (pode estar com trabalho pausado). */
+  readonly processUpCount = computed(
+    () =>
       this.systems().filter((s) => normalizeStatus(s.status) === 'running').length
+  );
+
+  readonly pausedCount = computed(
+    () =>
+      this.systems().filter(
+        (s) => normalizeStatus(s.status) === 'running' && Number(s.executar) !== 1
+      ).length
   );
 
   readonly anyRunning = computed(() => this.runningCount() > 0);

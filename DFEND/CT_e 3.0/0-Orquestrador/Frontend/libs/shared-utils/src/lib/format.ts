@@ -21,14 +21,86 @@ export function connectionHealthLabel(health: string | number): string {
     case 'Healthy':
       return 'Conectado';
     case 'Degraded':
-      // Degraded existe no modelo; aggregator ainda não atribui nesta POC.
       return 'Sem conexão';
     case 'Down':
       return 'Sem conexão';
+    case 'Unknown':
+    case 'Unchecked':
+    case 'SemDados':
+    case 'SemTelemetria':
+      return 'Sem dados do banco';
     default:
       return String(raw);
   }
 }
+
+/** Processo (SCM/DevHost) — separado do trabalho (Executar). */
+export function processStatusLabel(scmStatus?: string | null): string {
+  const status = (scmStatus ?? '').trim().toLowerCase();
+  if (status === 'running') return 'No ar';
+  if (status === 'stopped' || !status) return 'Parado';
+  if (status === 'notfound') return 'Não disponível';
+  if (status.includes('start')) return 'Ligando…';
+  if (status.includes('stop')) return 'Desligando…';
+  return scmStatus?.trim() || '—';
+}
+
+/** Trabalho (flag Executar) — ativo / pausado / sem telemetria. */
+export function workStatusLabel(
+  scmStatus?: string | null,
+  executar?: number | null,
+  opts?: { workNoun?: string; executarKnown?: boolean | null }
+): string {
+  const noun = opts?.workNoun ?? 'Trabalho';
+  const processUp = (scmStatus ?? '').trim().toLowerCase() === 'running';
+  const known = opts?.executarKnown !== false && executar != null;
+  if (!processUp) return `${noun} parado`;
+  if (!known) return `${noun}: sem telemetria`;
+  if (executar === 1) return `${noun} ativo`;
+  return `${noun} pausado`;
+}
+
+/** Status do processo para leigo (SCM/Running/Stopped/NotFound). */
+export function receptorStatusLabel(scmStatus?: string | null, executar?: number | null): string {
+  const status = (scmStatus ?? '').trim();
+  const running = status.toLowerCase() === 'running';
+  if (running && executar === 1) return 'Trabalho ativo';
+  if (running && executar == null) return 'Processo no ar · sem telemetria';
+  if (running && executar !== 1) return 'Processo no ar · recepção pausada';
+  if (status.toLowerCase() === 'stopped' || !status) {
+    return 'Processo parado';
+  }
+  if (status.toLowerCase() === 'notfound') {
+    return 'Não disponível';
+  }
+  return status || '—';
+}
+
+function serviceStatusLabel(
+  scmStatus: string | null | undefined,
+  executar: number | null | undefined,
+  pausedLabel: string
+): string {
+  const status = (scmStatus ?? '').trim();
+  const running = status.toLowerCase() === 'running';
+  if (running && executar === 1) return 'Trabalho ativo';
+  if (running && executar == null) return 'Processo no ar · sem telemetria';
+  if (running && executar !== 1) return pausedLabel;
+  if (status.toLowerCase() === 'stopped' || !status) return 'Processo parado';
+  if (status.toLowerCase() === 'notfound') return 'Não disponível';
+  return status || '—';
+}
+
+export const arquivadorStatusLabel = (status?: string | null, executar?: number | null) =>
+  serviceStatusLabel(status, executar, 'Processo no ar · arquivamento pausado');
+export const sintetizadorStatusLabel = (status?: string | null, executar?: number | null) =>
+  serviceStatusLabel(status, executar, 'Processo no ar · síntese pausada');
+export const analisadorStatusLabel = (status?: string | null, executar?: number | null) =>
+  serviceStatusLabel(status, executar, 'Processo no ar · análise pausada');
+export const integradorStatusLabel = (status?: string | null, executar?: number | null) =>
+  serviceStatusLabel(status, executar, 'Processo no ar · integração pausada');
+export const CargaStatusLabel = (status?: string | null, executar?: number | null) =>
+  serviceStatusLabel(status, executar, 'Processo no ar · carga pausada');
 
 export function formatAge(iso?: string | null): string {
   if (!iso) return '—';
@@ -88,64 +160,24 @@ export function formatHeartbeatAge(
   return { text: `última batida há ${formatAge(iso)}`, stale: false };
 }
 
-/** Status do processo para leigo (SCM/Running/Stopped/NotFound). */
-export function receptorStatusLabel(scmStatus?: string | null, executar?: number | null): string {
-  const status = (scmStatus ?? '').trim();
-  const running = status.toLowerCase() === 'running';
-  if (running && executar === 1) return 'Ligado';
-  if (running && executar !== 1) return 'Recepção pausada';
-  if (status.toLowerCase() === 'stopped' || !status) {
-    return 'Desligado';
-  }
-  if (status.toLowerCase() === 'notfound') {
-    return 'Não disponível';
-  }
-  return status || '—';
-}
-
-function serviceStatusLabel(
-  scmStatus: string | null | undefined,
-  executar: number | null | undefined,
-  pausedLabel: string
-): string {
-  const status = (scmStatus ?? '').trim();
-  const running = status.toLowerCase() === 'running';
-  if (running && executar === 1) return 'Ligado';
-  if (running && executar !== 1) return pausedLabel;
-  if (status.toLowerCase() === 'stopped' || !status) return 'Desligado';
-  if (status.toLowerCase() === 'notfound') return 'Não disponível';
-  return status || '—';
-}
-
-export const arquivadorStatusLabel = (status?: string | null, executar?: number | null) =>
-  serviceStatusLabel(status, executar, 'Recepção pausada');
-export const sintetizadorStatusLabel = (status?: string | null, executar?: number | null) =>
-  serviceStatusLabel(status, executar, 'Síntese pausada');
-export const analisadorStatusLabel = (status?: string | null, executar?: number | null) =>
-  serviceStatusLabel(status, executar, 'Síntese pausada');
-export const integradorStatusLabel = (status?: string | null, executar?: number | null) =>
-  serviceStatusLabel(status, executar, 'Síntese pausada');
-export const CargaStatusLabel = (status?: string | null, executar?: number | null) =>
-  serviceStatusLabel(status, executar, 'Carga pausada');
-
 /** Mensagens da API start/stop → texto simples + detalhe técnico. */
 export function friendlyActionMessage(raw?: string | null): { title: string; detail?: string } {
   if (!raw) return { title: '' };
   const t = raw.toLowerCase();
   if (t.includes('encerrado') || t.includes('stopped') || t.includes('executar=0') || t.includes('desligado')) {
     return {
-      title: 'Receptor desligado',
+      title: 'Serviço desligado',
       detail: raw,
     };
   }
   if (t.includes('iniciado') || t.includes('running') || t.includes('executar=1') || t.includes('ligado')) {
     return {
-      title: 'Receptor ligado',
+      title: 'Serviço ligado',
       detail: raw,
     };
   }
   if (t.includes('já em execução') || t.includes('já estava')) {
-    return { title: 'Receptor já estava ligado', detail: raw };
+    return { title: 'Serviço já estava ligado', detail: raw };
   }
   return { title: raw };
 }

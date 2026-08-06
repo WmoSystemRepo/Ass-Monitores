@@ -123,6 +123,18 @@ export class ChainOrchestratorStore {
       this.live.set(true);
       this.lastPushAt.set(new Date());
       this.bootError.set(null);
+      // Limpa banner de falha de "Ligar cadeia" quando o snapshot já está saudável.
+      const msg = this.actionMessage();
+      if (
+        msg &&
+        /Host POC não encontrado/i.test(msg) &&
+        (snap.systems?.every(
+          (s) => normalizeStatus(s.status) === 'running' && !s.lastError
+        ) ??
+          false)
+      ) {
+        this.actionMessage.set(null);
+      }
     } catch (err) {
       this.live.set(false);
       // Não mantém erros velhos de Host POC se a API sumiu — limpa lastError visual.

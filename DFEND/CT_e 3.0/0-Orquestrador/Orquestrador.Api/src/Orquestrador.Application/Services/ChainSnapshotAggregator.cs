@@ -30,94 +30,40 @@ public sealed class ChainSnapshotAggregator
     public async Task<ChainSnapshot> BuildAsync(CancellationToken ct)
     {
         var now = DateTimeOffset.UtcNow;
-        var systems = new List<ChainSystemView>();
         var alerts = new List<string>();
         LastLoteView? lastLote = null;
 
         var anyRunning = false;
         var anyTraffic = false;
 
-        foreach (var cfg in _options.Systems)
+        var cascadeSystems = _options.Systems.Where(cfg => cfg.InCascade).ToList();
+        var systemTasks = cascadeSystems.Select(cfg => BuildSystemViewAsync(cfg, ct)).ToArray();
+        var built = await Task.WhenAll(systemTasks).ConfigureAwait(false);
+
+        // Preserva a ordem do registry (Task.WhenAll mantém índice).
+        var systems = new List<ChainSystemView>(built.Length);
+        foreach (var item in built)
         {
-            // Resgate e outros sidecars: API sobe no boot, mas não aparecem no fluxograma R→C.
-            if (!cfg.InCascade)
+            systems.Add(item.View);
+
+            if (item.Alert is not null)
             {
-                continue;
+                alerts.Add(item.Alert);
             }
 
-            if (!cfg.Enabled)
+            if (item.IsRunning)
             {
-                systems.Add(DisabledView(cfg));
-                continue;
+                anyRunning = true;
             }
 
-            try
+            if (item.HasTraffic)
             {
-                var ready = await _client.PingReadyAsync(cfg, ct);
-                if (!ready)
-                {
-                    systems.Add(ReachabilityView(cfg, "offline", "Monitor não ready (/health/ready)."));
-                    alerts.Add($"{cfg.DisplayName}: monitor indisponível.");
-                    continue;
-                }
-
-                var snapshotResult = await _client.GetSnapshotAsync(cfg, ct);
-                if (snapshotResult.ErrorKind is "unauthorized")
-                {
-                    systems.Add(ReachabilityView(cfg, "unauthorized", snapshotResult.Message));
-                    alerts.Add($"{cfg.DisplayName}: autenticação interna rejeitada.");
-                    snapshotResult.Value?.Dispose();
-                    continue;
-                }
-
-                if (snapshotResult.ErrorKind is "offline")
-                {
-                    systems.Add(ReachabilityView(cfg, "offline", snapshotResult.Message));
-                    alerts.Add($"{cfg.DisplayName}: monitor indisponível.");
-                    continue;
-                }
-
-                var statusResult = await _client.GetStatusAsync(cfg, ct);
-                if (statusResult.ErrorKind is "unauthorized")
-                {
-                    systems.Add(ReachabilityView(cfg, "unauthorized", statusResult.Message));
-                    alerts.Add($"{cfg.DisplayName}: autenticação interna rejeitada.");
-                    snapshotResult.Value?.Dispose();
-                    continue;
-                }
-
-                using (snapshotResult.Value)
-                {
-                    var status = statusResult.ErrorKind is null ? statusResult.Value : null;
-                    var parsed = ParseMonitorPayload(cfg, snapshotResult.Value, status);
-                    systems.Add(parsed.View);
-
-                    if (parsed.IsRunning)
-                    {
-                        anyRunning = true;
-                    }
-
-                    if (parsed.HasTraffic)
-                    {
-                        anyTraffic = true;
-                    }
-
-                    if (cfg.Id.Equals("receptor", StringComparison.OrdinalIgnoreCase) && parsed.LastLote is not null)
-                    {
-                        lastLote = parsed.LastLote;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(parsed.View.LastError))
-                    {
-                        alerts.Add($"{cfg.DisplayName}: {parsed.View.LastError}");
-                    }
-                }
+                anyTraffic = true;
             }
-            catch (Exception ex)
+
+            if (item.LastLote is not null)
             {
-                _logger.LogWarning(ex, "Falha ao agregar {Id}", cfg.Id);
-                systems.Add(ReachabilityView(cfg, "offline", ex.Message));
-                alerts.Add($"{cfg.DisplayName}: {ex.Message}");
+                lastLote = item.LastLote;
             }
         }
 
@@ -146,6 +92,90 @@ public sealed class ChainSnapshotAggregator
             message,
             now,
             BeltMoving: (anyRunning && anyTraffic) || (anyRunning && anyQueue));
+    }
+
+    private async Task<(
+        ChainSystemView View,
+        string? Alert,
+        bool IsRunning,
+        bool HasTraffic,
+        LastLoteView? LastLote)> BuildSystemViewAsync(OrchestratorSystemOptions cfg, CancellationToken ct)
+    {
+        if (!cfg.Enabled)
+        {
+            return (DisabledView(cfg), null, false, false, null);
+        }
+
+        try
+        {
+            var ready = await _client.PingReadyAsync(cfg, ct).ConfigureAwait(false);
+            if (!ready)
+            {
+                return (
+                    ReachabilityView(cfg, "offline", "Monitor não ready (/health/ready)."),
+                    $"{cfg.DisplayName}: monitor indisponível.",
+                    false,
+                    false,
+                    null);
+            }
+
+            var snapshotResult = await _client.GetSnapshotAsync(cfg, ct).ConfigureAwait(false);
+            if (snapshotResult.ErrorKind is "unauthorized")
+            {
+                snapshotResult.Value?.Dispose();
+                return (
+                    ReachabilityView(cfg, "unauthorized", snapshotResult.Message),
+                    $"{cfg.DisplayName}: autenticação interna rejeitada.",
+                    false,
+                    false,
+                    null);
+            }
+
+            if (snapshotResult.ErrorKind is "offline")
+            {
+                return (
+                    ReachabilityView(cfg, "offline", snapshotResult.Message),
+                    $"{cfg.DisplayName}: monitor indisponível.",
+                    false,
+                    false,
+                    null);
+            }
+
+            var statusResult = await _client.GetStatusAsync(cfg, ct).ConfigureAwait(false);
+            if (statusResult.ErrorKind is "unauthorized")
+            {
+                snapshotResult.Value?.Dispose();
+                return (
+                    ReachabilityView(cfg, "unauthorized", statusResult.Message),
+                    $"{cfg.DisplayName}: autenticação interna rejeitada.",
+                    false,
+                    false,
+                    null);
+            }
+
+            using (snapshotResult.Value)
+            {
+                var status = statusResult.ErrorKind is null ? statusResult.Value : null;
+                var parsed = ParseMonitorPayload(cfg, snapshotResult.Value, status);
+                var alert = !string.IsNullOrWhiteSpace(parsed.View.LastError)
+                    ? $"{cfg.DisplayName}: {parsed.View.LastError}"
+                    : null;
+                var lote = cfg.Id.Equals("receptor", StringComparison.OrdinalIgnoreCase)
+                    ? parsed.LastLote
+                    : null;
+                return (parsed.View, alert, parsed.IsRunning, parsed.HasTraffic, lote);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Falha ao agregar {Id}", cfg.Id);
+            return (
+                ReachabilityView(cfg, "offline", ex.Message),
+                $"{cfg.DisplayName}: {ex.Message}",
+                false,
+                false,
+                null);
+        }
     }
 
     private static ChainSystemView DisabledView(OrchestratorSystemOptions cfg) =>

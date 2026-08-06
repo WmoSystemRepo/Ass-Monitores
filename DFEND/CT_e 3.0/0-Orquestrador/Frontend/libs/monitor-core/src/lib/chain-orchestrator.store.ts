@@ -29,7 +29,8 @@ const PHASE_BY_ORDINAL: Record<number, string> = {
 @Injectable({ providedIn: 'root' })
 export class ChainOrchestratorStore {
   private readonly api = inject(MonitorApiService);
-  private pollTimer?: ReturnType<typeof setInterval>;
+  private pollTimer?: ReturnType<typeof setTimeout>;
+  private refreshInFlight = false;
 
   readonly snapshot = signal<ChainSnapshot | null>(null);
   readonly live = signal(false);
@@ -96,19 +97,35 @@ export class ChainOrchestratorStore {
   }
 
   private startPolling(): void {
-    if (this.pollTimer) clearInterval(this.pollTimer);
-    this.pollTimer = setInterval(() => {
-      void this.refreshSnapshot().catch(() => {
-        this.live.set(false);
-      });
-    }, 1000);
+    if (this.pollTimer) clearTimeout(this.pollTimer);
+    const tick = () => {
+      void this.refreshSnapshot()
+        .catch(() => {
+          this.live.set(false);
+        })
+        .finally(() => {
+          // Online: 1s. Offline: 5s (evita pilha de requests com timeout).
+          const delay = this.live() ? 1000 : 5000;
+          this.pollTimer = setTimeout(tick, delay);
+        });
+    };
+    this.pollTimer = setTimeout(tick, 0);
   }
 
   private async refreshSnapshot(): Promise<void> {
-    const snap = await firstValueFrom(this.api.snapshot());
-    this.applySnapshot(snap);
-    this.live.set(true);
-    this.lastPushAt.set(new Date());
+    if (this.refreshInFlight) {
+      return;
+    }
+    this.refreshInFlight = true;
+    try {
+      const snap = await firstValueFrom(this.api.snapshot());
+      this.applySnapshot(snap);
+      this.live.set(true);
+      this.lastPushAt.set(new Date());
+      this.bootError.set(null);
+    } finally {
+      this.refreshInFlight = false;
+    }
   }
 
   private applySnapshot(snap: ChainSnapshot): void {

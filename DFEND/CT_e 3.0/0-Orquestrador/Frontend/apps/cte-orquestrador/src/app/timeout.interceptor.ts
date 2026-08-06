@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { timeout } from 'rxjs';
 
-/** Timeout padrão (poll/snapshot). Cascata Ligar/Desligar / ensure-open precisa esperar API+Angular. */
-const DEFAULT_MS = 15_000;
+/** Timeout padrão (poll/snapshot). Fail-fast: API offline não prende a UI ~15s. */
+const DEFAULT_MS = 4_000;
 const CASCADE_MS = 300_000; // 5 min — npm start + ensure monitores
 
 /** Timeout global de HTTP (POC DEV). */

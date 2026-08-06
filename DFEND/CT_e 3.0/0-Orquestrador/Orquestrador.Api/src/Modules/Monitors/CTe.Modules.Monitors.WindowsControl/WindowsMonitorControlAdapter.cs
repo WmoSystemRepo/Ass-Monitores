@@ -40,7 +40,8 @@ public sealed class WindowsMonitorControlAdapter
 
         if (_options.PreferLocalProcess)
         {
-            if (TryResolveExePath(out var exePath, out var resolveError))
+            // Status/poll NÃO compila DevHost — MSBuild no snapshot travava a UI (~1 min).
+            if (TryFindExistingExe(out var exePath, out var resolveError))
             {
                 return new ServiceControlResult(
                     true,
@@ -60,7 +61,7 @@ public sealed class WindowsMonitorControlAdapter
             return scm;
         }
 
-        if (TryResolveExePath(out var path, out _))
+        if (TryFindExistingExe(out var path, out _))
         {
             return new ServiceControlResult(true, "Stopped", $"SCM ausente; host POC disponível: {path}");
         }
@@ -309,7 +310,8 @@ public sealed class WindowsMonitorControlAdapter
         return installed;
     }
 
-    private bool TryResolveExePath(out string exePath, out string? error)
+    /// <summary>Só localiza o .exe existente — usado em GetStatus/poll (sem MSBuild).</summary>
+    private bool TryFindExistingExe(out string exePath, out string? error)
     {
         exePath = string.Empty;
         error = null;
@@ -332,21 +334,51 @@ public sealed class WindowsMonitorControlAdapter
         var full = Path.GetFullPath(Path.Combine(root, _options.ExeRelativePath));
         if (!File.Exists(full))
         {
-            // Exe fica em tools\X.DevHost\bin\Debug\X.DevHost.exe — sobe a partir do exe
-            // até achar X.DevHost.csproj (não assumir só 2 níveis: isso apontava para bin\).
             var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
-            var csproj = FindDevHostCsproj(full, devHostName);
-            string? buildError = null;
-            if (csproj is null || !DevHostMsBuild.TryBuild(csproj, full, out buildError))
-            {
-                error =
-                    buildError
-                    ?? $"Host POC não encontrado: {full}. Compile tools\\{devHostName} (Debug) ou rode 0-Orquestrador\\tools\\build-devhosts.ps1.";
-                return false;
-            }
+            error =
+                $"Host POC não encontrado: {full}. Compile tools\\{devHostName} (Debug) ou rode 0-Orquestrador\\tools\\build-devhosts.ps1.";
+            return false;
         }
 
         exePath = full;
+        return true;
+    }
+
+    /// <summary>Localiza o .exe; se faltar, tenta compilar o DevHost (somente no Start).</summary>
+    private bool TryResolveExePath(out string exePath, out string? error)
+    {
+        if (TryFindExistingExe(out exePath, out error))
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.ExeRelativePath))
+        {
+            return false;
+        }
+
+        var root = FindPackageRoot();
+        if (root is null)
+        {
+            return false;
+        }
+
+        var full = Path.GetFullPath(Path.Combine(root, _options.ExeRelativePath));
+        var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
+        var csproj = FindDevHostCsproj(full, devHostName);
+        string? buildError = null;
+        if (csproj is null || !DevHostMsBuild.TryBuild(csproj, full, out buildError))
+        {
+            error =
+                buildError
+                ?? error
+                ?? $"Host POC não encontrado: {full}. Compile tools\\{devHostName} (Debug) ou rode 0-Orquestrador\\tools\\build-devhosts.ps1.";
+            exePath = string.Empty;
+            return false;
+        }
+
+        exePath = full;
+        error = null;
         return true;
     }
 

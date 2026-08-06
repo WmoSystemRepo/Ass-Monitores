@@ -10,7 +10,10 @@ import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
 import { timeoutInterceptor } from './timeout.interceptor';
 
 function initMonitor(store: ChainOrchestratorStore) {
-  return () => store.initialize();
+  // Não bloqueia o bootstrap Angular aguardando a API (antes: tela branca até snapshot/timeout).
+  return () => {
+    void store.initialize();
+  };
 }
 
 export const appConfig: ApplicationConfig = {

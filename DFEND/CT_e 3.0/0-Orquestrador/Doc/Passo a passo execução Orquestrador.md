@@ -57,12 +57,12 @@ API base: `public/config.json` → `http://localhost:5000`.
 
 1. UI indigo/violet (visão da cadeia)
 2. Seis símbolos **R A S An I C**
-3. **Ligar cadeia CT-e** → garante engines online (silencioso) → sobe workers na ordem
+3. **Ligar as filas** → sobe engines (se preciso) → sobe workers **e** grava `Executar=1` na ordem (Receptor → … → Carga). Não existe estado “pausado” na cascata: ligado = processo + trabalho ativo.
 4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0)
 5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config nas rotas filhas
-6. **Desligar cadeia** → para na ordem inversa
+6. **Desligar filas** → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready)
 
-> Se engines não ficarem online no Ligar, a barra mostra a falha e **o serviço daquele sistema não liga**.  
+> Se engines não ficarem online no Ligar, a barra mostra a falha e **as filas daquele sistema não ligam**.  
 > Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).
 
 ## B) Homologacao (smoke local)

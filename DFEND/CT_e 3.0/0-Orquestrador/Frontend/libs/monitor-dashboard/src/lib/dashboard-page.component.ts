@@ -26,7 +26,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
             Orquestrador cadeia CT-e
           </h1>
           <p class="text-[11px] text-slate-400">
-            Ligue ou desligue a cadeia e acompanhe os 6 sistemas em tempo real.
+            Ligue ou desligue as filas e acompanhe os 6 sistemas em tempo real.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -56,7 +56,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
             [disabled]="store.actionBusy() || !canStart()"
             (click)="confirmStart()"
           >
-            Ligar cadeia CT-e
+            Ligar as filas
           </button>
           <button
             type="button"
@@ -64,7 +64,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
             [disabled]="store.actionBusy() || !canStop()"
             (click)="confirmStop()"
           >
-            Desligar cadeia
+            Desligar filas
           </button>
         </div>
       </header>
@@ -179,7 +179,12 @@ export class DashboardPageComponent {
   readonly canStop = computed(() => {
     const phase = normalizePhase(this.store.cascadePhase());
     if (phase === 'starting' || phase === 'stopping') return false;
-    return this.store.anyRunning() || phase === 'running';
+    // Desligar filas fica habilitado com processos no ar (não só com Executar=1).
+    return (
+      this.store.processUpCount() > 0 ||
+      this.store.anyRunning() ||
+      phase === 'running'
+    );
   });
 
   /** Um banner só — erro em rose; não repete a mesma frase no health-strip. */
@@ -189,16 +194,16 @@ export class DashboardPageComponent {
     if (phase === 'starting' || phase === 'stopping') {
       return {
         tone: 'wait' as const,
-        text: msg || (phase === 'starting' ? 'Ligando a cadeia…' : 'Desligando a cadeia…'),
+        text: msg || (phase === 'starting' ? 'Ligando as filas…' : 'Desligando filas…'),
       };
     }
     if (this.isFailureMessage(msg)) {
       return { tone: 'error' as const, text: msg };
     }
-    if (phase === 'running' || this.store.anyRunning()) {
+    if (phase === 'running' || this.store.anyRunning() || this.store.processUpCount() > 0) {
       return {
         tone: 'ok' as const,
-        text: msg || 'Cadeia em execução.',
+        text: msg || 'Filas em execução.',
       };
     }
     return null;
@@ -239,7 +244,7 @@ export class DashboardPageComponent {
   confirmStart(): void {
     if (
       confirm(
-        'Ligar a cadeia CT-e? O Orquestrador iniciará os sistemas habilitados em ordem (Receptor → Arquivador → …).'
+        'Ligar as filas CT-e? O Orquestrador sobe os processos e ativa Executar=1 na ordem (Receptor → Arquivador → …).'
       )
     ) {
       void this.store.startChain();
@@ -249,7 +254,7 @@ export class DashboardPageComponent {
   confirmStop(): void {
     if (
       confirm(
-        'Desligar a cadeia CT-e? Os sistemas serão parados na ordem inversa.'
+        'Desligar filas CT-e? Os serviços param na ordem inversa (Executar=0 + processo).'
       )
     ) {
       void this.store.stopChain();

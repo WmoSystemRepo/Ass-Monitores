@@ -5,11 +5,21 @@
 
 ## 1. Objetivo
 
-Observar e controlar (Ligar/Desligar em cascata) os monitores da cadeia:
+Observar e controlar (**Ligar as filas** / **Desligar filas** em cascata) os monitores da cadeia:
 
 **Receptor (R) → Arquivador (A) → Sintetizador (S) → Analisador (An) → Integrador (I) → Carga (C)**
 
 O Orquestrador é um **BFF**: não processa CT-e. Agrega saúde/telemetria dos monitores e dispara start/stop em ordem.
+
+### Regra operacional das filas
+
+| Ação UI | Efeito |
+|---------|--------|
+| **Ligar as filas** | Sobe o processo (DevHost/SCM) **e** grava `Executar=1` no SQL de cada serviço |
+| **Desligar filas** | Grava `Executar=0` **e** para o processo (ordem inversa) |
+
+Não há estado **“pausado”** na cascata: processo no ar com filas ligadas = **Ativo**; desligado = **Parado**.  
+`service/start` e `service/stop` do módulo in-process seguem a mesma regra.
 
 No dashboard (`:4220`):
 
@@ -17,7 +27,7 @@ No dashboard (`:4220`):
 - Dados do monitor vêm de `/api/monitores/{servico}/*` no mesmo host `:5000`.
 - `FrontendUrl` / “front legado” é opcional; a operação principal é o Angular único.
 
-Quem garante engines/DevHosts online antes do worker é o **Ligar** (cascata) ou o **container** em Docker.
+Quem garante engines/DevHosts online antes do worker é o **Ligar as filas** (cascata) ou o **container** em Docker.
 
 Para plugar um sistema novo quando quiser: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  
 Dev em qualquer PC (paths, one-click, troubleshooting): [DEV_PORTATIL.md](DEV_PORTATIL.md).
@@ -123,8 +133,8 @@ Arquivador em DEV: API `:5020` · UI `:4210`. Orquestrador UI: `:4220`.
 | Método | Path | Uso |
 |--------|------|-----|
 | GET | `/api/orchestrator/snapshot` | dashboard em tempo real (inclui `frontendUrl` por sistema) |
-| POST | `/api/orchestrator/start` | cascata ligar: (1) API+Angular online em paralelo (2) `service/start` |
-| POST | `/api/orchestrator/stop` | cascata desligar (… → A → R) |
+| POST | `/api/orchestrator/start` | **Ligar as filas**: (1) API+Angular online (2) `service/start` = processo + `Executar=1` |
+| POST | `/api/orchestrator/stop` | **Desligar filas**: `service/stop` = `Executar=0` + parar processo (… → A → R) |
 | POST | `/api/orchestrator/ensure-stacks` | boot do front Orquestrador: sobe API+Angular de todos `Enabled` (sem workers) |
 | GET | `/api/orchestrator/status` | fase da cascata |
 | GET | `/api/orchestrator/info` | meta + registry (`BaseUrl`, `FrontendUrl`, `Enabled`) |
@@ -217,7 +227,8 @@ Não se aplica em Homolog/Prod (process spawn desligado — use deploy/container
 | Bootstrap | `loadRuntimeApiConfig()`; UI fala com Orquestrador `:5000` |
 | Clique no estágio | navega para `/monitores/{servico}` (anatomia CT_e 2.0, lib `service-monitors`) |
 | Dados do monitor | poll REST `/api/monitores/{servico}/*` |
-| Ligar cadeia | garante engines online (DEV) → depois `service/start` |
+| Ligar as filas | garante engines online (DEV) → `service/start` (= processo + `Executar=1`) |
+| Desligar filas | `service/stop` (= `Executar=0` + parar processo), ordem inversa |
 
 Homolog/Prod: publicar `config.json` (ou script inline) com a URL do Orquestrador daquele ambiente — **não** embutir host no build.  
 `FrontendUrl` no registry permanece só como link legado opcional.
@@ -276,7 +287,7 @@ SQL worker↔Monitor = integração **transitória**.
 2. Injetar `Orchestrator__InternalApiKey` e `Monitor__InternalApiKey` (secret store)
 3. Injetar `Orchestrator__Systems__N__BaseUrl` e `Orchestrator__Systems__N__FrontendUrl` para cada sistema `Enabled`
 4. Front: `config.json` / `__CTE_ORQ_API_BASE__` apontando ao Orquestrador
-5. Smoke: `GET /health/ready`, `GET /api/chain/health`, Ligar cadeia, clique no estágio → `/monitores/{servico}` no `:4220`
+5. Smoke: `GET /health/ready`, `GET /api/chain/health`, Ligar as filas, clique no estágio → `/monitores/{servico}` no `:4220`
 
 ## 10. Checklist go-live (Homolog e Prod)
 

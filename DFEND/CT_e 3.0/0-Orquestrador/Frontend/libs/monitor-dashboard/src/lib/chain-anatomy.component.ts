@@ -57,10 +57,6 @@ import {
               Ativo
             </li>
             <li class="anatomy-legend-item">
-              <span class="anatomy-legend-swatch anatomy-legend-queue"></span>
-              Pausado
-            </li>
-            <li class="anatomy-legend-item">
               <span class="anatomy-legend-swatch anatomy-legend-stopped"></span>
               Parado
             </li>
@@ -361,7 +357,11 @@ export class ChainAnatomyComponent {
   }
 
   isWorkActive(sys: { status: string | number; executar?: number | null }): boolean {
-    return this.isProcessUp(sys) && Number(sys.executar) === 1;
+    // Ligar as filas = processo no ar (e Executar=1 quando telemetria existe).
+    // Sem estado “pausado” na cascata: processo no ar ⇒ ativo.
+    if (!this.isProcessUp(sys)) return false;
+    if (sys.executar == null) return true;
+    return Number(sys.executar) === 1;
   }
 
   statusChipLabel(sys: {
@@ -374,7 +374,6 @@ export class ChainAnatomyComponent {
     if (this.isStartingStatus(sys.status)) return 'Ligando…';
     if (this.isStoppingStatus(sys.status)) return 'Desligando…';
     if (this.isWorkActive(sys)) return 'Ativo';
-    if (this.isProcessUp(sys)) return 'Pausado';
     return this.statusLabel(sys.status);
   }
 

@@ -92,7 +92,7 @@ public sealed class CascadeControlService
 
         try
         {
-            SetPhase(CascadePhase.Starting, "Iniciando cascata…");
+            SetPhase(CascadePhase.Starting, "Ligando as filas…");
 
             var enabled = GetEnabledOrdered();
             if (enabled.Count == 0)
@@ -184,7 +184,7 @@ public sealed class CascadeControlService
 
                 SetPhase(
                     CascadePhase.Starting,
-                    $"API e Angular do {system.DisplayName} online — ligando serviço…");
+                    $"API e Angular do {system.DisplayName} online — ligando filas (processo + Executar=1)…");
 
                 var result = await _client.StartAsync(system, workCt);
                 if (!result.Success)
@@ -197,18 +197,18 @@ public sealed class CascadeControlService
                     startFailed.Add(system.DisplayName);
                     SetPhase(
                         CascadePhase.Starting,
-                        $"Falha ao ligar {system.DisplayName} — cascata interrompida (já ligados permanecem).");
+                        $"Falha ao ligar filas do {system.DisplayName} — cascata interrompida (já ligados permanecem).");
                     break;
                 }
 
-                SetPhase(CascadePhase.Starting, $"Aguardando {system.DisplayName} em Running…");
+                SetPhase(CascadePhase.Starting, $"Aguardando {system.DisplayName} em execução…");
                 var settled = await PollUntilSettledAsync(system, wantRunning: true, workCt);
                 if (!settled)
                 {
                     startFailed.Add($"{system.DisplayName} (timeout/{OfficialMonitorState.Failed})");
                     SetPhase(
                         CascadePhase.Starting,
-                        $"{system.DisplayName} não entrou em Running a tempo — cascata interrompida.");
+                        $"{system.DisplayName} não entrou em execução a tempo — cascata interrompida.");
                     break;
                 }
 
@@ -231,13 +231,13 @@ public sealed class CascadeControlService
         }
         catch (OperationCanceledException)
         {
-            SetPhase(CascadePhase.Idle, "Cascata de ligar cancelada ou expirou o tempo de espera.");
+            SetPhase(CascadePhase.Idle, "Ligar as filas cancelado ou expirou o tempo de espera.");
             return (false, _message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro na cascata de start");
-            SetPhase(CascadePhase.Idle, $"Erro ao ligar cadeia: {ex.Message}");
+            SetPhase(CascadePhase.Idle, $"Erro ao ligar as filas: {ex.Message}");
             return (false, _message);
         }
         finally
@@ -255,7 +255,7 @@ public sealed class CascadeControlService
 
         try
         {
-            SetPhase(CascadePhase.Stopping, "Desligando cascata…");
+            SetPhase(CascadePhase.Stopping, "Desligando filas…");
 
             var enabled = GetEnabledOrdered();
             enabled.Reverse();
@@ -268,17 +268,10 @@ public sealed class CascadeControlService
             foreach (var system in enabled)
             {
                 ct.ThrowIfCancellationRequested();
-                SetPhase(CascadePhase.Stopping, $"Parando {system.DisplayName}…");
+                SetPhase(CascadePhase.Stopping, $"Parando filas do {system.DisplayName}…");
 
-                var ready = await _client.PingReadyAsync(system, ct);
-                if (!ready)
-                {
-                    _logger.LogWarning("Skip stop {MonitorId}: health/ready falhou", system.Id);
-                    SetPhase(CascadePhase.Stopping, $"{system.DisplayName} indisponível — pulando.");
-                    await DelayAsync(ct);
-                    continue;
-                }
-
+                // Sempre tenta stop (Executar=0 + processo). Não pular por health —
+                // Desligar filas precisa funcionar mesmo com SQL/API instável.
                 var result = await _client.StopAsync(system, ct);
                 if (!result.Success)
                 {
@@ -297,18 +290,18 @@ public sealed class CascadeControlService
                 await DelayAsync(ct);
             }
 
-            SetPhase(CascadePhase.Idle, "Cadeia desligada.");
+            SetPhase(CascadePhase.Idle, "Filas desligadas.");
             return (true, _message);
         }
         catch (OperationCanceledException)
         {
-            SetPhase(CascadePhase.Idle, "Cascata de desligar cancelada.");
+            SetPhase(CascadePhase.Idle, "Desligar filas cancelado.");
             throw;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro na cascata de stop");
-            SetPhase(CascadePhase.Idle, $"Erro ao desligar cadeia: {ex.Message}");
+            SetPhase(CascadePhase.Idle, $"Erro ao desligar filas: {ex.Message}");
             return (false, _message);
         }
         finally
@@ -497,23 +490,23 @@ public sealed class CascadeControlService
 
         if (started.Count > 0)
         {
-            parts.Add($"Serviços ligados: {string.Join(", ", started)}.");
+            parts.Add($"Filas ligadas (processo + Executar=1): {string.Join(", ", started)}.");
         }
 
         if (prepBlocked.Count > 0)
         {
             parts.Add(
-                $"API/Angular indisponível — serviço não ligado: {string.Join("; ", prepBlocked)}.");
+                $"API/Angular indisponível — filas não ligadas: {string.Join("; ", prepBlocked)}.");
         }
 
         if (startFailed.Count > 0)
         {
-            parts.Add($"Falha ao ligar serviço: {string.Join(", ", startFailed)}.");
+            parts.Add($"Falha ao ligar filas: {string.Join(", ", startFailed)}.");
         }
 
         if (parts.Count == 0)
         {
-            return "Nenhum serviço foi ligado.";
+            return "Nenhuma fila foi ligada.";
         }
 
         return string.Join(" ", parts);

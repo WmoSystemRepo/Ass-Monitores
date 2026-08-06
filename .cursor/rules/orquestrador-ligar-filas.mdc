@@ -1,0 +1,35 @@
+---
+description: Regra operacional Ligar/Desligar filas do Orquestrador CT-e (sem estado pausado)
+globs: DFEND/CT_e 3.0/0-Orquestrador/**
+alwaysApply: false
+---
+
+# Ligar / Desligar filas (Orquestrador CT-e)
+
+## Semântica oficial
+
+| Botão UI | Ação |
+|----------|------|
+| **Ligar as filas** | Sobe processo (DevHost/SCM) **e** grava `Executar=1` no SQL de cada serviço da cascata |
+| **Desligar filas** | Grava `Executar=0` **e** para o processo (ordem inversa). Sempre tenta parar — não pular por health/ready |
+
+Não existe estado **“pausado”** na visão da cascata:
+
+- Processo no ar com filas ligadas → **Ativo**
+- Desligado → **Parado**
+
+Não separar “processo no ar” de “trabalho ativo” na UI da cascata como se fossem modos normais. Ligar as filas = ligar **e** executar.
+
+## Implementação
+
+- `InProcessMonitorModule.StartAsync` → `_control.Start()` + `ExecutarFlagSql.SetAsync(..., 1)`
+- `InProcessMonitorModule.StopAsync` → `ExecutarFlagSql.SetAsync(..., 0)` + `_control.Stop()`
+- `CascadeControlService` orquestra a ordem; rótulos/mensagens usam “filas”, não “cadeia” nos botões
+- Connection strings DEV em `Monitors:{id}:ConnectionString` (`appsettings.Development.json`)
+
+## Docs
+
+Manter alinhado em:
+
+- `Doc/Documentacao_Orquestrador_CTe.md`
+- `Doc/Passo a passo execução Orquestrador.md`

@@ -56,23 +56,22 @@ export class ChainOrchestratorStore {
 
   readonly runningCount = computed(
     () =>
-      this.systems().filter(
-        (s) => normalizeStatus(s.status) === 'running' && Number(s.executar) === 1
-      ).length
+      this.systems().filter((s) => {
+        if (normalizeStatus(s.status) !== 'running') return false;
+        // Sem telemetria de Executar: processo no ar = filas ligadas.
+        if (s.executar == null) return true;
+        return Number(s.executar) === 1;
+      }).length
   );
 
-  /** Processo/DevHost no ar (pode estar com trabalho pausado). */
+  /** Processo/DevHost no ar (filas ligadas na cascata). */
   readonly processUpCount = computed(
     () =>
       this.systems().filter((s) => normalizeStatus(s.status) === 'running').length
   );
 
-  readonly pausedCount = computed(
-    () =>
-      this.systems().filter(
-        (s) => normalizeStatus(s.status) === 'running' && Number(s.executar) !== 1
-      ).length
-  );
+  /** Mantido por compatibilidade; cascata não usa mais “pausado”. */
+  readonly pausedCount = computed(() => 0);
 
   readonly anyRunning = computed(() => this.runningCount() > 0);
 
@@ -138,7 +137,7 @@ export class ChainOrchestratorStore {
       this.live.set(true);
       this.lastPushAt.set(new Date());
       this.bootError.set(null);
-      // Limpa banner de falha de "Ligar cadeia" quando o snapshot já está saudável.
+      // Limpa banner de falha de "Ligar as filas" quando o snapshot já está saudável.
       const msg = this.actionMessage();
       if (
         msg &&
@@ -176,11 +175,11 @@ export class ChainOrchestratorStore {
     this.actionMessage.set(null);
     try {
       const result = await firstValueFrom(this.api.start());
-      this.actionMessage.set(result.cascadeMessage ?? 'Cascata de ligar iniciada.');
+      this.actionMessage.set(result.cascadeMessage ?? 'Ligar as filas iniciado.');
       await this.refreshSnapshot();
     } catch (err) {
       this.actionMessage.set(
-        extractCascadeMessage(err) ?? 'Falha ao ligar a cadeia CT-e'
+        extractCascadeMessage(err) ?? 'Falha ao ligar as filas'
       );
       await this.refreshSnapshot().catch(() => undefined);
     } finally {
@@ -193,11 +192,11 @@ export class ChainOrchestratorStore {
     this.actionMessage.set(null);
     try {
       const result = await firstValueFrom(this.api.stop());
-      this.actionMessage.set(result.cascadeMessage ?? 'Cascata de desligar iniciada.');
+      this.actionMessage.set(result.cascadeMessage ?? 'Desligar filas iniciado.');
       await this.refreshSnapshot();
     } catch (err) {
       this.actionMessage.set(
-        extractCascadeMessage(err) ?? 'Falha ao desligar a cadeia CT-e'
+        extractCascadeMessage(err) ?? 'Falha ao desligar filas'
       );
       await this.refreshSnapshot().catch(() => undefined);
     } finally {

@@ -228,7 +228,7 @@ public sealed class ChainSnapshotAggregator
     {
         var root = snapshotDoc?.RootElement;
 
-        var executar = TryGetExecutar(root, status);
+        var executarRaw = TryGetExecutarNullable(root, status);
         var isRunning = TryGetIsRunning(root, status);
         var scmStatus = TryGetScmStatus(root, status);
         var mainNsu = TryGetMainNsu(root);
@@ -245,6 +245,8 @@ public sealed class ChainSnapshotAggregator
              scmStatus.Contains("ligado", StringComparison.OrdinalIgnoreCase));
 
         var effectivelyRunning = isRunning == true || scmLooksRunning;
+        // Ligar as filas: processo no ar sem telemetria de Executar ⇒ ativo (sem “pausado”).
+        var executar = executarRaw ?? (effectivelyRunning ? 1 : 0);
         var queueDepth = ResolveQueueDepth(cfg.Id, brokerDepth, stagingDepth, tempBacklog);
         var hasQueueWork = queueDepth > 0;
         // AGORA = serviço ligado E com trabalho na fila/trânsito (igual destaque dos monitores).
@@ -483,7 +485,7 @@ public sealed class ChainSnapshotAggregator
         return (pill, hint);
     }
 
-    private static int TryGetExecutar(JsonElement? root, MonitorServiceStatusDto? status)
+    private static int? TryGetExecutarNullable(JsonElement? root, MonitorServiceStatusDto? status)
     {
         if (status?.Executar is int e)
         {
@@ -496,7 +498,7 @@ public sealed class ChainSnapshotAggregator
             return fromGlobal.Value;
         }
 
-        return TryGetInt32(root, "global", "service", "Executar") ?? 0;
+        return TryGetInt32(root, "global", "service", "Executar");
     }
 
     private static bool? TryGetIsRunning(JsonElement? root, MonitorServiceStatusDto? status)

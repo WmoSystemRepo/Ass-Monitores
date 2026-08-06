@@ -64,27 +64,20 @@ export class AppComponent {
     this.store.live() ? 'Orquestrador online' : 'Orquestrador offline'
   );
 
-  /** Ativos = processo no ar + Executar=1. Não confundir com DevHost só ligado. */
+  /** Ativos = filas ligadas (processo no ar + Executar=1). Sem estado “pausado” na cascata. */
   readonly systemsSummary = computed(() => {
     const ativos = this.store.runningCount();
     const noAr = this.store.processUpCount();
-    const pausados = this.store.pausedCount();
     if (ativos === 0 && noAr === 0) {
-      return 'Nenhum serviço ativo';
+      return 'Nenhuma fila ativa';
     }
-    if (pausados > 0 && ativos === 0) {
-      return `${noAr} processo(s) no ar · 0 ativos`;
-    }
-    if (pausados > 0) {
-      return `${ativos} ativo(s) · ${pausados} pausado(s)`;
-    }
-    return `${ativos} serviço(s) ativo(s)`;
+    return `${ativos} fila(s) ativa(s)`;
   });
 
   readonly systemsSummaryTitle = computed(() => {
     const ativos = this.store.runningCount();
     const noAr = this.store.processUpCount();
-    return `Ativos (trabalho): ${ativos} · Processos no ar: ${noAr}. Ativo = processo Running + Executar=1.`;
+    return `Filas ativas: ${ativos} · Processos no ar: ${noAr}. Ligar as filas = processo + Executar=1.`;
   });
 
   readonly links = [

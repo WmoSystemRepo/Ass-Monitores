@@ -145,13 +145,14 @@ export interface FlyingPacket {
                     class="anatomy-platform"
                     [class.anatomy-platform-active]="activeStage() === step.id"
                     [class.anatomy-platform-done]="isDone(step.id)"
-                    [attr.title]="step.blurb + ' · ' + step.techHint"
+                    [attr.title]="step.techHint"
                   >
                     <div class="anatomy-iso" [attr.data-icon]="step.id"></div>
                   </div>
                   <p class="anatomy-stage-title">{{ step.title }}</p>
                   <p class="anatomy-stage-tag">{{ step.tag }}</p>
                   <p class="anatomy-stage-count">{{ count(step.id) }}</p>
+                  <p class="anatomy-stage-blurb">{{ step.blurb }}</p>
                 </div>
                 @if (i < steps.length - 1) {
                   <div

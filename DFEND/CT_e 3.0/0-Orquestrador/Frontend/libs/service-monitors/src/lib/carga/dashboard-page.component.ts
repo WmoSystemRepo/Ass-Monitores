@@ -35,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Carga CT-e
+            Carga CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe Download pontual · Carga em tempo real.
+            Download pontual e carga de CT-e sob demanda.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">

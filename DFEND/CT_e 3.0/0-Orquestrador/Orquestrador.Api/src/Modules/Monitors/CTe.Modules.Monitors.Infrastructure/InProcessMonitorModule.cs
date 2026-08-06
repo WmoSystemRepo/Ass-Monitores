@@ -325,7 +325,7 @@ public sealed class InProcessMonitorModule : IMonitorModule
 
         if (!processUp)
         {
-            Add("PROC_OFF", "Atenção", "Processo parado. Use Ligar o fluxo no monitor para começar a buscar CT-e.");
+            Add("PROC_OFF", "Atenção", "Processo parado. Use Ligar o fluxo no monitor para começar a processar a fila.");
         }
         else if (executar is 0)
         {

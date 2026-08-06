@@ -35,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Arquivador CT-e
+            Arquivador CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe o ciclo de arquivamento em tempo real.
+            Pega CT-e da fila, arquiva e encaminha para os próximos serviços.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">

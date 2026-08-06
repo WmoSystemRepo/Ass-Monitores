@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   OnDestroy,
@@ -38,17 +39,18 @@ export interface FlyingPacket {
       class="pipeline-anatomy anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-600/60 shadow-md"
       [class.anatomy-poster-live]="running()"
       [class.anatomy-poster-busy]="!!activeStage()"
+      [class.anatomy-poster-starting]="isBooting()"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-300/90">
-            Pipeline interno do Analisador
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
+            Como o documento anda
           </p>
           <h2
             class="text-base font-semibold leading-tight text-slate-50"
             title="DFEND_CTe_Analisador — ciclo fila → temp → classificar → detalhar → limpar"
           >
-            Fluxo do Analisador CT-e
+            Caminho do CT-e no Analisador
           </h2>
           <p class="text-[11px] text-zinc-400">
             {{ caption() }}
@@ -109,7 +111,7 @@ export interface FlyingPacket {
           class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 rounded-md border border-slate-600/40 bg-slate-900/50 px-3 py-1.5 text-center text-[11px] font-medium text-slate-300"
           title="Aguardando próximo ciclo de análise"
         >
-          Sem CT-e em trânsito
+          Nenhum documento passando agora — o Analisador processa a fila de tempos em tempos
         </p>
       }
 
@@ -117,7 +119,7 @@ export interface FlyingPacket {
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
         <div class="anatomy-fill-board relative flex h-full min-w-[880px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
-            <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running()" aria-hidden="true"></div>
+            <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running() || isBooting()" aria-hidden="true"></div>
 
             @for (pkt of packets(); track pkt.id; let pi = $index) {
               <div
@@ -137,6 +139,8 @@ export interface FlyingPacket {
                   class="anatomy-stage"
                   [class.anatomy-stage-active]="activeStage() === step.id"
                   [class.anatomy-stage-done]="isDone(step.id)"
+                  [class.anatomy-stage-booting]="isBooting()"
+                  [style.--boot-delay]="i * 0.12 + 's'"
                 >
                   @if (activeStage() === step.id) {
                     <span class="anatomy-now">AGORA</span>
@@ -145,14 +149,36 @@ export interface FlyingPacket {
                     class="anatomy-platform"
                     [class.anatomy-platform-active]="activeStage() === step.id"
                     [class.anatomy-platform-done]="isDone(step.id)"
-                    [class.anatomy-platform-waiting]="running() && !activeStage() && step.id === 'fila'"
+                    [class.anatomy-platform-waiting]="
+                      running() && !activeStage() && step.id === 'fila'
+                    "
+                    [class.anatomy-platform-rising]="queueMotion(step.id) === 'rising'"
+                    [class.anatomy-platform-draining]="queueMotion(step.id) === 'draining'"
+                    [class.anatomy-platform-booting]="isBooting()"
                     [attr.title]="step.techHint"
                   >
                     <div class="anatomy-iso" [attr.data-icon]="step.id"></div>
+                    @if (queueChips(step.id); as chips) {
+                      @if (chips.length > 0) {
+                        <div class="anatomy-queue-stack" aria-hidden="true">
+                          @for (c of chips; track c) {
+                            <span
+                              class="anatomy-queue-block"
+                              [style.--chip-i]="c"
+                            ></span>
+                          }
+                        </div>
+                      }
+                    }
                   </div>
                   <p class="anatomy-stage-title">{{ step.title }}</p>
                   <p class="anatomy-stage-tag">{{ step.tag }}</p>
-                  <p class="anatomy-stage-count">{{ count(step.id) }}</p>
+                  <p
+                    class="anatomy-stage-count"
+                    [class.anatomy-stage-count-hot]="depthOf(step.id) > 0"
+                  >
+                    {{ count(step.id) }}
+                  </p>
                   <p class="anatomy-stage-blurb">{{ step.blurb }}</p>
                 </div>
                 @if (i < steps.length - 1) {
@@ -200,7 +226,9 @@ export class AnalisadorAnatomyFlowComponent implements OnDestroy {
 
   readonly running = input(false);
   readonly activeStage = input<AnatomyStage | null>(null);
-  readonly caption = input('Ligue o Analisador para ver o fluxo.');
+  readonly caption = input(
+    'Use Ligar o fluxo no topo para o Analisador começar a processar a fila.'
+  );
   readonly latest = input<RecentDocument | null>(null);
   readonly packets = input<FlyingPacket[]>([]);
   /** true enquanto fila/temp estão diminuindo (processamento real). */
@@ -241,35 +269,35 @@ export class AnalisadorAnatomyFlowComponent implements OnDestroy {
       id: 'fila',
       title: 'Fila',
       tag: 'Entrada',
-      blurb: 'RECEIVE na fila do analisador.',
+      blurb: 'Retira o lote da fila.',
       techHint: 'fila_alvo_cte_analisador · RECEIVE / chave retirada',
     },
     {
       id: 'temp',
       title: 'Temporária',
-      tag: 'Leitura',
-      blurb: 'Obtém o lote em tmp_analise.',
+      tag: 'Guarda rápido',
+      blurb: 'Lê o lote na temporária.',
       techHint: 'tmp_analise_* · lote obtido no banco',
     },
     {
       id: 'classificar',
       title: 'Classificar',
-      tag: 'Schema',
-      blurb: 'Roteia por schema (aut / evento / inut).',
+      tag: 'Organiza',
+      blurb: 'Classifica o documento.',
       techHint: 'NegCTeSintetico.SintetizarLote · schema routing',
     },
     {
       id: 'detalhar',
       title: 'Detalhar',
-      tag: 'INSERT',
-      blurb: 'Grava documento_* sintético.',
+      tag: 'Detalha',
+      blurb: 'Aprofunda a análise do lote.',
       techHint: 'INSERT documento_* (+ NSU faltante)',
     },
     {
       id: 'limpar',
       title: 'Limpar',
-      tag: 'Saída',
-      blurb: 'DELETE temp ou AtualizarErro.',
+      tag: 'Limpa',
+      blurb: 'Remove o temporário ou registra erro.',
       techHint: 'ExcluirLote / AtualizarErro · documento excluído',
     },
   ];

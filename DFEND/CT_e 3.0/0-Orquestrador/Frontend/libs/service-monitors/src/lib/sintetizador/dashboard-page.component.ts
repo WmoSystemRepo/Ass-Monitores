@@ -35,10 +35,10 @@ import {
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
           <h1 class="text-base font-semibold leading-tight text-zinc-50">
-            Monitor do Sintetizador CT-e
+            Sintetizador CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe o ciclo de síntese em tempo real.
+            Transforma o lote em documentos sintéticos para a cadeia.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">

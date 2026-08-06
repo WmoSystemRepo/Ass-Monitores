@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -283,7 +283,7 @@ export class ArquivadorDashboardPageComponent {
         ? 'Reiniciar Arquivador'
         : 'Ativar arquivamento';
     }
-    return 'Ligar Arquivador CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -823,7 +823,7 @@ export class ArquivadorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Arquivador CT-e? Ele para o ciclo de arquivamento.')) {
+    if (confirm('Desligar filas do Arquivador CT-e? Ele para o ciclo de arquivamento.')) {
       void this.store.stopService();
     }
   }

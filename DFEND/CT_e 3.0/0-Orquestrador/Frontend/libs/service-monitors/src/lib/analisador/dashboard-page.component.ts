@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -280,7 +280,7 @@ export class AnalisadorDashboardPageComponent {
         ? 'Reiniciar Analisador'
         : 'Ativar an�lise';
     }
-    return 'Ligar Analisador CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -822,7 +822,7 @@ export class AnalisadorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Analisador CT-e? Ele para o ciclo de análise.')) {
+    if (confirm('Desligar filas do Analisador CT-e? Ele para o ciclo de análise.')) {
       void this.store.stopService();
     }
   }

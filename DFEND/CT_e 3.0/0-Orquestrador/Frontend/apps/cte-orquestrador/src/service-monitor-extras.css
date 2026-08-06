@@ -1,10 +1,143 @@
+/* ùù Pùster + animaùùes (paridade CT_e 2.0 Receptor) ùù */
+.pipeline-anatomy.anatomy-poster {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(34, 211, 238, 0.22), transparent 48%),
+    radial-gradient(ellipse at 88% 8%, rgba(14, 116, 144, 0.28), transparent 42%),
+    linear-gradient(180deg, #0b1a2a 0%, #071422 48%, #020617 100%);
+  color: #e0f2fe;
+}
+
+.pipeline-anatomy .anatomy-path-line {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 3.65rem;
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #38bdf8, #60a5fa, #818cf8, #a78bfa, #fb923c);
+  opacity: 0.45;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  transition: opacity 0.4s ease, box-shadow 0.4s ease;
+}
+
+.pipeline-anatomy.anatomy-poster-live .anatomy-path-line {
+  opacity: 0.72;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+  animation: path-glow 2.4s ease-in-out infinite;
+}
+
+.pipeline-anatomy.anatomy-poster-live .anatomy-path-line-active,
+.pipeline-anatomy.anatomy-poster-busy .anatomy-path-line {
+  opacity: 0.85;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+}
+
+@keyframes path-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.25);
+  }
+}
+
+.pipeline-anatomy .anatomy-belt-idle-hint {
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  background: rgba(15, 23, 42, 0.55);
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.75rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* AGORA / active ó regras definitivas mais abaixo (apÛs .anatomy-platform). */
+@keyframes active-stage-pulse-amber {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(250, 204, 21, 0.45),
+      0 0 18px rgba(250, 204, 21, 0.18),
+      0 9px 0 #b45309;
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(250, 204, 21, 0.7),
+      0 0 36px rgba(250, 204, 21, 0.35),
+      0 9px 0 #b45309;
+  }
+}
+
+/* Espera (ligado, sem est·gio AGORA) ó pulso suave na Consulta */
+.pipeline-anatomy .anatomy-platform-waiting {
+  border-color: rgba(56, 189, 248, 0.65);
+  box-shadow:
+    0 0 0 2px rgba(56, 189, 248, 0.25),
+    0 9px 0 #0c4a6e,
+    0 12px 18px rgba(14, 165, 233, 0.2);
+  animation: waiting-stage-pulse 2s ease-in-out infinite;
+}
+
+@keyframes waiting-stage-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.3),
+      0 9px 0 #0c4a6e,
+      0 12px 16px rgba(14, 165, 233, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(56, 189, 248, 0.55),
+      0 9px 0 #0369a1,
+      0 14px 22px rgba(14, 165, 233, 0.28);
+  }
+}
+
+/* Atividade / timeline (paridade 2.0) */
+.activity-new {
+  animation: flash-in 0.7s ease-out;
+  border-color: rgba(34, 211, 238, 0.35) !important;
+}
+
+.timeline-flash {
+  animation: flash-in 0.8s ease-out;
+}
+
+@keyframes flash-in {
+  0% {
+    background-color: rgba(34, 211, 238, 0.12);
+    transform: translateX(-4px);
+  }
+  100% {
+    background-color: transparent;
+    transform: translateX(0);
+  }
+}
+
+.timeline-item {
+  animation: row-in 0.35s ease-out;
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* CT_e 2.0 Receptor baseline, followed by service-specific icon skins. */
 
-/* Tokens / live-dot / pulse-banner: definidos em styles.css (fonte ˙nica).
-   Regras de anatomia abaixo s„o escopadas em .pipeline-anatomy para
-   n„o colidir com a grade de 6 colunas da cadeia (.chain-anatomy). */
+/* Tokens / live-dot / pulse-banner: definidos em styles.css (fonte ùnica).
+   Regras de anatomia abaixo sùo escopadas em .pipeline-anatomy para
+   nùo colidir com a grade de 6 colunas da cadeia (.chain-anatomy). */
 
-/* ?? CronÙmetro decrescente (banner) ?? */
+/* ùù Cronùmetro decrescente (banner) ùù */
 .cycle-chrono {
   display: inline-flex;
   align-items: baseline;
@@ -60,7 +193,7 @@
   animation: chrono-blink 0.7s steps(1) infinite;
 }
 
-/* Tempo sem achar CT-e novo (crescente desde o ˙ltimo lote) */
+/* Tempo sem achar CT-e novo (crescente desde o ùltimo lote) */
 .cycle-chrono-wait {
   border-color: rgba(56, 189, 248, 0.45);
   background: linear-gradient(180deg, rgba(12, 74, 110, 0.55), rgba(7, 40, 64, 0.75));
@@ -102,7 +235,7 @@
   right: 5.5%;
 }
 
-/* 5 colunas + setas ? sÛ no pipeline interno do serviÁo */
+/* 5 colunas + setas ? sù no pipeline interno do serviùo */
 .pipeline-anatomy .anatomy-stages {
   display: grid;
   grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
@@ -139,13 +272,13 @@
 }
 
 .pipeline-anatomy .anatomy-platform-active {
-  border-color: var(--monitor-accent);
+  border-color: #f59e0b;
   box-shadow:
-    0 0 0 3px rgba(96, 165, 250, 0.35),
-    0 9px 0 #1d4ed8,
-    0 14px 22px rgba(37, 99, 235, 0.25);
+    0 0 0 3px rgba(245, 158, 11, 0.35),
+    0 9px 0 #b45309,
+    0 14px 22px rgba(245, 158, 11, 0.25);
   transform: translateY(-4px) scale(1.04);
-  animation: active-stage-pulse 1.4s ease-in-out infinite;
+  animation: active-stage-pulse-amber 1.4s ease-in-out infinite;
 }
 
 .pipeline-anatomy .anatomy-platform-done {
@@ -162,20 +295,20 @@
   transform: translateX(-50%);
   z-index: 3;
   border-radius: 9999px;
-  border: 1px solid var(--monitor-success);
-  background: linear-gradient(180deg, #365314, #3f6212);
-  color: #ecfccb;
+  border: 1px solid #f59e0b;
+  background: linear-gradient(180deg, #78350f, #92400e);
+  color: #fef3c7;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.1em;
   padding: 0.12rem 0.5rem;
-  box-shadow: 0 3px 10px rgba(163, 230, 53, 0.35);
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
   animation: badge-blink 1.2s ease-in-out infinite;
   white-space: nowrap;
 }
 
 .pipeline-anatomy .anatomy-stage-active .anatomy-stage-title {
-  color: var(--monitor-accent);
+  color: #fbbf24;
 }
 
 .pipeline-anatomy .anatomy-stage-title {
@@ -248,7 +381,7 @@
 }
 
 .pipeline-anatomy .anatomy-step-arrow-hot {
-  color: var(--monitor-success);
+  color: #facc15;
   opacity: 1;
   animation: arrow-flow 0.9s ease-in-out infinite;
 }
@@ -1078,7 +1211,7 @@
   min-height: 12rem;
 }
 
-/* óó Fit monitores na viewport (sem scroll) óó */
+/* ùù Fit monitores na viewport (sem scroll) ùù */
 .pipeline-anatomy.anatomy-poster-fill {
   min-height: 0;
 }

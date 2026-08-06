@@ -207,13 +207,20 @@ public sealed class InProcessMonitorModule : IMonitorModule
         var processUp = status.Status.Equals("Running", StringComparison.OrdinalIgnoreCase);
         var executar = await ResolveExecutarAsync(processUp, ct);
         var executarKnown = executar is not null;
+        var (tempBacklog, brokerDepth, recentDocs) = await MonitorTelemetrySql.ReadAsync(
+            _options.ConnectionString,
+            _options.Domain,
+            _options.SqlTimeoutSeconds,
+            _logger,
+            ct);
+        var hasQueueTelemetry = !string.IsNullOrWhiteSpace(_options.ConnectionString);
         return new
         {
-            mode = "in-process-limited",
-            limitation =
-                $"Snapshot completo (threads/filas/documentos) requer o SqlMonitorRepository do {_options.Domain} " +
-                "— não copiado nesta wave (W3). Ligue Monitors:" + ServiceId +
-                ":UseHttpFallback=true para snapshot completo via Monitor.Api enquanto essa paridade não é feita.",
+            // Mantém telemetria de filas/docs para animações (esteira/AGORA/flyers).
+            mode = hasQueueTelemetry ? "in-process" : "in-process-limited",
+            limitation = hasQueueTelemetry
+                ? null
+                : $"Snapshot completo requer Monitors:{ServiceId}:ConnectionString (filas/docs/Executar).",
             global = new
             {
                 service = new
@@ -222,20 +229,23 @@ public sealed class InProcessMonitorModule : IMonitorModule
                     desServico = _options.DisplayName,
                     scmStatus = status.Status,
                     isRunning = processUp,
-                    // Regra: processo no ar = filas ligadas (Executar=1). Sem “pausado”.
                     executar,
                     executarKnown
                 },
                 snapshotAtUtc = DateTimeOffset.UtcNow
             },
+            queues = new
+            {
+                tempBacklog,
+                serviceBrokerDepth = brokerDepth,
+                brokerDepthTrend = Array.Empty<long>()
+            },
             connectionHealth = string.IsNullOrWhiteSpace(_options.ConnectionString)
                 ? "SemDados"
-                : executarKnown
-                    ? "Ok"
-                    : "SemTelemetria",
+                : "Ok",
             codServico = _options.CodServico,
             threads = Array.Empty<object>(),
-            recentDocuments = Array.Empty<object>(),
+            recentDocuments = recentDocs,
             alerts = Array.Empty<object>(),
             config = Array.Empty<object>()
         };

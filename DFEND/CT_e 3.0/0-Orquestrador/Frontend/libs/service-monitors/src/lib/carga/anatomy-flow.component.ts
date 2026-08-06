@@ -120,7 +120,7 @@ export interface FlyingPacket {
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
         <div class="anatomy-fill-board relative flex h-full min-w-[760px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
-            <div class="anatomy-path-line anatomy-path-line-5" aria-hidden="true"></div>
+            <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running()" aria-hidden="true"></div>
 
             @for (pkt of packets(); track pkt.id; let pi = $index) {
               <div
@@ -148,6 +148,7 @@ export interface FlyingPacket {
                     class="anatomy-platform"
                     [class.anatomy-platform-active]="activeStage() === step.id"
                     [class.anatomy-platform-done]="isDone(step.id)"
+                    [class.anatomy-platform-waiting]="running() && !activeStage() && step.id === 'fila'"
                     [attr.title]="step.techHint"
                   >
                     <div class="anatomy-iso" [attr.data-icon]="step.id"></div>

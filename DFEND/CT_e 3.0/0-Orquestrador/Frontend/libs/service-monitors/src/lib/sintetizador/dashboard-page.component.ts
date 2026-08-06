@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -280,7 +280,7 @@ export class SintetizadorDashboardPageComponent {
         ? 'Reiniciar Sintetizador'
         : 'Ativar s�ntese';
     }
-    return 'Ligar Sintetizador CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -822,7 +822,7 @@ export class SintetizadorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Sintetizador CT-e? Ele para o ciclo de síntese.')) {
+    if (confirm('Desligar filas do Sintetizador CT-e? Ele para o ciclo de síntese.')) {
       void this.store.stopService();
     }
   }

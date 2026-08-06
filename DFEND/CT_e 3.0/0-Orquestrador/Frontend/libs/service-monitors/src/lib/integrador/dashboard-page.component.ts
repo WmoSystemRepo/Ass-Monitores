@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -280,7 +280,7 @@ export class IntegradorDashboardPageComponent {
         ? 'Reiniciar Integrador'
         : 'Ativar integra��o';
     }
-    return 'Ligar Integrador CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -822,7 +822,7 @@ export class IntegradorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Integrador CT-e? Ele para o ciclo de integração.')) {
+    if (confirm('Desligar filas do Integrador CT-e? Ele para o ciclo de integração.')) {
       void this.store.stopService();
     }
   }

@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -280,7 +280,7 @@ export class CargaDashboardPageComponent {
         ? 'Reiniciar Carga'
         : 'Ativar carga';
     }
-    return 'Ligar Carga CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -822,7 +822,7 @@ export class CargaDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Carga CT-e? Ele para Download pontual · Carga.')) {
+    if (confirm('Desligar filas do Carga CT-e? Ele para Download pontual · Carga.')) {
       void this.store.stopService();
     }
   }

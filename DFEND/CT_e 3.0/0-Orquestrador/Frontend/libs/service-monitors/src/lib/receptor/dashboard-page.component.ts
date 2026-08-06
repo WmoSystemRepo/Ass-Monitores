@@ -75,7 +75,7 @@ import {
             [disabled]="store.actionBusy()"
             (click)="confirmStop()"
           >
-            Desligar
+            Desligar filas
           </button>
         </div>
       </header>
@@ -249,7 +249,7 @@ export class ReceptorDashboardPageComponent {
         ? 'Reiniciar Receptor'
         : 'Ativar recepção';
     }
-    return 'Ligar Receptor CT-e';
+    return 'Ligar as filas';
   });
 
   readonly heartbeat = computed(() => {
@@ -648,7 +648,7 @@ export class ReceptorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Receptor CT-e? Ele para de buscar novos documentos.')) {
+    if (confirm('Desligar filas do Receptor CT-e? Ele para de buscar novos documentos.')) {
       void this.store.stopService();
     }
   }

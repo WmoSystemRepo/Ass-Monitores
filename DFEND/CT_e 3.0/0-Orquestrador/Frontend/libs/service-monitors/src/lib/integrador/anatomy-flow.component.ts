@@ -106,7 +106,7 @@ export interface FlyingPacket {
         </div>
       } @else {
         <p
-          class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 text-center text-[11px] text-slate-500"
+          class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 rounded-md border border-slate-600/40 bg-slate-900/50 px-3 py-1.5 text-center text-[11px] font-medium text-slate-300"
           title="Aguardando próximo ciclo de integração"
         >
           Sem CT-e em trânsito
@@ -115,7 +115,7 @@ export interface FlyingPacket {
 
       <!-- Diagrama principal — uma composição centrada -->
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
-        <div class="anatomy-fill-board relative flex h-full min-w-[760px] flex-col items-stretch px-2 py-2">
+        <div class="anatomy-fill-board relative flex h-full min-w-[880px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
             <div class="anatomy-path-line anatomy-path-line-5" [class.anatomy-path-line-active]="running()" aria-hidden="true"></div>
 

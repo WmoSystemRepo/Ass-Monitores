@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orquestrador.Api.Auth;
 using Orquestrador.Api.Endpoints;
+using Orquestrador.Api.Realtime;
 using Orquestrador.Application.Abstractions;
 using Orquestrador.Application.Options;
 using Orquestrador.Application.Services;
@@ -36,6 +37,14 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddOrquestradorInfrastructure();
 builder.Services.AddUnifiedMonitorModules();
+
+// Paridade CT_e 2.0: push SignalR unificado (/hubs/monitor) para monitores ricos.
+builder.Services
+    .AddOptions<MonitorPushOptions>()
+    .Bind(builder.Configuration.GetSection(MonitorPushOptions.SectionName));
+builder.Services.AddSingleton<MonitorHubSubscriptions>();
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<MonitorPushHostedService>();
 
 // Wave 4 (SDD Monitor Unificado): Resgate CT-e AN absorvido no Orquestrador.Api — deixa de exigir
 // processo/porta próprios (antes 7-Resgate/CTe.Resgate.Api, :5070). Fonte permanece em 7-Resgate.
@@ -215,7 +224,8 @@ orchestrator.MapGet("/api/orchestrator/info", (IOptions<OrchestratorOptions> opt
             "/api/monitores/{servico}/service/status",
             "/api/monitores/{servico}/service/start",
             "/api/monitores/{servico}/service/stop",
-            "/api/monitores/{servico}/health"
+            "/api/monitores/{servico}/health",
+            "/hubs/monitor"
         }
     });
 });
@@ -474,6 +484,9 @@ orchestrator.MapGet("/api/health/ready", (IOptions<OrchestratorOptions> options,
 
 // Rotas unificadas dos monitores (SDD): /api/monitores/{servico}/* — Monitor.Read/Monitor.Control.
 app.MapUnifiedMonitorEndpoints();
+
+// Hub SignalR unificado (paridade CT_e 2.0) — JoinService(servico) → snapshot / logsAppend.
+app.MapHub<MonitorHub>("/hubs/monitor");
 
 // Wave 4: rotas do Resgate CT-e AN (/api/auth/token, /api/resgate/*) — JWT próprio ("ResgateJwt").
 app.MapResgateEndpoints();

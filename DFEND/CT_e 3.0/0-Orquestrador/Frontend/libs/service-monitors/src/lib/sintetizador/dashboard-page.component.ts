@@ -49,7 +49,9 @@ import {
             [class.text-zinc-400]="!store.live()"
             [attr.title]="
               store.live()
-                ? 'Monitor recebendo atualizações (SignalR)'
+                ? store.transport() === 'signalr'
+                  ? 'Monitor recebendo atualizações (SignalR)'
+                  : 'Monitor recebendo atualizações (REST)'
                 : 'Monitor sem push recente'
             "
           >

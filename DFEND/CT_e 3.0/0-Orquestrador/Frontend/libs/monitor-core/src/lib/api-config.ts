@@ -17,6 +17,11 @@ export function getApiBaseUrl(): string {
   return resolvedBase.replace(/\/$/, '');
 }
 
+/** Hub SignalR unificado dos monitores (paridade CT_e 2.0). */
+export function getHubUrl(): string {
+  return `${getApiBaseUrl()}/hubs/monitor`;
+}
+
 /** @deprecated Prefer getApiBaseUrl() — valor pode mudar após loadRuntimeApiConfig. */
 export const API_BASE_URL = DEV_FALLBACK;
 

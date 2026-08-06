@@ -1,9 +1,37 @@
+"""
+Mescla CSS de anatomia/cronômetros dos monitores CT_e 2.0 em
+service-monitor-extras.css do Orquestrador 3.0 (escopo .pipeline-anatomy
+é aplicado manualmente / já presente no arquivo gerado).
+
+Paths padrão:
+  - Fonte: Ass-Monitores/DFEND/CT_e 2.0
+  - Destino: Ass-Monitores (workspace) DFEND/CT_e 3.0/.../service-monitor-extras.css
+"""
 from pathlib import Path
 import re
+import os
 
-base = Path(r"C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e 2.0")
-out = Path(
-    r"C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\CT_e\0-Orquestrador\Frontend\apps\cte-orquestrador\src\service-monitor-extras.css"
+# Resolve a partir deste script: .../Frontend/tools → sobe até DFEND
+_tools = Path(__file__).resolve().parent
+_frontend = _tools.parent
+_orquestrador = _frontend.parent
+_cte30 = _orquestrador.parent  # CT_e 3.0
+_dfend = _cte30.parent  # DFEND (workspace ou Ass-Monitores)
+
+# Preferir CT_e 2.0 irmão no mesmo DFEND; senão clone Ass-Monitores clássico.
+_candidates_20 = [
+    Path(r"C:\Users\Mendes\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 2.0"),
+    _dfend / "CT_e 2.0",
+    Path(r"C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0"),
+]
+base = next((p for p in _candidates_20 if p.is_dir()), _candidates_20[0])
+
+out = (
+    _frontend
+    / "apps"
+    / "cte-orquestrador"
+    / "src"
+    / "service-monitor-extras.css"
 )
 
 styles = {
@@ -14,6 +42,13 @@ styles = {
     "integrador": base / "5-Integrador/Frontend/apps/cte-integrador/src/styles.css",
     "carga": base / "6-Carga/Frontend/apps/cte-carga/src/styles.css",
 }
+
+missing = [k for k, p in styles.items() if not p.is_file()]
+if missing:
+    raise SystemExit(
+        f"CT_e 2.0 styles ausentes ({base}): {', '.join(missing)}\n"
+        "Ajuste _candidates_20 em merge-service-monitor-css.py."
+    )
 
 rx = styles["receptor"].read_text(encoding="utf-8")
 start = rx.find("/* —— Cronômetro")
@@ -65,7 +100,10 @@ for sel in sorted(icon_rules.keys()):
     parts.append(icon_rules[sel])
     parts.append("\n")
 
-out.write_text("\n".join(parts), encoding="utf-8")
+# Não sobrescrever o extras já escopado em .pipeline-anatomy —
+# grava um artefato de referência ao lado para diff/merge manual.
+ref_out = out.with_name("service-monitor-extras.from-2.0.css")
+ref_out.write_text("\n".join(parts), encoding="utf-8")
 icons = sorted(
     {
         re.search(r"data-icon='([^']+)'", k).group(1)
@@ -73,5 +111,7 @@ icons = sorted(
         if re.search(r"data-icon='([^']+)'", k)
     }
 )
-print(f"Wrote {out} bytes={out.stat().st_size} icons={len(icon_rules)}")
+print(f"Fonte CT_e 2.0: {base}")
+print(f"Wrote reference {ref_out} bytes={ref_out.stat().st_size} icons={len(icon_rules)}")
+print(f"Live extras (não sobrescrito): {out}")
 print("Icons:", ", ".join(icons))

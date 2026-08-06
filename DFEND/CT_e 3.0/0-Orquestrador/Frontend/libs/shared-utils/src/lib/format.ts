@@ -1,4 +1,5 @@
 import { describeLogActivity } from './pipeline-activity';
+import { explainLogError } from './log-error-catalog';
 
 export function severityLabel(severity: string | number): string {
   if (typeof severity === 'number') {
@@ -206,6 +207,9 @@ export function logKindLabel(kind: Exclude<LogKind, 'all'>): string {
 }
 
 export function summarizeLogMessage(mensagem?: string | null, cStat?: string | null): string {
+  const plain = explainLogError({ mensagem, cStat });
+  if (plain) return plain.title;
+
   const activity = describeLogActivity({ mensagem, cStat });
   if (activity) return activity.detail;
 

@@ -462,6 +462,12 @@ Se a fase for Parada **e** Com fila = 0 **e** todos os estágios cinza PARADO, a
 
 Não. Ligar/Desligar controla **processo + flag Executar**. Lotes, NSU e profundidade de fila vêm da telemetria SQL/broker de cada serviço.
 
+### O que significa Status 215 / “Falha no esquema XML”?
+
+É rejeição da **SEFAZ**: o XML enviado na chamada (ex.: `retDistCTeSVD` / Carga `ProcessarDownload`) não passou na validação do schema oficial.  
+No monitor, **Mais informações → Ver erro** mostra a **frase clara** (catálogo) + o **texto original** do banco.  
+Histórico de traduções: `Frontend/libs/shared-utils/src/lib/log-error-catalog.ts` — acrescentar novas entradas quando aparecerem casos novos.
+
 ## 15. Documentos relacionados
 
 - [Dev portátil (one-click, paths, troubleshooting)](DEV_PORTATIL.md)

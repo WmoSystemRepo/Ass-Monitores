@@ -12,6 +12,10 @@ import { ServiceMonitorStore } from './service-monitor.store';
 import {
   classifyLogKind,
   describeLogActivity,
+  explainLogError,
+  extractStatusCode,
+  formatLogErrorCopyPayload,
+  formatLogErrorPlainMessage,
   logKindLabel,
   severityLabel,
   summarizeLogMessage,
@@ -181,7 +185,8 @@ const META: Record<string, ServiceDetailsMeta> = {
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Últimos eventos do banco</h2>
             <p class="text-[11px] text-slate-500">
-              Sucesso, aviso ou erro. Em erro, abra o texto original para estudar.
+              Sucesso, aviso ou erro. Em erro/aviso mapeado, abra a explicação e o texto
+              original.
             </p>
           </div>
           <div class="min-h-0 flex-1 space-y-1 overflow-hidden">
@@ -207,14 +212,14 @@ const META: Record<string, ServiceDetailsMeta> = {
                 <span class="min-w-0 flex-1 truncate text-slate-200">{{
                   summarize(l.mensagem, l.cStat)
                 }}</span>
-                @if (isErrorEvent(l)) {
+                @if (canOpenErrorDetail(l)) {
                   <button
                     type="button"
                     class="shrink-0 rounded border border-rose-500/50 bg-rose-950/40 px-1.5 py-0.5 text-[10px] font-semibold text-rose-200 hover:bg-rose-900/50"
-                    title="Ver erro original"
+                    title="Ver explicação e texto original"
                     (click)="openErrorDetail(l)"
                   >
-                    Ver erro
+                    {{ isErrorEvent(l) ? 'Ver erro' : 'Ver detalhes' }}
                   </button>
                 }
               </div>
@@ -409,13 +414,53 @@ export class SharedServiceDetailsPageComponent {
     return classifyLogKind(l.severityHint, l.cStat) === 'error';
   }
 
+  canOpenErrorDetail(l: LogEntry): boolean {
+    if (this.isErrorEvent(l)) return true;
+    return !!explainLogError({
+      mensagem: l.mensagem,
+      cStat: l.cStat,
+      severityHint: l.severityHint,
+    });
+  }
+
   openErrorDetail(l: LogEntry): void {
     const original = (l.mensagem || '').trim() || '(sem mensagem no registro)';
+    const plain = explainLogError({
+      mensagem: original,
+      cStat: l.cStat,
+      severityHint: l.severityHint,
+    });
+    const code = extractStatusCode(original, l.cStat);
+
+    if (plain) {
+      void this.confirmDialog.ask({
+        mode: 'info',
+        title: plain.title,
+        message: formatLogErrorPlainMessage(plain, {
+          seqLog: l.seqLog,
+          cStat: code,
+        }),
+        detailLabel: 'Texto original (banco)',
+        detail: original,
+        copyText: formatLogErrorCopyPayload({
+          plain,
+          original,
+          seqLog: l.seqLog,
+          cStat: code,
+        }),
+        confirmLabel: 'Fechar',
+        tone: 'danger',
+      });
+      return;
+    }
+
     void this.confirmDialog.ask({
       mode: 'info',
       title: 'Erro original (banco)',
-      message: `Evento #${l.seqLog}${l.cStat ? ` · cStat ${l.cStat}` : ''} — texto completo para estudo:`,
+      message: `Evento #${l.seqLog}${code ? ` · código ${code}` : ''} — ainda sem tradução no histórico. Texto completo:`,
+      detailLabel: 'Texto original (banco)',
       detail: original,
+      copyText: original,
       confirmLabel: 'Fechar',
       tone: 'danger',
     });

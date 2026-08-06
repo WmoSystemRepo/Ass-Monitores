@@ -7,8 +7,12 @@ export interface ConfirmDialogOptions {
   title: string;
   /** Corpo explicativo — pode mudar por uso. */
   message: string;
-  /** Bloco monoespaçado (ex.: erro original) abaixo da mensagem. */
+  /** Bloco monoespaçado (ex.: erro original) abaixo da mensagem. Quando presente, o modal oferece botão Copiar texto. */
   detail?: string;
+  /** Rótulo acima do bloco detail (ex.: "Texto original"). */
+  detailLabel?: string;
+  /** Texto completo para a área de transferência (senão: message + detail). */
+  copyText?: string;
   /** confirm = OK/Cancelar; info = só Fechar. */
   mode?: ConfirmDialogMode;
   /** Rótulo do botão de confirmação. */

@@ -4,6 +4,7 @@ import {
   HostListener,
   effect,
   inject,
+  signal,
 } from '@angular/core';
 import { ConfirmDialogService } from './confirm-dialog.service';
 
@@ -33,11 +34,26 @@ import { ConfirmDialogService } from './confirm-dialog.service';
           <header class="confirm-dialog-head">
             <h2 [id]="titleId" class="confirm-dialog-title">{{ d.title }}</h2>
           </header>
-          <p [id]="bodyId" class="confirm-dialog-message">{{ d.message }}</p>
+          <p [id]="bodyId" class="confirm-dialog-message confirm-dialog-message-plain">
+            {{ d.message }}
+          </p>
           @if (d.detail) {
+            @if (d.detailLabel) {
+              <p class="confirm-dialog-detail-label">{{ d.detailLabel }}</p>
+            }
             <pre class="confirm-dialog-detail">{{ d.detail }}</pre>
           }
           <footer class="confirm-dialog-actions">
+            @if (d.detail || d.copyText) {
+              <button
+                type="button"
+                class="confirm-dialog-btn confirm-dialog-btn-copy"
+                [attr.aria-live]="'polite'"
+                (click)="copyDetail(d.copyText || buildCopyFallback(d.message, d.detail))"
+              >
+                {{ copied() ? 'Copiado!' : 'Copiar texto' }}
+              </button>
+            }
             @if (d.mode !== 'info') {
               <button
                 type="button"
@@ -106,6 +122,20 @@ import { ConfirmDialogService } from './confirm-dialog.service';
         font-size: 0.875rem;
         line-height: 1.45;
         color: #94a3b8;
+        white-space: pre-wrap;
+      }
+
+      .confirm-dialog-message-plain {
+        color: #cbd5e1;
+      }
+
+      .confirm-dialog-detail-label {
+        margin: 0.85rem 0 0.35rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
       }
 
       .confirm-dialog-detail {
@@ -122,6 +152,7 @@ import { ConfirmDialogService } from './confirm-dialog.service';
         color: #fecdd3;
         white-space: pre-wrap;
         word-break: break-word;
+        user-select: text;
       }
 
       .confirm-dialog-panel:has(.confirm-dialog-detail) {
@@ -131,6 +162,7 @@ import { ConfirmDialogService } from './confirm-dialog.service';
       .confirm-dialog-actions {
         display: flex;
         justify-content: flex-end;
+        flex-wrap: wrap;
         gap: 0.5rem;
         margin-top: 1.15rem;
       }
@@ -155,6 +187,18 @@ import { ConfirmDialogService } from './confirm-dialog.service';
       .confirm-dialog-btn:focus-visible {
         outline: 2px solid rgba(165, 180, 252, 0.9);
         outline-offset: 2px;
+      }
+
+      .confirm-dialog-btn-copy {
+        margin-right: auto;
+        background: rgba(30, 41, 59, 0.9);
+        border-color: rgba(148, 163, 184, 0.55);
+        color: #e2e8f0;
+      }
+
+      .confirm-dialog-btn-copy:hover {
+        background: rgba(51, 65, 85, 0.95);
+        border-color: rgba(165, 180, 252, 0.7);
       }
 
       .confirm-dialog-btn-cancel {
@@ -229,11 +273,16 @@ export class ConfirmDialogComponent {
   readonly dialog = inject(ConfirmDialogService);
   readonly titleId = 'confirm-dialog-title';
   readonly bodyId = 'confirm-dialog-body';
+  readonly copied = signal(false);
+  private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     effect(() => {
       const open = !!this.dialog.active();
       document.body.style.overflow = open ? 'hidden' : '';
+      if (!open) {
+        this.resetCopied();
+      }
     });
   }
 
@@ -254,5 +303,40 @@ export class ConfirmDialogComponent {
 
   confirm(): void {
     this.dialog.close(true);
+  }
+
+  async copyDetail(text: string): Promise<void> {
+    const value = (text || '').trim();
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // Fallback para ambientes sem Clipboard API / permissão.
+      const ta = document.createElement('textarea');
+      ta.value = value;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    this.copied.set(true);
+    if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+    this.copyResetTimer = setTimeout(() => this.resetCopied(), 2000);
+  }
+
+  buildCopyFallback(message?: string, detail?: string): string {
+    const parts = [(message || '').trim(), (detail || '').trim()].filter(Boolean);
+    return parts.join('\n\n');
+  }
+
+  private resetCopied(): void {
+    this.copied.set(false);
+    if (this.copyResetTimer) {
+      clearTimeout(this.copyResetTimer);
+      this.copyResetTimer = null;
+    }
   }
 }

@@ -19,7 +19,15 @@ NAO precisa copiar caminho. NAO use o Prompt de Comando com comandos PowerShell.
 SE NAO ACHAR A PASTA:
 - Copie PROCURAR-E-CONSERTAR.cmd para o Desktop
 - Duplo clique nele
-- Ele procura Orquestrador.sln no PC e conserta sozinho
+- Ele procura clone VALIDO (com LIMPAR-E-BUILDAR.cmd)
+- Ignora Lixeira, Temp e Ass-Monitores duplicado
+
+SE O SCRIPT DISSER QUE SO ACHOU NA LIXEIRA / NAO ACHOU:
+1) Abra a Lixeira do Windows
+2) Restaure a pasta 0-Orquestrador (ou Ass-Monitores)
+   OU na pasta Ass-Monitores rode: git pull
+3) Confirme que existe o arquivo LIMPAR-E-BUILDAR.cmd
+4) Duplo clique de novo em LIMPAR-E-BUILDAR.cmd
 
 ERRO "Ass-Monitores\Ass-Monitores":
 - Clone errado (pasta duplicada)
@@ -29,3 +37,4 @@ ERRO "Ass-Monitores\Ass-Monitores":
 NUNCA:
 - Abrir atalho antigo do VS com path wmoliveira errado
 - Copiar pastas bin / obj / _artifacts entre maquinas
+- Usar projeto que so existe dentro de $Recycle.Bin

@@ -1,77 +1,102 @@
 @echo off
 chcp 65001 >nul
 title Procurar Orquestrador e consertar
-REM Coloque este .cmd em qualquer pasta (Desktop, H:\, etc.) e de duplo clique.
-REM Ele procura Orquestrador.sln e roda o conserto automaticamente.
+REM Copia na raiz Ass-Monitores — mesmo conteudo do 0-Orquestrador.
 
 echo.
-echo Procurando Orquestrador.sln em discos comuns...
-echo (pode demorar 1-2 minutos)
+echo Procurando Orquestrador.sln valido...
+echo (ignora Lixeira / Temp / AppData)
 echo.
 
 set "FOUND="
+set "ORQ_ROOT="
 
-REM Locais tipicos (sem precisar digitar path)
+call :TRY "%~dp0DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "C:\Users\%USERNAME%\Desktop\Clones\Assefaz\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "C:\Users\%USERNAME%\Desktop\Clones\DFEND\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "C:\Users\%USERNAME%\Desktop\Clones\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "D:\Clones\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "H:\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+call :TRY "H:\Clones\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador"
+if defined FOUND goto :RUN
+
 for %%D in (C D E F G H) do (
   if exist "%%D:\" (
     echo  - varrendo %%D:\ ...
     for /f "delims=" %%F in ('dir /s /b "%%D:\Orquestrador.sln" 2^>nul') do (
-      echo %%F | findstr /i "\\0-Orquestrador\\Orquestrador.Api\\Orquestrador.sln" >nul
-      if not errorlevel 1 (
-        set "FOUND=%%F"
-        goto :FOUND_ONE
-      )
+      call :CANDIDATE "%%F"
+      if defined FOUND goto :RUN
     )
   )
 )
 
-:FOUND_ONE
-if not defined FOUND (
-  echo.
-  echo NAO ACHEI Orquestrador.sln.
-  echo Verifique se o clone CT_e 3.0\0-Orquestrador existe neste PC.
-  echo.
-  pause
-  exit /b 1
-)
-
 echo.
-echo Achei:
+echo NAO ACHEI um clone valido do Orquestrador.
+echo.
+echo Precisa ter LIMPAR-E-BUILDAR.cmd + Orquestrador.sln.
+echo Se so esta na Lixeira: restaure a pasta ou faca git pull do Ass-Monitores.
+echo.
+pause
+exit /b 1
+
+:RUN
+echo.
+echo Achei clone VALIDO:
 echo   %FOUND%
 echo.
+echo Raiz:
+echo   %ORQ_ROOT%
+echo.
 
-REM Detecta Ass-Monitores duplicado
-echo %FOUND% | findstr /i "Ass-Monitores\\Ass-Monitores" >nul
+echo %ORQ_ROOT% | findstr /i "Ass-Monitores\\Ass-Monitores" >nul
 if not errorlevel 1 (
-  echo ERRO: caminho com Ass-Monitores DUPLICADO.
-  echo Isso quebra o Visual Studio.
-  echo.
-  echo Apague/mova o clone interno e use so:
-  echo   ...\Ass-Monitores\DFEND\CT_e 3.0\0-Orquestrador
-  echo.
+  echo ERRO: Ass-Monitores DUPLICADO no path.
   pause
   exit /b 2
 )
 
-for %%I in ("%FOUND%") do set "API_DIR=%%~dpI"
-for %%I in ("%API_DIR%\..") do set "ORQ_ROOT=%%~fI"
-
-echo Raiz Orquestrador:
-echo   %ORQ_ROOT%
-echo.
-echo Rodando limpeza + build...
-echo.
-
-cd /d "%ORQ_ROOT%"
-if exist "%ORQ_ROOT%\LIMPAR-E-BUILDAR.cmd" (
-  call "%ORQ_ROOT%\LIMPAR-E-BUILDAR.cmd"
-) else if exist "%ORQ_ROOT%\tools\fix-dev.ps1" (
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%ORQ_ROOT%\tools\fix-dev.ps1"
-) else (
-  echo ERRO: LIMPAR-E-BUILDAR.cmd / fix-dev.ps1 nao encontrados nesse clone.
-  echo Faca git pull na pasta Ass-Monitores e tente de novo.
+echo %ORQ_ROOT% | findstr /i "Recycle.Bin" >nul
+if not errorlevel 1 (
+  echo ERRO: isto esta na Lixeira. Restaure o projeto primeiro.
   pause
-  exit /b 1
+  exit /b 3
 )
 
+echo Rodando limpeza + build...
+echo.
+cd /d "%ORQ_ROOT%"
+call "%ORQ_ROOT%\LIMPAR-E-BUILDAR.cmd"
 exit /b %ERRORLEVEL%
+
+:TRY
+if defined FOUND goto :EOF
+if exist "%~1\LIMPAR-E-BUILDAR.cmd" if exist "%~1\Orquestrador.Api\Orquestrador.sln" (
+  set "ORQ_ROOT=%~1"
+  set "FOUND=%~1\Orquestrador.Api\Orquestrador.sln"
+  echo  + tipico OK: %~1
+)
+goto :EOF
+
+:CANDIDATE
+if defined FOUND goto :EOF
+set "P=%~1"
+echo %P% | findstr /i "Recycle.Bin \\Temp\\ \\AppData\\ \\node_modules\\ \\.git\\" >nul
+if not errorlevel 1 goto :EOF
+echo %P% | findstr /i "Ass-Monitores\\Ass-Monitores" >nul
+if not errorlevel 1 goto :EOF
+echo %P% | findstr /i "\\0-Orquestrador\\Orquestrador.Api\\Orquestrador.sln$" >nul
+if errorlevel 1 goto :EOF
+for %%I in ("%P%") do set "API_DIR=%%~dpI"
+for %%I in ("%API_DIR%\..") do set "ROOT_TRY=%%~fI"
+if not exist "%ROOT_TRY%\LIMPAR-E-BUILDAR.cmd" goto :EOF
+if not exist "%ROOT_TRY%\tools\fix-dev.ps1" goto :EOF
+set "ORQ_ROOT=%ROOT_TRY%"
+set "FOUND=%P%"
+echo  + valido: %P%
+goto :EOF

@@ -76,16 +76,23 @@ public sealed class WindowsMonitorControlAdapter
     {
         lock (_startLock)
         {
-            if (IsLocalHostRunning())
-            {
-                return new ServiceControlResult(true, "Running", "Host POC já em execução.");
-            }
-
             if (_options.PreferLocalProcess)
             {
                 if (!TryResolveExePath(out var exePath, out var resolveError))
                 {
                     return new ServiceControlResult(false, "NotFound", resolveError ?? "Host POC não encontrado.");
+                }
+
+                var configWritten = EnsureDevConfigBesideExe(exePath);
+                if (IsLocalHostRunning())
+                {
+                    if (!configWritten)
+                    {
+                        return new ServiceControlResult(true, "Running", "Host POC já em execução.");
+                    }
+
+                    // Config SQL acabou de ser gerada — reinicia para o worker enxergar o banco.
+                    StopLocalProcesses();
                 }
 
                 return StartLocalProcess(exePath);
@@ -107,6 +114,7 @@ public sealed class WindowsMonitorControlAdapter
 
             if (TryResolveExePath(out var hostPath, out var err))
             {
+                EnsureDevConfigBesideExe(hostPath);
                 return StartLocalProcess(hostPath);
             }
 
@@ -210,27 +218,103 @@ public sealed class WindowsMonitorControlAdapter
         }
     }
 
-    private void EnsureDevConfigBesideExe(string exePath)
+    /// <returns>true se gravou/atualizou o .config nesta chamada.</returns>
+    private bool EnsureDevConfigBesideExe(string exePath)
     {
+        var dest = exePath + ".config";
         var root = FindPackageRoot();
-        if (root is null || string.IsNullOrWhiteSpace(_options.MonitoredService))
+
+        // 1) AppConfig canônico do pacote (quando existir).
+        if (root is not null && !string.IsNullOrWhiteSpace(_options.MonitoredService))
         {
-            return;
+            var src = Path.Combine(
+                root,
+                $"dfend-cte-{_options.Domain}-windowsservices",
+                _options.MonitoredService,
+                "AppConfig",
+                "Desenvolvimento",
+                $"{_options.MonitoredService}.exe.config");
+            if (File.Exists(src))
+            {
+                var changed = !File.Exists(dest)
+                    || !string.Equals(
+                        File.ReadAllText(src),
+                        File.ReadAllText(dest),
+                        StringComparison.Ordinal);
+                File.Copy(src, dest, overwrite: true);
+                return changed;
+            }
         }
 
-        var src = Path.Combine(
-            root,
-            $"dfend-cte-{_options.Domain}-windowsservices",
-            _options.MonitoredService,
-            "AppConfig",
-            "Desenvolvimento",
-            $"{_options.MonitoredService}.exe.config");
-        if (!File.Exists(src))
+        // 2) Já existe config ao lado do .exe com connection string.
+        if (File.Exists(dest) && HasConnectionStringKey(dest))
         {
-            return;
+            return false;
         }
 
-        File.Copy(src, exePath + ".config", overwrite: true);
+        // 3) Gera config mínimo a partir de Monitors:{id}:ConnectionString.
+        if (string.IsNullOrWhiteSpace(_options.ConnectionString))
+        {
+            return false;
+        }
+
+        WriteMinimalDevConfig(dest);
+        return true;
+    }
+
+    private static bool HasConnectionStringKey(string configPath)
+    {
+        try
+        {
+            var text = File.ReadAllText(configPath);
+            return text.Contains("BDCTeRecepcao", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("BDCTeSintetico", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void WriteMinimalDevConfig(string destPath)
+    {
+        var domain = (_options.Domain ?? "receptor").Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(domain))
+        {
+            domain = "receptor";
+        }
+
+        var nomeServico = string.IsNullOrWhiteSpace(_options.MonitoredService)
+            ? $"DFEND_CTe_{char.ToUpperInvariant(domain[0])}{domain[1..]}"
+            : _options.MonitoredService;
+        var codKey = domain switch
+        {
+            "receptor" => "CodServicoReceptor",
+            "arquivador" => "CodServicoArquivador",
+            "sintetizador" => "CodServicoSintetizador",
+            "analisador" => "CodServicoAnalisador",
+            "integrador" => "CodServicoIntegrador",
+            "carga" => "CodServicoCarga",
+            _ => "CodServico"
+        };
+        var csKey = domain is "sintetizador" or "analisador" or "integrador"
+            ? "BDCTeSintetico"
+            : "BDCTeRecepcao";
+        var cs = System.Security.SecurityElement.Escape(_options.ConnectionString!) ?? _options.ConnectionString!;
+        var xml = $"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <startup>
+                <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7" />
+              </startup>
+              <appSettings>
+                <add key="NomeServico" value="{nomeServico}" />
+                <add key="{codKey}" value="{_options.CodServico}" />
+                <add key="{csKey}" value="{cs}" />
+              </appSettings>
+            </configuration>
+            """;
+        File.WriteAllText(destPath, xml);
     }
 
     private static ServiceControlResult StartScm(string serviceName)

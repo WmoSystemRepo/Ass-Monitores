@@ -51,12 +51,17 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- Garante config DEV ao lado do host (mesma fonte do AppConfig/Desenvolvimento). -->
+  <!-- Garante config DEV ao lado do host. -->
   <Target Name="CopyDevConfig" AfterTargets="Build">
     <Copy
       SourceFiles="$(ProjectDir)..\..\dfend-cte-receptor-windowsservices\DFEND_CTe_Receptor\AppConfig\Desenvolvimento\DFEND_CTe_Receptor.exe.config"
       DestinationFiles="$(OutputPath)$(AssemblyName).exe.config"
       SkipUnchangedFiles="true"
       Condition="Exists('$(ProjectDir)..\..\dfend-cte-receptor-windowsservices\DFEND_CTe_Receptor\AppConfig\Desenvolvimento\DFEND_CTe_Receptor.exe.config')" />
+    <Copy
+      SourceFiles="$(ProjectDir)App.config"
+      DestinationFiles="$(OutputPath)$(AssemblyName).exe.config"
+      SkipUnchangedFiles="true"
+      Condition="!Exists('$(ProjectDir)..\..\dfend-cte-receptor-windowsservices\DFEND_CTe_Receptor\AppConfig\Desenvolvimento\DFEND_CTe_Receptor.exe.config') And Exists('$(ProjectDir)App.config')" />
   </Target>
 </Project>

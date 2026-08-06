@@ -187,10 +187,22 @@ public sealed class InProcessMonitorModule : IMonitorModule
         return await BuildLimitedSnapshotAsync(ct);
     }
 
-    public Task<object?> GetLogsAsync(long afterSeq, int take, CancellationToken ct) =>
-        _httpFallback is not null
-            ? _httpFallback.GetLogsAsync(afterSeq, take, ct)
-            : Task.FromResult<object?>(Array.Empty<object>());
+    public async Task<object?> GetLogsAsync(long afterSeq, int take, CancellationToken ct)
+    {
+        if (_httpFallback is not null)
+        {
+            return await _httpFallback.GetLogsAsync(afterSeq, take, ct);
+        }
+
+        var logs = await MonitorTelemetrySql.ReadLogsOnlyAsync(
+            _options.ConnectionString,
+            _options.Domain,
+            afterSeq,
+            take,
+            _options.SqlTimeoutSeconds,
+            ct);
+        return logs;
+    }
 
     public Task<object?> GetTableAsync(string key, int take, CancellationToken ct) =>
         _httpFallback is not null
@@ -198,56 +210,83 @@ public sealed class InProcessMonitorModule : IMonitorModule
             : Task.FromResult<object?>(null);
 
     /// <summary>
-    /// Snapshot operacional: SCM/DevHost + flag Executar (quando há SQL).
-    /// Filas/threads/documentos completos exigem UseHttpFallback ou repositório por domínio.
+    /// Snapshot operacional + telemetria SQL (filas/docs/logs/config) para animações do pipeline
+    /// com paridade CT_e 2.0 — sem depender do Monitor.Api HTTP.
     /// </summary>
     private async Task<object> BuildLimitedSnapshotAsync(CancellationToken ct)
     {
         var status = _control.GetStatus();
         var processUp = status.Status.Equals("Running", StringComparison.OrdinalIgnoreCase);
-        var executar = await ResolveExecutarAsync(processUp, ct);
-        var executarKnown = executar is not null;
-        var (tempBacklog, brokerDepth, recentDocs) = await MonitorTelemetrySql.ReadAsync(
+        var hasSql = !string.IsNullOrWhiteSpace(_options.ConnectionString);
+
+        var telemetry = await MonitorTelemetrySql.ReadSnapshotAsync(
             _options.ConnectionString,
             _options.Domain,
+            _options.CodServico,
             _options.SqlTimeoutSeconds,
             _logger,
             ct);
-        var hasQueueTelemetry = !string.IsNullOrWhiteSpace(_options.ConnectionString);
+
+        var executar = telemetry.Executar
+            ?? await ResolveExecutarAsync(processUp, ct);
+        var intervalo = MonitorTelemetrySql.ResolveIntervaloSeconds(telemetry.Configs);
+        _ = telemetry.Configs.TryGetValue("PacoteCompleto", out var pacoteRaw);
+        _ = telemetry.Configs.TryGetValue("ReBuscar", out var reBuscarRaw);
+        _ = telemetry.Configs.TryGetValue("Threads", out var threadsRaw);
+        _ = int.TryParse(pacoteRaw, out var pacoteCompleto);
+        _ = int.TryParse(reBuscarRaw, out var reBuscar);
+        _ = int.TryParse(threadsRaw, out var configuredThreads);
+
+        var configItems = telemetry.Configs
+            .OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(kv => new { key = kv.Key, value = kv.Value })
+            .ToList();
+
         return new
         {
-            // Mantém telemetria de filas/docs para animações (esteira/AGORA/flyers).
-            mode = hasQueueTelemetry ? "in-process" : "in-process-limited",
-            limitation = hasQueueTelemetry
+            mode = hasSql ? "in-process" : "in-process-limited",
+            limitation = hasSql
                 ? null
-                : $"Snapshot completo requer Monitors:{ServiceId}:ConnectionString (filas/docs/Executar).",
+                : $"Snapshot completo requer Monitors:{ServiceId}:ConnectionString (filas/docs/logs/Executar).",
             global = new
             {
                 service = new
                 {
                     windowsServiceName = _options.WindowsServiceName,
-                    desServico = _options.DisplayName,
+                    desServico = telemetry.Service?.DesServico ?? _options.DisplayName,
+                    nomServidor = telemetry.Service?.NomServidor,
+                    dtcExecucao = telemetry.Service?.DtcExecucao,
                     scmStatus = status.Status,
                     isRunning = processUp,
                     executar,
-                    executarKnown
+                    executarKnown = executar is not null
                 },
+                intervaloSeconds = intervalo,
+                pacoteCompleto,
+                reBuscar,
+                configuredThreads = configuredThreads > 0 ? configuredThreads : (int?)null,
+                mainNsu = telemetry.Service?.MainNsu,
                 snapshotAtUtc = DateTimeOffset.UtcNow
             },
             queues = new
             {
-                tempBacklog,
-                serviceBrokerDepth = brokerDepth,
+                tempBacklog = telemetry.TempBacklog,
+                serviceBrokerDepth = telemetry.BrokerDepth,
+                oldestTempAt = telemetry.OldestTempAt,
                 brokerDepthTrend = Array.Empty<long>()
             },
-            connectionHealth = string.IsNullOrWhiteSpace(_options.ConnectionString)
+            connectionHealth = !hasSql
                 ? "SemDados"
-                : "Ok",
+                : telemetry.Service is not null || telemetry.Configs.Count > 0
+                    ? "Healthy"
+                    : "Down",
             codServico = _options.CodServico,
             threads = Array.Empty<object>(),
-            recentDocuments = recentDocs,
+            recentDocuments = telemetry.RecentDocs,
+            liveTrace = Array.Empty<object>(),
             alerts = Array.Empty<object>(),
-            config = Array.Empty<object>()
+            config = configItems,
+            sessionStartUtc = (DateTimeOffset?)null
         };
     }
 

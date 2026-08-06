@@ -8,7 +8,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { LogEntry } from '@orquestrador/shared-data';
-import { ServiceMonitorStore } from '../service-monitor.store';
+import { ServiceMonitorStore } from './service-monitor.store';
 import {
   classifyLogKind,
   describeLogActivity,

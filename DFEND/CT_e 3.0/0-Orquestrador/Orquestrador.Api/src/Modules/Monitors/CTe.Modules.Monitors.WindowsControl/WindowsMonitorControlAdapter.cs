@@ -332,9 +332,10 @@ public sealed class WindowsMonitorControlAdapter
         var full = Path.GetFullPath(Path.Combine(root, _options.ExeRelativePath));
         if (!File.Exists(full))
         {
-            var devHostDir = Path.GetDirectoryName(Path.GetDirectoryName(full));
+            // Exe fica em tools\X.DevHost\bin\Debug\X.DevHost.exe — sobe a partir do exe
+            // até achar X.DevHost.csproj (não assumir só 2 níveis: isso apontava para bin\).
             var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
-            var csproj = devHostDir is null ? null : Path.Combine(devHostDir, $"{devHostName}.csproj");
+            var csproj = FindDevHostCsproj(full, devHostName);
             string? buildError = null;
             if (csproj is null || !DevHostMsBuild.TryBuild(csproj, full, out buildError))
             {
@@ -358,6 +359,32 @@ public sealed class WindowsMonitorControlAdapter
 
         var repoRoot = RepoRootResolver.FindRepoRoot(null, _searchStarts);
         return repoRoot is null ? null : RepoRootResolver.FindPackageRoot(repoRoot, _options.PackageFolder);
+    }
+
+    /// <summary>
+    /// Localiza o .csproj do DevHost subindo a partir do caminho do .exe
+    /// (ex.: …\X.DevHost\bin\Debug\X.exe → …\X.DevHost\X.csproj).
+    /// </summary>
+    private static string? FindDevHostCsproj(string exeFullPath, string devHostName)
+    {
+        if (string.IsNullOrWhiteSpace(devHostName))
+        {
+            return null;
+        }
+
+        var dir = Path.GetDirectoryName(exeFullPath);
+        for (var i = 0; i < 4 && dir is not null; i++)
+        {
+            var candidate = Path.Combine(dir, $"{devHostName}.csproj");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = Path.GetDirectoryName(dir);
+        }
+
+        return null;
     }
 
     private bool IsLocalHostRunning()

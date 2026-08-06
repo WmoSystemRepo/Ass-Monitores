@@ -9,6 +9,7 @@ import {
   ChainOrchestratorStore,
   normalizePhase,
 } from '@orquestrador/monitor-core';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ChainAnatomyComponent } from './chain-anatomy.component';
 
 @Component({
@@ -165,6 +166,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
 })
 export class DashboardPageComponent {
   readonly store = inject(ChainOrchestratorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly connectionLabel = computed(() =>
     this.store.live() ? 'Orquestrador online' : 'Orquestrador offline'
@@ -262,22 +264,30 @@ export class DashboardPageComponent {
     );
   }
 
-  confirmStart(): void {
-    if (
-      confirm(
-        'Ligar as filas CT-e? O Orquestrador sobe os processos e ativa Executar=1 na ordem (Receptor → Arquivador → …).'
-      )
-    ) {
+  async confirmStart(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Ligar as filas CT-e?',
+      message:
+        'O Orquestrador sobe os 6 serviços na ordem Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga e começa a processar documentos.',
+      confirmLabel: 'Ligar filas',
+      cancelLabel: 'Cancelar',
+      tone: 'primary',
+    });
+    if (ok) {
       void this.store.startChain();
     }
   }
 
-  confirmStop(): void {
-    if (
-      confirm(
-        'Desligar filas CT-e? Os serviços param na ordem inversa (Executar=0 + processo).'
-      )
-    ) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar as filas CT-e?',
+      message:
+        'Os serviços param na ordem inversa e deixam de processar novos documentos até você ligar novamente.',
+      confirmLabel: 'Desligar filas',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopChain();
     }
   }

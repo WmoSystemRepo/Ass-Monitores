@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -216,6 +217,7 @@ import {
 })
 export class AnalisadorDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
   readonly queues = this.store.queues;
@@ -823,8 +825,15 @@ export class AnalisadorDashboardPageComponent {
     this.flyingPackets.set(items);
   }
 
-  confirmStop(): void {
-    if (confirm('Desligar filas do Analisador CT-e? Ele para o ciclo de análise.')) {
+  async confirmStop(): Promise<void> {
+    const ok = await this.confirmDialog.ask({
+      title: 'Desligar filas do Analisador CT-e?',
+      message: 'Ele para o ciclo de análise.',
+      confirmLabel: 'Desligar',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
+    if (ok) {
       void this.store.stopService();
     }
   }

@@ -6,7 +6,7 @@ Paths / one-click / troca de PC: [DEV_PORTATIL.md](DEV_PORTATIL.md).
 ## Pré-requisitos
 
 - .NET 8 SDK + Visual Studio 2022
-- Node.js **20 ou 22** LTS (não usar Node 24 com Nx 20)
+- Node.js **20, 22 ou 24** LTS (`.nvmrc` = 24; Nx 21 + Angular 19)
 - Clone válido em `...\DFEND\CT_e 3.0\0-Orquestrador` (sem `Ass-Monitores` duplicado, sem Lixeira)
 - Mesma API key nos lados que usarem monitor HTTP (DEV padrão: `dev-cte-chain-key`)
 
@@ -55,12 +55,13 @@ API base: `public/config.json` → `http://localhost:5000`.
 
 ### 3) Fluxo operacional
 
-1. UI indigo/violet (visão da cadeia)
-2. Seis símbolos **R A S An I C**
-3. **Ligar as filas** → sobe engines (se preciso) → sobe workers **e** grava `Executar=1` na ordem (Receptor → … → Carga). Não existe estado “pausado” na cascata: ligado = processo + trabalho ativo.
-4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0)
-5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config nas rotas filhas
-6. **Desligar filas** → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready)
+1. UI indigo/violet — menu **Dashboard** (cadeia) e Resgate
+2. Seis símbolos **R A S An I C** com badges AGORA / fila / ativo / parado
+3. **Ligar as filas** (só no header) → sobe engines (se preciso) → sobe workers **e** grava `Executar=1` na ordem (Receptor → … → Carga). Não existe estado “pausado” na cascata: ligado = processo + trabalho ativo. Estações animam em cascata durante o start.
+4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0; push SignalR + badge SignalR/REST)
+5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config/mais-informações nas rotas filhas
+6. Receptor → **Mais informações**: 4 cards na tela; em erro SQL use **Ver erro** para o texto original
+7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready)
 
 > Se engines não ficarem online no Ligar, a barra mostra a falha e **as filas daquele sistema não ligam**.  
 > Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).
@@ -103,7 +104,10 @@ Plugar sistema / Registry: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.
 - [ ] `LIMPAR-E-BUILDAR.cmd` concluiu OK neste PC
 - [ ] UI `:4220` · API `:5000`
 - [ ] `/health/ready` e `/api/chain/health` OK
-- [ ] Cascade Ligar / Desligar na ordem da cadeia
+- [ ] Cascade Ligar / Desligar na ordem da cadeia (CTA Ligar só no header)
 - [ ] Clique no estágio → `/monitores/{servico}` com anatomia (não tela JSON)
+- [ ] Badge do monitor indica SignalR (ou REST em fallback)
 - [ ] Start/Stop e threads/logs no monitor do serviço
+- [ ] Receptor → Mais informações: 4 cards visíveis; **Ver erro** em linha de erro SQL
+- [ ] Com processo parado, card Avisos mostra alerta (após restart da API com `BuildHealthAlerts`)
 - [ ] Snapshot sem `unauthorized` com monitores/engines no ar

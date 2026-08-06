@@ -36,13 +36,16 @@ Antes: subir Orquestrador.Api em `http://localhost:5000`.
 
 O bootstrap chama `loadRuntimeApiConfig()` antes do Angular. Em Homolog/Prod, publique o `config.json` (ou o script) com a URL do Orquestrador **daquele** ambiente — não embutir no build.
 
+Hub SignalR: `{apiBaseUrl}/hubs/monitor` (`getHubUrl()` em `@orquestrador/monitor-core`).
+
 ## Menu / rotas
 
 | Menu / ação | Rota |
 |-------------|------|
-| Monitor (visão da cadeia) | `/` |
+| **Dashboard** (ligar e acompanhar filas) | `/` |
 | Clique no estágio R/A/S/An/I/C | `/monitores/{servico}` |
-| Threads / Logs / Tabelas / Config / Detalhes | `/monitores/{servico}/…` |
+| Mais informações (Receptor) | `/monitores/receptor/mais-informacoes` |
+| Threads / Logs / Tabelas / Config | `/monitores/{servico}/…` |
 | Resgate CT-e | `/resgate` |
 
 `{servico}`: `receptor` · `arquivador` · `sintetizador` · `analisador` · `integrador` · `carga`.
@@ -51,14 +54,36 @@ O bootstrap chama `loadRuntimeApiConfig()` antes do Angular. Em Homolog/Prod, pu
 
 | Alias | Papel |
 |-------|--------|
-| `@orquestrador/monitor-dashboard` | Cadeia (Ligar/Desligar + anatomia dos 6 sistemas) |
-| `@orquestrador/monitor-core` | `ChainOrchestratorStore` + `getApiBaseUrl()` |
-| `@orquestrador/service-monitors` | Monitor rico por serviço (paridade **CT_e 2.0**) |
+| `@orquestrador/monitor-dashboard` | Cadeia: Ligar/Desligar, `ChainAnatomy`, `StationCard`, `QueueMeter`, legenda |
+| `@orquestrador/monitor-core` | `ChainOrchestratorStore`, `getApiBaseUrl()`, `getHubUrl()` |
+| `@orquestrador/service-monitors` | Monitor rico por serviço (paridade **CT_e 2.0** + SignalR) |
+| `@orquestrador/shared-ui` | `ConfirmDialog` (confirm / info com `detail` monoespaçado) |
 | `@orquestrador/resgate-cte` | Resgate |
 
-CSS de anatomia/animações dos monitores: `apps/cte-orquestrador/src/service-monitor-extras.css` (importado em `styles.css`).
+CSS de anatomia/animações:
 
-Dados do monitor: `ServiceMonitorStore` faz poll REST em `/api/monitores/{servico}/*` (a cada ~2s).
+- `apps/cte-orquestrador/src/styles.css` — tokens, queue-meter, station-card, reduced-motion
+- `apps/cte-orquestrador/src/service-monitor-extras.css` — pipeline Receptor (plataformas, fila sobe/desce, boot)
+
+### Dados do monitor
+
+`ServiceMonitorStore`:
+
+1. Conecta SignalR → `JoinService(servico)` → eventos `snapshot` / `logsAppend`
+2. Se o hub falhar → poll REST `/api/monitores/{servico}/*` (~2s)
+3. Badge de conexão indica **SignalR** vs **REST**
+
+### Dashboard — fila visual
+
+- Hierarquia: **AGORA** > profundidade de fila > ativo > parado
+- `QueueMeterComponent`: chips sobem ao encher (`rising`) e encolhem ao drenar (`draining`)
+- Ao **Ligar as filas**: estações animam em cascata (`booting` + `--boot-delay`)
+- CTA Ligar **só no header** (idle hero só explica)
+
+### Receptor — Mais informações
+
+Grid 2×2 sem scroll da página. Em eventos SQL de **erro**, botão **Ver erro** abre o texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
+Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API).
 
 ## Observações
 
@@ -66,3 +91,4 @@ Dados do monitor: `ServiceMonitorStore` faz poll REST em `/api/monitores/{servic
 - Cascata e snapshot da cadeia: `/api/orchestrator/*`
 - Operação principal **não** depende de micro-fronts `:4200`–`:42xx`
 - Auth usuário do dashboard ainda não existe; a proteção serviço-a-serviço é a API key interna no BFF ↔ engines
+- Não existe `demoMode`: animações de CT-e = jornada do lote + telemetria ao vivo

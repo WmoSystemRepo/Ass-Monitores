@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+  effect,
+} from '@angular/core';
 
 export type QueueMeterTone = 'agora' | 'fila' | 'idle' | 'error' | 'running';
 
@@ -14,12 +21,18 @@ export type QueueMeterTone = 'agora' | 'fila' | 'idle' | 'error' | 'running';
       [class.queue-meter-idle]="tone() === 'idle'"
       [class.queue-meter-error]="tone() === 'error'"
       [class.queue-meter-running]="tone() === 'running'"
+      [class.queue-meter-rising]="motion() === 'rising'"
+      [class.queue-meter-draining]="motion() === 'draining'"
       [attr.aria-label]="ariaLabel()"
       role="img"
     >
       <div class="queue-meter-track" aria-hidden="true">
         @for (chip of chips(); track chip) {
-          <span class="queue-meter-chip" [style.--chip-i]="chip"></span>
+          <span
+            class="queue-meter-chip"
+            [class.queue-meter-chip-out]="motion() === 'draining'"
+            [style.--chip-i]="chip"
+          ></span>
         }
       </div>
       <span class="queue-meter-depth font-mono">{{ depthLabel() }}</span>
@@ -32,6 +45,27 @@ export class QueueMeterComponent {
   readonly tone = input<QueueMeterTone>('idle');
   /** Cap visual de chips (não altera o número exibido). */
   readonly maxChips = input(10);
+
+  private readonly prevDepth = signal(0);
+  readonly motion = signal<'idle' | 'rising' | 'draining'>('idle');
+  private motionTimer?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    effect(() => {
+      const d = Math.max(0, Math.floor(this.depth()));
+      const prev = this.prevDepth();
+      if (d === prev) return;
+
+      if (this.motionTimer) clearTimeout(this.motionTimer);
+      if (d > prev) {
+        this.motion.set('rising');
+      } else if (d < prev) {
+        this.motion.set('draining');
+      }
+      this.prevDepth.set(d);
+      this.motionTimer = setTimeout(() => this.motion.set('idle'), 700);
+    });
+  }
 
   readonly chips = computed(() => {
     const d = Math.max(0, Math.floor(this.depth()));

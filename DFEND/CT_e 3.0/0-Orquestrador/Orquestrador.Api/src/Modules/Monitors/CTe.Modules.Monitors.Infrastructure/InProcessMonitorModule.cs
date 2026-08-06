@@ -284,10 +284,83 @@ public sealed class InProcessMonitorModule : IMonitorModule
             threads = Array.Empty<object>(),
             recentDocuments = telemetry.RecentDocs,
             liveTrace = Array.Empty<object>(),
-            alerts = Array.Empty<object>(),
+            alerts = BuildHealthAlerts(
+                processUp,
+                executar,
+                hasSql,
+                telemetry.TempBacklog,
+                telemetry.BrokerDepth,
+                telemetry.Service?.DtcExecucao,
+                telemetry.Service?.NomServidor),
             config = configItems,
             sessionStartUtc = (DateTimeOffset?)null
         };
+    }
+
+    private static List<object> BuildHealthAlerts(
+        bool processUp,
+        int? executar,
+        bool hasSql,
+        long tempBacklog,
+        long brokerDepth,
+        DateTimeOffset? dtcExecucao,
+        string? servidor)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var list = new List<object>();
+
+        void Add(string code, string severity, string message) =>
+            list.Add(new
+            {
+                code,
+                severity,
+                message,
+                detectedAtUtc = now
+            });
+
+        if (!hasSql)
+        {
+            Add("SQL_CFG", "Alerta", "Sem connection string — filas e lotes não podem ser lidos.");
+        }
+
+        if (!processUp)
+        {
+            Add("PROC_OFF", "Atenção", "Processo parado. Use Ligar o fluxo no monitor para começar a buscar CT-e.");
+        }
+        else if (executar is 0)
+        {
+            Add("EXEC_0", "Atenção", "Processo no ar, mas Executar=0 — a fila não está consumindo trabalho.");
+        }
+
+        if (dtcExecucao is not null)
+        {
+            var age = now - dtcExecucao.Value.ToUniversalTime();
+            if (age.TotalHours > 2)
+            {
+                var host = string.IsNullOrWhiteSpace(servidor) ? "servidor" : servidor;
+                Add(
+                    "SVC_STALE",
+                    "Alerta",
+                    $"Última batida em {host} desatualizada (há {(int)age.TotalHours}h). Verifique se o serviço está vivo.");
+            }
+        }
+
+        if (tempBacklog > 0)
+        {
+            Add("TEMP_BACKLOG", "Info", $"{tempBacklog} documento(s) na temporária aguardando.");
+        }
+
+        if (brokerDepth > 0)
+        {
+            Add("FILA_BACKLOG", "Info", $"{brokerDepth} item(ns) na fila do Service Broker.");
+        }
+
+        if (list.Count == 0 && processUp)
+        {
+            Add("OK", "Info", "Sem alertas — serviço ligado e telemetria estável.");
+        }
+
+        return list;
     }
 
     /// <summary>

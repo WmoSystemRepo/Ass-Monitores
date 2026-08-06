@@ -125,7 +125,7 @@ Health: `/health` · `/health/ready` · `/api/chain/health`
 
 ## Navegação entre monitores
 
-No dashboard da cadeia (`:4220`), **clicar em um estágio** abre **in-app** o monitor rico daquele serviço:
+No **Dashboard** da cadeia (`:4220`), **clicar em um estágio** abre **in-app** o monitor rico daquele serviço:
 
 `http://localhost:4220/monitores/{id}`
 
@@ -138,10 +138,18 @@ No dashboard da cadeia (`:4220`), **clicar em um estágio** abre **in-app** o mo
 | Integrador | `integrador` | `/monitores/integrador` |
 | Carga | `carga` | `/monitores/carga` |
 
-Cada monitor reutiliza a anatomia/animações do **CT_e 2.0**, consumindo `/api/monitores/{id}/*` no Orquestrador `:5000` (lib `Frontend/libs/service-monitors`).  
+Cada monitor reutiliza a anatomia/animações do **CT_e 2.0**, com push **SignalR** (`/hubs/monitor`) e fallback REST em `/api/monitores/{id}/*` no Orquestrador `:5000` (lib `Frontend/libs/service-monitors`).  
 Link “front legado” / `FrontendUrl` (se existir) é **opcional** — a operação principal é o monitor unificado.
 
 No Ligar (DEV): paths do registry sobem engines/DevHosts em silêncio. Em Docker/Homolog/Prod: serviços já online via container/deploy.
+
+### UX recente (resumo)
+
+- Dashboard: foco em **AGORA** e profundidade de fila; medidor sobe/desce; boot visual ao Ligar
+- Receptor: textos para leigo; **Mais informações** em 4 cards; **Ver erro** com mensagem original; alertas de saúde na API
+- Confirmações via `ConfirmDialog` (shared-ui)
+
+Detalhes: [Doc/Documentacao_Orquestrador_CTe.md](Doc/Documentacao_Orquestrador_CTe.md) §8.
 
 ## Paleta
 

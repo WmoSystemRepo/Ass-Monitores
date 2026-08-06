@@ -1,7 +1,7 @@
 # Documentação — Orquestrador CT-e
 
 > Dashboard central da cadeia DFEND CT-e · registry, autenticação interna e multiambiente  
-> Atualizado: 05/08/2026 (dev portátil / one-click / `_artifacts`)
+> Atualizado: 06/08/2026 (SignalR · UX cadeia/Receptor · alertas · ConfirmDialog)
 
 ## 1. Objetivo
 
@@ -23,9 +23,11 @@ Não há estado **“pausado”** na cascata: processo no ar com filas ligadas =
 
 No dashboard (`:4220`):
 
+- Menu lateral: **Dashboard** (cadeia) e **Resgate CT-e**.
 - **Clique em um estágio** → navega **in-app** para `/monitores/{servico}` (monitor rico com anatomia/animações, paridade CT_e 2.0).
-- Dados do monitor vêm de `/api/monitores/{servico}/*` no mesmo host `:5000`.
+- Dados do monitor: **SignalR** `/hubs/monitor` (push ~1s) com **fallback REST** `/api/monitores/{servico}/*` no mesmo host `:5000`.
 - `FrontendUrl` / “front legado” é opcional; a operação principal é o Angular único.
+- Confirmações (Ligar/Desligar e “Ver erro”) usam o modal compartilhado `ConfirmDialog` — não `window.confirm`.
 
 Quem garante engines/DevHosts online antes do worker é o **Ligar as filas** (cascata) ou o **container** em Docker.
 
@@ -140,8 +142,21 @@ Arquivador em DEV: API `:5020` · UI `:4210`. Orquestrador UI: `:4220`.
 | GET | `/api/orchestrator/info` | meta + registry (`BaseUrl`, `FrontendUrl`, `Enabled`) |
 | POST | `/api/orchestrator/systems/{id}/ensure-open` | Clique no estágio: sobe/valida API+front; só abre URL se `frontendReachable` |
 | GET | `/api/chain/health` | por sistema: `online` \| `offline` \| `disabled` \| `unauthorized` |
+| WS/HTTP | `/hubs/monitor` | **SignalR** — monitores ricos: `JoinService(servico)` → eventos `snapshot` / `logsAppend` (~1s) |
+| GET | `/api/monitores/{servico}/*` | REST do monitor unificado (snapshot, logs, start/stop, …) — fallback se SignalR cair |
 | GET | `/health` | liveness |
 | GET | `/health/ready` | readiness do BFF (config OK; monitores offline **não** derrubam) |
+
+### SignalR — monitores ricos (paridade CT_e 2.0)
+
+| Item | Detalhe |
+|------|---------|
+| Hub | `/hubs/monitor` (`MonitorHub`) |
+| Cliente | `ServiceMonitorStore` → `getHubUrl()` = `{apiBaseUrl}/hubs/monitor` |
+| Entrada | `JoinService("receptor" \| "arquivador" \| …)` |
+| Push | `snapshot` (telemetria completa) e `logsAppend` (logs novos) |
+| Hosted service | `MonitorPushHostedService` — intervalo ~1s para serviços com assinantes |
+| Fallback | se o hub cair, o store volta a poll REST (~2s) e o badge de conexão indica SignalR vs REST |
 
 ### Status no snapshot (`MetricPill` / reachability)
 
@@ -225,13 +240,78 @@ Não se aplica em Homolog/Prod (process spawn desligado — use deploy/container
 | Runtime config | `public/config.json` → `{ "apiBaseUrl": "..." }` |
 | Override deploy | `window.__CTE_ORQ_API_BASE__` no `index.html` |
 | Bootstrap | `loadRuntimeApiConfig()`; UI fala com Orquestrador `:5000` |
+| Menu | **Dashboard** (`/`) · **Resgate CT-e** (`/resgate`) |
 | Clique no estágio | navega para `/monitores/{servico}` (anatomia CT_e 2.0, lib `service-monitors`) |
-| Dados do monitor | poll REST `/api/monitores/{servico}/*` |
-| Ligar as filas | garante engines online (DEV) → `service/start` (= processo + `Executar=1`) |
-| Desligar filas | `service/stop` (= `Executar=0` + parar processo), ordem inversa |
+| Dados do monitor | SignalR `/hubs/monitor` + fallback REST `/api/monitores/{servico}/*` |
+| Ligar as filas | CTA **só no header** (evita duplicata no idle) → engines (DEV) → `service/start` |
+| Desligar filas | `ConfirmDialog` → `service/stop` (= `Executar=0` + parar processo), ordem inversa |
+| Modal | `ConfirmDialogService` / `ConfirmDialogComponent` (`shared-ui`) — confirm + modo `info` (erro original) |
 
 Homolog/Prod: publicar `config.json` (ou script inline) com a URL do Orquestrador daquele ambiente — **não** embutir host no build.  
 `FrontendUrl` no registry permanece só como link legado opcional.
+
+### 8.1 Dashboard da cadeia — UX
+
+Hierarquia visual (lib `monitor-dashboard`):
+
+1. **AGORA** — serviço com trabalho ativo / telemetria “quente”
+2. **Fila** — profundidade de arquivos (`QueueMeterComponent`: chips sobem ao encher, encolhem ao drenar)
+3. **Ativo** — processo + `Executar=1`, sem fila
+4. **Parado** / ligando / desligando
+
+Componentes-chave:
+
+| Componente | Papel |
+|------------|-------|
+| `ChainAnatomyComponent` | 6 estações + idle hero + boot em cascata ao Ligar |
+| `StationCardComponent` | card clicável (badge AGORA / NA FILA / … + medidor) |
+| `QueueMeterComponent` | profundidade visual; animação `rising` / `draining` |
+| `StatusLegendComponent` | legenda Agora / Feito / Parado |
+
+Ao **Ligar as filas**, cada estação anima com atraso (`--boot-delay`) enquanto `cascadePhase === starting`.  
+CTA “Ligar” fica **apenas no header** — o idle hero só orienta o usuário (sem segundo botão).
+
+### 8.2 Monitor Receptor — UX para leigo
+
+| Tela | Rota | Comportamento |
+|------|------|----------------|
+| Painel | `/monitores/receptor` | Título/legendas em linguagem simples; caminho SEFAZ → consulta → temporária → fila → Arquivador |
+| Anatomia | (mesmo painel) | Plataformas crescem/encolhem com temp/fila; blocos empilhados; boot ao Ligar (`actionBusy`) |
+| Mais informações | `/monitores/receptor/mais-informacoes` | Grid **2×2** cabendo na viewport (sem scroll da página) |
+
+Cards de **Mais informações**:
+
+1. **O que aconteceu agora** — passos recentes (debug + banco)
+2. **Últimos eventos do banco** — sucesso/aviso/erro; em **erro**, botão **Ver erro** abre o texto original (`ConfirmDialog` mode `info` + `detail`)
+3. **Configuração e lotes** — NSU, intervalo, profundidades; lista de lotes da temporária (vazio é normal se parado / sem CT-e)
+4. **Avisos e saúde** — alertas do snapshot (ver §8.3)
+
+### 8.3 Alertas de saúde (API)
+
+`InProcessMonitorModule` **não** devolve mais `alerts = []`.  
+`BuildHealthAlerts(...)` sintetiza avisos a partir da telemetria:
+
+| Código (ex.) | Quando |
+|--------------|--------|
+| `SQL_CFG` | sem connection string |
+| `PROC_OFF` | processo parado |
+| `EXEC_0` | processo no ar com `Executar=0` |
+| `SVC_STALE` | batida (`DtcExecucao`) atrasada (>2h) |
+| `TEMP_BACKLOG` / `FILA_BACKLOG` | profundidade > 0 |
+| `OK` | serviço ligado e sem outros alertas |
+
+O card “Avisos e saúde” no Receptor consome `snapshot.alerts`. **Reinicie a API** após deploy para ver os novos alertas.
+
+### 8.4 Animações — o que existe (e o que não)
+
+Não há toggle `demoMode` / “fluxo de demonstração” no 2.0 nem no 3.0.  
+As animações de documento são a **jornada do lote** (`playLoteJourney` + chips CT-e voando + esteira), acionadas pela telemetria quando o serviço está ligado.
+
+Extras de UX recentes:
+
+- Medidor / plataforma **sobe** quando a fila enche e **diminui** quando drena
+- Cascata visual ao **Ligar** (cadeia e Receptor)
+- `prefers-reduced-motion` respeitado nos CSS (`styles.css`, `service-monitor-extras.css`)
 
 ## 9. Como subir
 
@@ -298,7 +378,7 @@ SQL worker↔Monitor = integração **transitória**.
 5. CORS restrito ao host do front  
 6. Rotação da API key no runbook  
 7. Front com URL de API do ambiente (não localhost)  
-8. Smoke: snapshot sem `unauthorized` / `offline` inesperado; cascade start/stop OK; clique no estágio abre o monitor  
+8. Smoke: snapshot sem `unauthorized` / `offline` inesperado; cascade start/stop OK; clique no estágio abre o monitor; SignalR conecta (ou REST fallback); Receptor Mais informações + alertas OK  
 
 ## 11. Estrutura do pacote
 
@@ -308,12 +388,22 @@ SQL worker↔Monitor = integração **transitória**.
   COMO-USAR.txt
   Directory.Build.props / .gitignore   # _artifacts (paths curtos; nao versionar)
   Frontend/                            # Nx cte-orquestrador :4220
+    apps/cte-orquestrador/
+      src/styles.css                   # tokens + queue-meter + reduced-motion
+      src/service-monitor-extras.css   # anatomia Receptor / plataformas / fila
+    libs/
+      monitor-dashboard/               # Dashboard cadeia (station-card, queue-meter)
+      service-monitors/                # Monitores ricos (receptor…carga)
+      shared-ui/                       # ConfirmDialog (+ severity helpers)
+      monitor-core/                    # ChainOrchestratorStore, getHubUrl()
   Orquestrador.Api/                    # BFF :5000 / Swagger :7100
+    …/Realtime/                        # MonitorHub + push ~1s
+    …/Monitors/.../InProcessMonitorModule.cs  # BuildHealthAlerts
   engines/                             # DevHosts (receptor…carga)
   libs/resgate/
-  tools/                               # fix-dev.ps1, verify-structure.ps1
+  tools/                               # fix-dev.ps1, verify-structure.ps1, start-chain-fronts.cjs
   Doc/
-    DEV_PORTATIL.md                    # one-click / paths / troca de PC
+    DEV_PORTATIL.md
     Documentacao_Orquestrador_CTe.md   # este arquivo
     ONBOARDING_MICROSERVICO.md
     Passo a passo execução Orquestrador.md
@@ -322,12 +412,24 @@ SQL worker↔Monitor = integração **transitória**.
 
 ## 12. Paleta UI
 
-Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador (âmbar).
+Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador (âmbar).  
+Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 
-## 13. Documentos relacionados
+## 13. Histórico recente (UX / realtime)
+
+| Quando | Entrega |
+|--------|---------|
+| 06/08/2026 | SignalR `/hubs/monitor` + fallback REST; layout anatomia alinhado ao 2.0 |
+| 06/08/2026 | Redesign da cadeia: AGORA > fila > `QueueMeter` / `StationCard`; idle hero; CTA Ligar só no header |
+| 06/08/2026 | Receptor: copy para leigo; Mais informações 2×2; **Ver erro** original; `BuildHealthAlerts` |
+| 06/08/2026 | Animação fila sobe/desce + boot ao Ligar (cadeia e Receptor); `ConfirmDialog` compartilhado |
+| 06/08/2026 | `start-chain-fronts.cjs` garante `npm install` antes do start |
+
+## 14. Documentos relacionados
 
 - [Dev portátil (one-click, paths, troubleshooting)](DEV_PORTATIL.md)
 - [Onboarding microserviço (plugar + Docker)](ONBOARDING_MICROSERVICO.md)
 - [Passo a passo execução](Passo%20a%20passo%20execução%20Orquestrador.md)
 - [README do pacote](../README.md)
+- [README do Frontend](../Frontend/README.md)
 - [COMO-USAR.txt](../COMO-USAR.txt)

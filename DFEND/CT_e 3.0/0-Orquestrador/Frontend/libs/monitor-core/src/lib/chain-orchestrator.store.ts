@@ -123,6 +123,18 @@ export class ChainOrchestratorStore {
       this.live.set(true);
       this.lastPushAt.set(new Date());
       this.bootError.set(null);
+    } catch (err) {
+      this.live.set(false);
+      // Não mantém erros velhos de Host POC se a API sumiu — limpa lastError visual.
+      const current = this.snapshot();
+      if (current?.systems.some((s) => !!s.lastError)) {
+        this.snapshot.set({
+          ...current,
+          systems: current.systems.map((s) => ({ ...s, lastError: null })),
+          alerts: [],
+        });
+      }
+      throw err;
     } finally {
       this.refreshInFlight = false;
     }

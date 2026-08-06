@@ -312,6 +312,10 @@ export class ChainAnatomyComponent {
     lastError?: string | null;
   }): boolean {
     const s = normalizeStatus(sys.status);
+    // Nunca mostrar ERRO se o monitor já está running (evita lastError stale na UI).
+    if (s === 'running') {
+      return false;
+    }
     return s === 'failed' || s === 'offline' || !!sys.lastError?.trim();
   }
 

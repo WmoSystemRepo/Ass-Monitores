@@ -264,7 +264,10 @@ public sealed class ChainSnapshotAggregator
             agora,
             MetricPill: string.IsNullOrWhiteSpace(pill) ? "online" : pill,
             hint,
-            status is { Success: false } ? status.Message : null,
+            // Não propaga mensagem de "Host POC" se o processo já está running.
+            effectivelyRunning
+                ? null
+                : status is { Success: false } ? status.Message : null,
             Enabled: true,
             FrontendUrl: NullIfWhiteSpace(cfg.ResolveFrontendUrl()),
             Version: cfg.Version,

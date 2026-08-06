@@ -295,7 +295,7 @@ export class IntegradorDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
-      return 'Ligue o Integrador para ver O Ciclo de Integração.';
+      return 'Ligue o Integrador para ver o pipeline interno (fila → temp → classificar → persistir → limpar).';
     }
     if (this.queuesConsuming()) {
       return `Sintetizando CT-e em tempo real — fila ${broker} · temp ${temp}`;

@@ -295,7 +295,7 @@ export class SintetizadorDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
-      return 'Ligue o Sintetizador para ver O Ciclo de Síntese.';
+      return 'Ligue o Sintetizador para ver o pipeline interno (fila → temp → classificar → persistir → limpar).';
     }
     if (this.queuesConsuming()) {
       return `Sintetizando CT-e em tempo real — fila ${broker} · temp ${temp}`;

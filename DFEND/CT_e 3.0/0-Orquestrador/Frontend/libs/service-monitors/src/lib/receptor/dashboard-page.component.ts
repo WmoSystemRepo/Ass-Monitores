@@ -292,7 +292,7 @@ export class ReceptorDashboardPageComponent {
     const lote = this.latestLote();
     const act = this.liveActivity();
     if (!this.isRunning()) {
-      return 'Ligue o Receptor para ver o fluxo SEFAZ → consulta → temporária → fila → Arquivador.';
+      return 'Ligue o Receptor para ver o pipeline interno (SEFAZ → consulta → temporária → fila → Arquivador).';
     }
     if (!stage) {
       return 'Receptor ligado — aguardando próxima consulta à SEFAZ.';

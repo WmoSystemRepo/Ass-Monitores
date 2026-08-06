@@ -19,41 +19,65 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-indigo-900/80 shadow-md"
+      class="chain-anatomy anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-indigo-900/80 shadow-md"
       [class.anatomy-poster-live]="anyRunning() || hasQueueBusy()"
       [class.anatomy-poster-busy]="hasAgora() || hasQueueBusy()"
+      [class.anatomy-poster-starting]="isStarting()"
+      [class.anatomy-poster-idle]="isIdlePoster()"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-300/90">
-            Em tempo real
+          <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
+            Cadeia de serviços CT-e
           </p>
           <h2
-            class="text-base font-semibold leading-tight text-indigo-50"
-            title="Cadeia CT-e — Serviço Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga"
+            class="text-base font-semibold leading-tight text-slate-50"
+            title="Cadeia CT-e — Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga"
           >
             Fluxo da cadeia CT-e
           </h2>
-          <p class="text-[11px] text-indigo-300/80">
-            Clique no serviço para abrir o monitor do serviço
+          <p class="text-[11px] text-slate-400">
+            Clique no serviço para abrir o monitor
           </p>
+          <ul class="anatomy-legend" aria-label="Legenda de status">
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-error"></span>
+              Erro
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-agora"></span>
+              Agora
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-queue"></span>
+              Na fila
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-running"></span>
+              Ligado
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-stopped"></span>
+              Parado
+            </li>
+          </ul>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           @if (lastLote(); as lote) {
             <div class="rounded-lg border border-indigo-800 bg-indigo-950/70 px-3 py-1.5 shadow-sm">
-              <p class="text-[9px] font-semibold uppercase tracking-wide text-violet-300">
+              <p class="text-[9px] font-semibold uppercase tracking-wide text-sky-300">
                 Último lote
               </p>
-              <p class="font-mono text-xs text-indigo-100">
+              <p class="font-mono text-xs text-slate-100">
                 NSU {{ lote.nsu ?? '—' }}
                 @if (lote.nsuFinal != null) {
                   → {{ lote.nsuFinal }}
                 }
-                <span class="text-indigo-400">
+                <span class="text-slate-400">
                   · {{ lote.qtdDocumento ?? 0 }} CT-e
                 </span>
                 @if (lote.at) {
-                  <span class="text-indigo-400"> · {{ lote.at | date: 'HH:mm:ss' }}</span>
+                  <span class="text-slate-400"> · {{ lote.at | date: 'HH:mm:ss' }}</span>
                 }
               </p>
             </div>
@@ -76,11 +100,8 @@ import {
           </div>
         </div>
       } @else {
-        <p
-          class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 rounded-md border border-indigo-800/50 bg-indigo-950/60 px-3 py-1.5 text-center text-[11px] font-medium text-indigo-300"
-          title="Aguardando atividade na cadeia"
-        >
-          Sem CT-e em trânsito — aguardando atividade na cadeia
+        <p class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 text-center text-[11px] text-slate-500">
+          Sem CT-e em trânsito
         </p>
       }
 
@@ -97,7 +118,7 @@ import {
               >
                 <span class="anatomy-live-symbol">{{ sys.symbol }}</span>
                 <div class="min-w-0 flex-1">
-                  <p class="anatomy-live-name">{{ sys.label }}</p>
+                  <p class="anatomy-live-name">{{ shortLabel(sys.label) }}</p>
                   <p class="anatomy-live-metric">{{ sys.metricPill }}</p>
                   <p class="anatomy-live-process">
                     {{
@@ -124,7 +145,7 @@ import {
             <div class="anatomy-error-row">
               <span class="anatomy-error-symbol">{{ sys.symbol }}</span>
               <div class="min-w-0 flex-1">
-                <p class="anatomy-error-name">{{ sys.label }}</p>
+                <p class="anatomy-error-name">{{ shortLabel(sys.label) }}</p>
                 <p class="anatomy-error-detail">
                   {{ sys.lastError || sys.hint || 'Falha reportada pelo monitor.' }}
                 </p>
@@ -137,7 +158,11 @@ import {
       <div class="relative mx-3 mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
         <div class="anatomy-fill-board relative flex h-full min-w-[980px] flex-col items-stretch px-2 py-2">
           <div class="anatomy-cycle-block relative z-[1] mx-auto w-full">
-            <div class="anatomy-path-line anatomy-path-line-6" aria-hidden="true"></div>
+            <div
+              class="anatomy-path-line anatomy-path-line-6"
+              [class.anatomy-path-line-active]="anyRunning() || hasQueueBusy() || isStarting()"
+              aria-hidden="true"
+            ></div>
 
             <div class="anatomy-stages anatomy-stages-6 relative z-[1] shrink-0 py-1">
               @for (sys of systems(); track sys.id; let i = $index) {
@@ -151,6 +176,8 @@ import {
                     isRunning(sys.status) && !sys.agora && !sys.hasQueueWork && !isError(sys)
                   "
                   [class.anatomy-stage-muted]="isVisuallyMuted(sys)"
+                  [class.anatomy-stage-booting]="isStarting()"
+                  [style.--boot-delay]="i * 0.12 + 's'"
                   [attr.title]="stageTitle(sys)"
                   (click)="openUnified(sys)"
                 >
@@ -181,35 +208,39 @@ import {
                       [attr.data-symbol]="sys.symbol"
                     ></div>
                   </div>
-                  <p class="anatomy-stage-title">{{ sys.label }}</p>
-                  <p class="anatomy-stage-tag">{{ statusLabel(sys.status) }}</p>
+                  <p class="anatomy-stage-title">{{ shortLabel(sys.label) }}</p>
+                  <span
+                    class="anatomy-status-chip"
+                    [class.anatomy-status-chip-running]="
+                      isRunning(sys.status) && !isError(sys)
+                    "
+                    [class.anatomy-status-chip-error]="isError(sys)"
+                    [class.anatomy-status-chip-wait]="
+                      isStartingStatus(sys.status) || isStoppingStatus(sys.status)
+                    "
+                    [class.anatomy-status-chip-stopped]="
+                      !isRunning(sys.status) &&
+                      !isError(sys) &&
+                      !isStartingStatus(sys.status) &&
+                      !isStoppingStatus(sys.status)
+                    "
+                  >
+                    {{ statusLabel(sys.status) }}
+                  </span>
                   <p
                     class="anatomy-stage-count"
                     [class.anatomy-stage-count-hot]="!!sys.hasQueueWork || sys.agora"
                     [class.anatomy-stage-count-error]="isError(sys)"
+                    [attr.title]="sys.hint || sys.processHint || ''"
                   >
                     {{ queueLabel(sys) }}
                   </p>
-                  @if (sys.processHint) {
+                  @if (sys.processHint && (sys.agora || sys.hasQueueWork)) {
                     <p class="anatomy-stage-process" [title]="sys.processHint">
                       {{ sys.processHint }}
                     </p>
                   }
-                  <p class="anatomy-stage-blurb">
-                    {{ isError(sys) ? shortError(sys) : sys.hint }}
-                  </p>
                 </button>
-                @if (sys.frontendUrl) {
-                  <button
-                    type="button"
-                    class="anatomy-stage-unified-link"
-                    [disabled]="!!store.openingSystemId()"
-                    title="Abre o front Angular legado deste monitor (ensure-open)"
-                    (click)="openLegacyFront(sys)"
-                  >
-                    Abrir front legado →
-                  </button>
-                }
                 @if (i < systems().length - 1) {
                   <div
                     class="anatomy-step-arrow"
@@ -229,7 +260,7 @@ import {
               </div>
               <div>
                 <span class="anatomy-summary-label">Com fila</span>
-                <span class="anatomy-summary-value">{{ busySystems().length }}</span>
+                <span class="anatomy-summary-value">{{ queueBusyCount() }}</span>
               </div>
               <div>
                 <span class="anatomy-summary-label">Arquivos na cadeia</span>
@@ -238,12 +269,6 @@ import {
               <div>
                 <span class="anatomy-summary-label">Fase</span>
                 <span class="anatomy-summary-value">{{ phaseLabel() }}</span>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="anatomy-summary-label">Cascata</span>
-                <span class="anatomy-summary-value truncate">
-                  {{ cascadeMessage() || '—' }}
-                </span>
               </div>
             </div>
           </div>
@@ -261,26 +286,44 @@ export class ChainAnatomyComponent {
   readonly beltMoving = this.store.beltMoving;
   readonly runningCount = this.store.runningCount;
   readonly anyRunning = this.store.anyRunning;
-  readonly cascadeMessage = this.store.cascadeMessage;
 
   readonly hasAgora = computed(() => this.systems().some((s) => s.agora));
   readonly hasQueueBusy = computed(() =>
     this.systems().some((s) => s.agora || !!s.hasQueueWork)
   );
 
+  readonly isStarting = computed(
+    () => normalizePhase(this.store.cascadePhase()) === 'starting'
+  );
+
+  readonly isIdlePoster = computed(() => {
+    const phase = normalizePhase(this.store.cascadePhase());
+    return (
+      phase === 'idle' &&
+      !this.anyRunning() &&
+      !this.hasQueueBusy() &&
+      this.errorSystems().length === 0
+    );
+  });
+
   readonly busySystems = computed(() =>
-    this.systems().filter((s) => s.agora || !!s.hasQueueWork || this.isError(s))
+    this.systems().filter(
+      (s) => (s.agora || !!s.hasQueueWork) && !this.isError(s)
+    )
   );
 
   readonly errorSystems = computed(() => this.systems().filter((s) => this.isError(s)));
+
+  readonly queueBusyCount = computed(
+    () => this.systems().filter((s) => s.agora || !!s.hasQueueWork).length
+  );
 
   readonly totalQueueFiles = computed(() =>
     this.systems().reduce((sum, s) => sum + (Number(s.queueDepth) || 0), 0)
   );
 
   readonly phaseLabel = computed(() => {
-    const p = normalizePhase(this.store.cascadePhase());
-    switch (p) {
+    switch (normalizePhase(this.store.cascadePhase())) {
       case 'starting':
         return 'Ligando';
       case 'stopping':
@@ -298,8 +341,20 @@ export class ChainAnatomyComponent {
     return Array.from({ length: n }, (_, i) => i + 1);
   });
 
+  shortLabel(label: string): string {
+    return label.replace(/^Serviço\s+/i, '').trim() || label;
+  }
+
   isRunning(status: string | number): boolean {
     return normalizeStatus(status) === 'running';
+  }
+
+  isStartingStatus(status: string | number): boolean {
+    return normalizeStatus(status) === 'starting';
+  }
+
+  isStoppingStatus(status: string | number): boolean {
+    return normalizeStatus(status) === 'stopping';
   }
 
   isMuted(status: string | number): boolean {
@@ -312,14 +367,12 @@ export class ChainAnatomyComponent {
     lastError?: string | null;
   }): boolean {
     const s = normalizeStatus(sys.status);
-    // Nunca mostrar ERRO se o monitor já está running (evita lastError stale na UI).
     if (s === 'running') {
       return false;
     }
     return s === 'failed' || s === 'offline' || !!sys.lastError?.trim();
   }
 
-  /** Com fila ativa na cadeia, esmaece quem não tem trabalho. */
   isVisuallyMuted(sys: {
     status: string | number;
     agora: boolean;
@@ -327,6 +380,9 @@ export class ChainAnatomyComponent {
     lastError?: string | null;
   }): boolean {
     if (sys.agora || sys.hasQueueWork || this.isError(sys)) {
+      return false;
+    }
+    if (this.isStarting()) {
       return false;
     }
     if (this.hasQueueBusy() || this.errorSystems().length > 0) {
@@ -347,15 +403,16 @@ export class ChainAnatomyComponent {
     return sys.metricPill;
   }
 
-  shortError(sys: { lastError?: string | null; hint: string }): string {
-    const msg = (sys.lastError || sys.hint || 'Erro no serviço').trim();
-    return msg.length > 90 ? `${msg.slice(0, 87)}…` : msg;
-  }
-
   arrowHot(
-    sys: { agora: boolean; hasQueueWork?: boolean; lastError?: string | null; status: string | number },
+    sys: {
+      agora: boolean;
+      hasQueueWork?: boolean;
+      lastError?: string | null;
+      status: string | number;
+    },
     index: number
   ): boolean {
+    if (this.isStarting()) return true;
     const next = this.systems()[index + 1];
     const left = sys.agora || !!sys.hasQueueWork || this.isError(sys);
     const right =
@@ -377,19 +434,20 @@ export class ChainAnatomyComponent {
     if (this.store.openingSystemId() === sys.id) {
       return 'Preparando API + Angular…';
     }
+    const parts = [this.shortLabel(sys.label)];
     if (this.isError(sys)) {
-      return `${sys.label}: ${sys.lastError || 'erro'}`;
+      parts.push(sys.lastError || 'erro');
+    } else if (sys.processHint) {
+      parts.push(sys.processHint);
+    } else if (sys.agora) {
+      parts.push('processando agora');
+    } else if (sys.hasQueueWork) {
+      parts.push('há itens na fila');
+    } else if (sys.hint) {
+      parts.push(sys.hint);
     }
-    if (sys.processHint) {
-      return sys.processHint;
-    }
-    if (sys.agora) {
-      return `${sys.label}: processando agora`;
-    }
-    if (sys.hasQueueWork) {
-      return `${sys.label}: há itens na fila`;
-    }
-    return `Abrir monitor do servi�o — ${sys.label}`;
+    parts.push('Clique para abrir o monitor');
+    return parts.join(' — ');
   }
 
   statusLabel(status: string | number): string {
@@ -415,28 +473,7 @@ export class ChainAnatomyComponent {
     }
   }
 
-  /** Ação primária: navega em-app para o monitor do servi�o (`/monitores/{id}`). */
   openUnified(sys: { id: string }): void {
     void this.router.navigate(['/monitores', sys.id]);
-  }
-
-  /** Ação secundária opcional: sobe/abre o front Angular legado deste monitor. */
-  openLegacyFront(sys: {
-    id: string;
-    frontendUrl?: string | null;
-    label: string;
-  }): void {
-    if (!sys.frontendUrl?.trim()) {
-      return;
-    }
-    const pending = window.open('about:blank', '_blank');
-    if (!pending) {
-      this.store.actionMessage.set(
-        `Popup bloqueado — permita popups para este site ou abra: ${sys.frontendUrl}`
-      );
-      return;
-    }
-    pending.opener = null;
-    void this.store.openSystemUi(sys.id, pending, sys.frontendUrl.trim());
   }
 }

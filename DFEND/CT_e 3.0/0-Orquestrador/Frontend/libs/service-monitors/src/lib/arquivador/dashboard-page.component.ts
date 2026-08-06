@@ -298,7 +298,7 @@ export class ArquivadorDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
-      return 'Ligue o Arquivador para ver O Ciclo de Arquivamento.';
+      return 'Ligue o Arquivador para ver o pipeline interno (fila → temp → sintetizador → analisador → integrador).';
     }
     if (this.queuesConsuming()) {
       return `Arquivando CT-e em tempo real — fila ${broker} · temp ${temp}`;

@@ -295,13 +295,13 @@ export class CargaDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
-      return 'Ligue o Carga para ver Download pontual · Carga.';
+      return 'Ligue a Carga para ver o pipeline interno (fila → chave → WS → sintético → limpar).';
     }
     if (this.queuesConsuming()) {
       return `Consultando CT-e por chave em tempo real — fila ${broker} · temp ${temp}`;
     }
     if (!stage) {
-      return 'Carga ligado — aguardando próximDownload pontual · Carga.';
+      return 'Carga ligada — aguardando próximo download pontual.';
     }
 
     const nsuBit =

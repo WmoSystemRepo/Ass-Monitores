@@ -35,17 +35,17 @@ export interface FlyingPacket {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-600/60 shadow-md"
+      class="pipeline-anatomy anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-600/60 shadow-md"
       [class.anatomy-poster-live]="running()"
       [class.anatomy-poster-busy]="!!activeStage()"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <div class="min-w-0">
           <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-300/90">
-            O Ciclo de Síntese
+            Pipeline interno do Sintetizador
           </p>
           <h2
-            class="text-base font-semibold leading-tight text-zinc-100"
+            class="text-base font-semibold leading-tight text-slate-50"
             title="DFEND_CTe_Sintetizador — ciclo fila → temp → classificar → persistir → limpar"
           >
             Fluxo do Sintetizador CT-e
@@ -53,6 +53,20 @@ export interface FlyingPacket {
           <p class="text-[11px] text-zinc-400">
             {{ caption() }}
           </p>
+          <ul class="anatomy-legend" aria-label="Legenda de status">
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-agora"></span>
+              Agora
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-running"></span>
+              Feito
+            </li>
+            <li class="anatomy-legend-item">
+              <span class="anatomy-legend-swatch anatomy-legend-stopped"></span>
+              Parado
+            </li>
+          </ul>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           @if (latest(); as lote) {
@@ -92,10 +106,10 @@ export interface FlyingPacket {
         </div>
       } @else {
         <p
-          class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 rounded-md border border-zinc-600/40 bg-zinc-900/50 px-3 py-1.5 text-center text-[11px] font-medium text-zinc-300"
+          class="anatomy-belt-idle-hint mx-4 mt-2 shrink-0 text-center text-[11px] text-slate-500"
           title="Aguardando próximo ciclo de síntese"
         >
-          Sem NSU em trânsito — aguardando próximo ciclo
+          Sem CT-e em trânsito
         </p>
       }
 

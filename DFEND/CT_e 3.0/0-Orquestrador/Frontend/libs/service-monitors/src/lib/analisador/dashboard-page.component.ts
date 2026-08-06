@@ -37,7 +37,7 @@ import {
             Monitor do Analisador CT-e
           </h1>
           <p class="text-[11px] text-zinc-400">
-            Acompanhe o ciclo de síntese em tempo real.
+            Acompanhe o ciclo de análise em tempo real.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
@@ -295,13 +295,13 @@ export class AnalisadorDashboardPageComponent {
     const broker = this.queues()?.serviceBrokerDepth ?? 0;
     const temp = this.queues()?.tempBacklog ?? 0;
     if (!this.isRunning()) {
-      return 'Ligue o Analisador para ver O Ciclo de Síntese.';
+      return 'Ligue o Analisador para ver o pipeline interno (fila → temp → classificar → detalhar → limpar).';
     }
     if (this.queuesConsuming()) {
-      return `Sintetizando CT-e em tempo real — fila ${broker} · temp ${temp}`;
+      return `Analisando CT-e em tempo real — fila ${broker} · temp ${temp}`;
     }
     if (!stage) {
-      return 'Analisador ligado — aguardando próximo ciclo de síntese.';
+      return 'Analisador ligado — aguardando próximo ciclo de análise.';
     }
 
     const nsuBit =
@@ -333,7 +333,7 @@ export class AnalisadorDashboardPageComponent {
     }
   });
 
-  /** Contagem regressiva até o próximo ciclo de síntese. */
+  /** Contagem regressiva até o próximo ciclo de análise. */
   readonly cycleCountdown = computed(() => {
     if (!this.isRunning()) return null;
     const now = this.nowMs();
@@ -356,7 +356,7 @@ export class AnalisadorDashboardPageComponent {
         caption: 'próx. ciclo',
         display: this.formatMmSs(intervalo),
         secondsLeft: intervalo,
-        hint: `Próximo ciclo de síntese · a cada ${intervalo}s`,
+        hint: `Próximo ciclo de análise · a cada ${intervalo}s`,
       };
     }
 
@@ -379,12 +379,12 @@ export class AnalisadorDashboardPageComponent {
       caption: 'próx. ciclo',
       display: this.formatMmSs(left),
       secondsLeft: left,
-      hint: `Próximo ciclo de síntese em ${left}s (a cada ${intervalo}s)`,
+      hint: `Próximo ciclo de análise em ${left}s (a cada ${intervalo}s)`,
     };
   });
 
   /**
-   * Cronômetro de movimentação: sobe desde o último lote até nova síntese.
+   * Cronômetro de movimentação: sobe desde o último lote até nova análise.
    * Zera quando o “Último lote” muda.
    */
   readonly fileWaitChrono = computed(() => {
@@ -394,7 +394,7 @@ export class AnalisadorDashboardPageComponent {
     const loteAt = lote?.dtcAtualizacao ? new Date(lote.dtcAtualizacao).getTime() : NaN;
     const hasLote = Number.isFinite(loteAt) && loteAt > 0;
 
-    // Filas caindo = síntese em andamento (não “sem síntese”).
+    // Filas caindo = análise em andamento (não “sem análise”).
     if (this.queuesConsuming() || (this.visualStage() && hasLote && now - loteAt < 20_000)) {
       const broker = this.queues()?.serviceBrokerDepth ?? 0;
       const temp = this.queues()?.tempBacklog ?? 0;
@@ -411,10 +411,10 @@ export class AnalisadorDashboardPageComponent {
 
     return {
       mode: (elapsed === 0 ? 'fresh' : 'waiting') as 'fresh' | 'waiting',
-      caption: 'sem síntese',
+      caption: 'sem análise',
       display: this.formatElapsedClock(elapsed),
       hint: hasLote
-        ? `Há ${elapsed}s sem síntese · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`
+        ? `Há ${elapsed}s sem análise · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`
         : `Aguardando o primeiro ciclo · ${elapsed}s`,
     };
   });
@@ -775,7 +775,7 @@ export class AnalisadorDashboardPageComponent {
   }
 
   confirmStop(): void {
-    if (confirm('Desligar o Analisador CT-e? Ele para o ciclo de síntese.')) {
+    if (confirm('Desligar o Analisador CT-e? Ele para o ciclo de análise.')) {
       void this.store.stopService();
     }
   }

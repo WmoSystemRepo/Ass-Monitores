@@ -1,0 +1,23 @@
+---
+description: Mensagens de commit sempre em português (regra universal)
+alwaysApply: true
+---
+
+# Commits em português
+
+Ao criar commits com git, **sempre** escreva a mensagem em **português**.
+
+- Título curto (1 linha) focando no *porquê* / efeito
+- Corpo opcional (1–2 frases) se precisar de contexto
+- Pode usar prefixo convencional (`fix`, `feat`, `chore`, `docs`) + escopo, mas a descrição deve estar em português
+- Não use inglês na mensagem de commit, salvo nomes próprios de API/arquivo inevitáveis
+
+Exemplos:
+
+```text
+fix(orquestrador): acelerar carga do dashboard e limpar timeout preso
+
+feat(resgate): permitir filtrar lotes por período
+
+chore(frontend): reinstalar nx após pacote corrompido
+```

@@ -381,14 +381,28 @@ public sealed class ChainSnapshotAggregator
     {
         if (status?.Status is { } s)
         {
-            if (s.Contains("start", StringComparison.OrdinalIgnoreCase) &&
-                !s.Contains("Running", StringComparison.OrdinalIgnoreCase))
+            // Ordem importa: "Stopped" contém "stop" — não tratar como Stopping.
+            if (s.Equals("Stopped", StringComparison.OrdinalIgnoreCase) ||
+                s.Equals("NotFound", StringComparison.OrdinalIgnoreCase))
+            {
+                return effectivelyRunning ? SystemRuntimeStatus.Running : SystemRuntimeStatus.Off;
+            }
+
+            if (s.Contains("Running", StringComparison.OrdinalIgnoreCase) ||
+                s.Contains("ligado", StringComparison.OrdinalIgnoreCase))
+            {
+                return SystemRuntimeStatus.Running;
+            }
+
+            if (s.Contains("StartPending", StringComparison.OrdinalIgnoreCase) ||
+                (s.Contains("start", StringComparison.OrdinalIgnoreCase) &&
+                 !s.Contains("stop", StringComparison.OrdinalIgnoreCase)))
             {
                 return SystemRuntimeStatus.Starting;
             }
 
-            if (s.Contains("stop", StringComparison.OrdinalIgnoreCase) &&
-                !s.Contains("Running", StringComparison.OrdinalIgnoreCase))
+            if (s.Contains("StopPending", StringComparison.OrdinalIgnoreCase) ||
+                s.Equals("Stopping", StringComparison.OrdinalIgnoreCase))
             {
                 return SystemRuntimeStatus.Stopping;
             }

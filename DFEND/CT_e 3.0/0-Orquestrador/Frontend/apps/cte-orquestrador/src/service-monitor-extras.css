@@ -49,6 +49,9 @@
 
 .cycle-chrono-busy .cycle-chrono-digits {
   color: #fde68a;
+  min-width: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   animation: chrono-blink 1s steps(1) infinite;
 }
 
@@ -83,6 +86,9 @@
 
 .cycle-chrono-found .cycle-chrono-digits {
   color: #6ee7b7;
+  min-width: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   animation: chrono-blink 0.7s steps(1) infinite;
 }
 
@@ -511,6 +517,9 @@
 
 .cycle-chrono-busy .cycle-chrono-digits {
   color: #fde68a;
+  min-width: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   animation: chrono-blink 1s steps(1) infinite;
 }
 
@@ -544,6 +553,9 @@
 
 .cycle-chrono-found .cycle-chrono-digits {
   color: #6ee7b7;
+  min-width: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   animation: chrono-blink 0.7s steps(1) infinite;
 }
 
@@ -994,3 +1006,74 @@
 }
 
 
+
+/* —— Status hero + empty state (Receptor UX) —— */
+.status-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.4rem;
+  border: 1px solid #475569;
+  background: #0f172a;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.status-hero-label {
+  color: #f1f5f9;
+}
+
+.status-hero-detail {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.status-hero-detail::before {
+  content: '·';
+  margin-right: 0.35rem;
+  color: #64748b;
+}
+
+.status-hero-ok {
+  border-color: rgba(52, 211, 153, 0.55);
+  background: rgba(6, 78, 59, 0.45);
+}
+
+.status-hero-ok .status-hero-label {
+  color: #a7f3d0;
+}
+
+.status-hero-wait {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(12, 74, 110, 0.4);
+}
+
+.status-hero-wait .status-hero-label {
+  color: #bae6fd;
+}
+
+.status-hero-warn {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(120, 53, 15, 0.35);
+}
+
+.status-hero-warn .status-hero-label {
+  color: #fde68a;
+}
+
+.status-hero-off {
+  border-color: #475569;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.status-hero-off .status-hero-label {
+  color: #cbd5e1;
+}
+
+.receptor-empty {
+  min-height: 12rem;
+}

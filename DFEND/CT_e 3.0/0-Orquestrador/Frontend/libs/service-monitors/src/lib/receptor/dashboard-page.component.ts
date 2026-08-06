@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { TableHealthCardsComponent } from '../table-health-cards.component';
 import {
@@ -15,7 +16,6 @@ import {
   formatHeartbeatAge,
   friendlyActionMessage,
   monitorConnectionLabel,
-  receptorStatusLabel,
 } from '@orquestrador/shared-utils';
 import { resolvePipelineActivity, type PipelineStage } from './pipeline-activity';
 import {
@@ -27,18 +27,39 @@ import {
 @Component({
   selector: 'lib-receptor-dashboard-page',
   standalone: true,
-  imports: [DatePipe, ReceptorAnatomyFlowComponent, TableHealthCardsComponent],
+  imports: [DatePipe, RouterLink, ReceptorAnatomyFlowComponent, TableHealthCardsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="dashboard-fit flex h-[calc(100vh-3rem)] max-h-[calc(100vh-3rem)] flex-col gap-2 overflow-hidden">
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <div class="min-w-0">
-          <h1 class="text-base font-semibold leading-tight text-slate-50">
-            Monitor do Receptor CT-e
-          </h1>
-          <p class="text-[11px] text-slate-400">
-            Acompanhe se o sistema está recebendo documentos agora.
-          </p>
+        <div class="min-w-0 flex flex-wrap items-center gap-2.5">
+          <div class="min-w-0">
+            <h1 class="text-base font-semibold leading-tight text-slate-50">
+              Receptor CT-e
+            </h1>
+            <p class="text-[11px] text-slate-400">
+              Está recebendo documentos agora?
+            </p>
+          </div>
+          @if (heroStatus(); as hero) {
+            <div
+              class="status-hero"
+              [class.status-hero-ok]="hero.tone === 'ok'"
+              [class.status-hero-wait]="hero.tone === 'wait'"
+              [class.status-hero-warn]="hero.tone === 'warn'"
+              [class.status-hero-off]="hero.tone === 'off'"
+              [attr.title]="hero.hint"
+              role="status"
+            >
+              @if (hero.tone === 'ok') {
+                <span class="live-dot"></span>
+              }
+              <span class="status-hero-label">{{ hero.label }}</span>
+              @if (hero.detail) {
+                <span class="status-hero-detail">{{ hero.detail }}</span>
+              }
+            </div>
+          }
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
           <span
@@ -72,43 +93,13 @@ import {
           <button
             type="button"
             class="rounded border border-rose-500/60 px-2.5 py-1.5 text-xs text-rose-300 transition hover:bg-rose-950/40 disabled:opacity-40"
-            [disabled]="store.actionBusy()"
+            [disabled]="store.actionBusy() || !processUp()"
             (click)="confirmStop()"
           >
             Desligar
           </button>
         </div>
       </header>
-
-      @if (isRunning()) {
-        <div
-          class="pulse-banner flex shrink-0 items-center justify-end gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/30 px-3 py-1"
-        >
-          <div class="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-            @if (cycleCountdown(); as clock) {
-              <div
-                class="cycle-chrono shrink-0"
-                [class.cycle-chrono-busy]="clock.mode === 'busy'"
-                [class.cycle-chrono-zero]="clock.mode === 'zero'"
-                [attr.title]="clock.hint"
-              >
-                <span class="cycle-chrono-label">{{ clock.caption }}</span>
-                <span class="cycle-chrono-digits">{{ clock.display }}</span>
-              </div>
-            }
-            @if (fileWaitChrono(); as wait) {
-              <div
-                class="cycle-chrono cycle-chrono-wait shrink-0"
-                [class.cycle-chrono-found]="wait.mode === 'found'"
-                [attr.title]="wait.hint"
-              >
-                <span class="cycle-chrono-label">{{ wait.caption }}</span>
-                <span class="cycle-chrono-digits">{{ wait.display }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
 
       @if (store.bootError(); as err) {
         <div class="shrink-0 rounded border border-rose-500/40 bg-rose-950/40 px-3 py-1 text-xs text-rose-200">
@@ -133,80 +124,134 @@ import {
           @if (processUp()) {
             <span class="font-medium"> Processo no ar; trabalho sem telemetria completa.</span>
           }
+          <button
+            type="button"
+            class="ml-2 rounded border border-amber-400/50 px-2 py-0.5 text-[10px] font-medium text-amber-50 transition hover:bg-amber-900/50 disabled:opacity-40"
+            [disabled]="store.actionBusy()"
+            (click)="store.startService()"
+          >
+            Reiniciar Receptor
+          </button>
         </div>
       }
 
-      <div
-        class="health-strip flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-slate-700/80 bg-slate-900/50 px-3 py-1.5 text-[11px]"
-        [class.health-strip-live]="isRunning()"
-      >
-        <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-slate-500">Processo</span>
-          <span
-            class="font-medium"
-            [class.text-lime-300]="processUp()"
-            [class.text-slate-100]="!processUp()"
-          >
-            {{ processUp() ? 'No ar' : 'Parado' }}
-          </span>
-        </span>
-        <span class="hidden text-slate-700 sm:inline" aria-hidden="true">·</span>
-        <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-slate-500">Recepção</span>
-          <span
-            class="font-medium"
-            [class.text-emerald-300]="isRunning()"
-            [class.text-amber-300]="processUp() && !isRunning()"
-            [class.text-slate-300]="!processUp()"
-          >
-            {{ workLabel() }}
-          </span>
-        </span>
-        <span class="hidden text-slate-700 sm:inline" aria-hidden="true">·</span>
-        <span class="inline-flex items-baseline gap-1.5">
-          <span class="text-slate-500">Banco</span>
-          <span class="font-medium text-slate-100">{{ healthLabel() }}</span>
-        </span>
-        <span class="hidden text-slate-700 sm:inline" aria-hidden="true">·</span>
-        <span
-          class="inline-flex min-w-0 items-baseline gap-1.5"
-          [attr.title]="
-            heartbeat().stale
-              ? 'Última batida no banco (dtc_execucao) antiga — SVC_STALE conhecido na POC'
-              : 'Última batida no banco'
-          "
+      @if (isRunning()) {
+        <div
+          class="cycle-bar pulse-banner flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md border border-emerald-500/30 bg-emerald-950/30 px-3 py-1.5"
         >
-          <span class="text-slate-500">Servidor</span>
-          <span
-            class="truncate font-medium"
-            [class.text-amber-300]="heartbeat().stale"
-            [class.text-slate-100]="!heartbeat().stale"
-          >
-            {{ service()?.nomServidor || '—' }}
-            <span
-              class="font-normal"
-              [class.text-amber-200]="heartbeat().stale"
-              [class.text-slate-400]="!heartbeat().stale"
+          <div class="flex min-w-0 flex-wrap items-center gap-1.5">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80"
+              >Ciclo SEFAZ</span
             >
-              · {{ heartbeat().text }}
+            @if (cycleCountdown(); as clock) {
+              <div
+                class="cycle-chrono shrink-0"
+                [class.cycle-chrono-busy]="clock.mode === 'busy'"
+                [class.cycle-chrono-zero]="clock.mode === 'zero'"
+                [attr.title]="clock.hint"
+              >
+                <span class="cycle-chrono-label">{{ clock.caption }}</span>
+                <span class="cycle-chrono-digits">{{ clock.display }}</span>
+              </div>
+            }
+            @if (fileWaitChrono(); as wait) {
+              <div
+                class="cycle-chrono cycle-chrono-wait shrink-0"
+                [class.cycle-chrono-found]="wait.mode === 'found'"
+                [attr.title]="wait.hint"
+              >
+                <span class="cycle-chrono-label">{{ wait.caption }}</span>
+                <span class="cycle-chrono-digits">{{ wait.display }}</span>
+              </div>
+            }
+          </div>
+          <div
+            class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-400"
+            [attr.title]="
+              heartbeat().stale
+                ? 'Última batida no banco (dtc_execucao) antiga — SVC_STALE conhecido na POC'
+                : 'Saúde auxiliar'
+            "
+          >
+            <span>
+              Banco
+              <span class="font-medium text-slate-200">{{ healthLabel() }}</span>
             </span>
+            <span class="truncate">
+              {{ service()?.nomServidor || '—' }}
+              <span [class.text-amber-200]="heartbeat().stale">· {{ heartbeat().text }}</span>
+            </span>
+          </div>
+        </div>
+      } @else if (processUp()) {
+        <div
+          class="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-md border border-amber-500/35 bg-amber-950/25 px-3 py-1.5 text-[11px] text-amber-100"
+        >
+          <span>
+            @if (isLimitedTelemetry()) {
+              Processo no ar — telemetria incompleta. Reinicie para tentar ler filas/Executar.
+            } @else {
+              Recepção pausada (Executar≠1). Ative para voltar a consultar a SEFAZ.
+            }
           </span>
-        </span>
-      </div>
+          <button
+            type="button"
+            class="rounded bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-emerald-500 disabled:opacity-40"
+            [disabled]="store.actionBusy()"
+            (click)="store.startService()"
+          >
+            {{ primaryActionLabel() }}
+          </button>
+        </div>
+      }
 
-      @if (store.tableHealth().length) {
+      @if (store.tableHealth().length && isRunning()) {
         <lib-table-health-cards class="block shrink-0" [items]="store.tableHealth()" />
       }
 
       <div class="min-h-0 flex-1 overflow-hidden">
-        <lib-receptor-anatomy-flow
-          class="block h-full"
-          [running]="isRunning()"
-          [activeStage]="visualStage()"
-          [caption]="flowCaption()"
-          [latest]="latestLote()"
-          [packets]="flyingPackets()"
-        />
+        @if (!processUp()) {
+          <div class="receptor-empty flex h-full flex-col items-center justify-center gap-4 rounded-xl border border-slate-600/60 bg-slate-950/40 px-6 text-center">
+            <div class="max-w-md space-y-2">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
+                Pipeline do Receptor
+              </p>
+              <h2 class="text-lg font-semibold text-slate-50">Receptor parado</h2>
+              <p class="text-sm text-slate-400">
+                Ligue para buscar CT-e na SEFAZ e acompanhar o fluxo:
+                consulta → temporária → fila → Arquivador.
+              </p>
+              <p class="font-mono text-[11px] text-slate-500">
+                SEFAZ → Consulta → Temporária → Fila → Arquivador
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                class="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-40"
+                [disabled]="store.actionBusy()"
+                (click)="store.startService()"
+              >
+                {{ primaryActionLabel() }}
+              </button>
+              <a
+                routerLink="/monitores/receptor/mais-informacoes"
+                class="rounded border border-slate-600 px-3 py-2 text-xs font-medium text-sky-300 hover:bg-slate-800"
+              >
+                Mais informações →
+              </a>
+            </div>
+          </div>
+        } @else {
+          <lib-receptor-anatomy-flow
+            class="block h-full"
+            [running]="isRunning()"
+            [activeStage]="visualStage()"
+            [caption]="flowCaption()"
+            [latest]="latestLote()"
+            [packets]="flyingPackets()"
+          />
+        }
       </div>
     </section>
   `,
@@ -240,10 +285,6 @@ export class ReceptorDashboardPageComponent {
 
   readonly connectionLabel = computed(() => monitorConnectionLabel(this.store.live()));
 
-  readonly statusLabel = computed(() =>
-    receptorStatusLabel(this.service()?.scmStatus, this.service()?.executar)
-  );
-
   readonly processUp = computed(() => !!this.service()?.isRunning);
 
   readonly isLimitedTelemetry = computed(
@@ -255,11 +296,46 @@ export class ReceptorDashboardPageComponent {
     return !!s?.isRunning && s.executar === 1;
   });
 
-  readonly workLabel = computed(() => {
-    if (this.isRunning()) return 'Ativa';
-    if (this.processUp() && this.isLimitedTelemetry()) return 'Sem telemetria';
-    if (this.processUp()) return 'Pausada';
-    return 'Parada';
+  /** Status único legível em 2s — substitui Processo/Recepção fragmentados. */
+  readonly heroStatus = computed(() => {
+    if (this.processUp() && this.isLimitedTelemetry() && !this.isRunning()) {
+      return {
+        tone: 'warn' as const,
+        label: 'Telemetria limitada',
+        detail: 'processo no ar',
+        hint: 'DevHost sobe o processo, mas filas/Executar ainda não vêm do banco',
+      };
+    }
+    if (this.isRunning()) {
+      if (this.visualStage()) {
+        return {
+          tone: 'ok' as const,
+          label: 'Recebendo',
+          detail: this.stageShortLabel(this.visualStage()),
+          hint: this.flowCaption(),
+        };
+      }
+      return {
+        tone: 'wait' as const,
+        label: 'Aguardando ciclo',
+        detail: null as string | null,
+        hint: 'Receptor ligado — aguardando próxima consulta à SEFAZ',
+      };
+    }
+    if (this.processUp()) {
+      return {
+        tone: 'warn' as const,
+        label: 'Pausado',
+        detail: 'recepção off',
+        hint: 'Processo no ar, mas Executar≠1 — ative a recepção',
+      };
+    }
+    return {
+      tone: 'off' as const,
+      label: 'Parado',
+      detail: null as string | null,
+      hint: 'Receptor desligado — não busca novos CT-e',
+    };
   });
 
   readonly primaryActionLabel = computed(() => {
@@ -380,7 +456,7 @@ export class ReceptorDashboardPageComponent {
       return {
         mode: 'busy' as const,
         caption: 'próxima consulta',
-        display: '--:--',
+        display: 'em andamento',
         secondsLeft: 0,
         hint: `Consulta em andamento agora · intervalo configurado ${intervalo}s`,
       };
@@ -434,8 +510,8 @@ export class ReceptorDashboardPageComponent {
     if (this.visualStage() && hasLote && now - loteAt < 20_000) {
       return {
         mode: 'found' as const,
-        caption: 'achou CT-e',
-        display: '00:00',
+        caption: 'CT-e novo',
+        display: 'agora',
         hint: hasLote
           ? `Lote novo (NSU ${lote?.nsu}) — espera por arquivo reinicia`
           : 'CT-e em movimentação no fluxo',
@@ -447,7 +523,7 @@ export class ReceptorDashboardPageComponent {
 
     return {
       mode: (elapsed === 0 ? 'fresh' : 'waiting') as 'fresh' | 'waiting',
-      caption: 'sem CT-e novo',
+      caption: 'sem documento',
       display: this.formatElapsedClock(elapsed),
       hint: hasLote
         ? `Há ${elapsed}s sem CT-e novo · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`
@@ -550,6 +626,23 @@ export class ReceptorDashboardPageComponent {
       this.lastTemp = temp;
       this.lastBroker = broker;
     });
+  }
+
+  private stageShortLabel(stage: AnatomyStage | null): string | null {
+    switch (stage) {
+      case 'sefaz':
+        return 'SEFAZ';
+      case 'consulta':
+        return 'consulta';
+      case 'temp':
+        return 'temporária';
+      case 'broker':
+        return 'fila';
+      case 'arquivador':
+        return 'Arquivador';
+      default:
+        return null;
+    }
   }
 
   private formatMmSs(totalSec: number): string {

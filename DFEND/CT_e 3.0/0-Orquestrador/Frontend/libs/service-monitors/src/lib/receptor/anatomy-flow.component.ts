@@ -140,14 +140,13 @@ export interface FlyingPacket {
                     class="anatomy-platform"
                     [class.anatomy-platform-active]="activeStage() === step.id"
                     [class.anatomy-platform-done]="isDone(step.id)"
-                    [attr.title]="step.techHint"
+                    [attr.title]="step.blurb + ' · ' + step.techHint"
                   >
                     <div class="anatomy-iso" [attr.data-icon]="step.id"></div>
                   </div>
                   <p class="anatomy-stage-title">{{ step.title }}</p>
                   <p class="anatomy-stage-tag">{{ step.tag }}</p>
                   <p class="anatomy-stage-count">{{ count(step.id) }}</p>
-                  <p class="anatomy-stage-blurb">{{ step.blurb }}</p>
                 </div>
                 @if (i < steps.length - 1) {
                   <div
@@ -286,15 +285,16 @@ export class ReceptorAnatomyFlowComponent implements OnDestroy {
 
   count(id: AnatomyStage): string {
     this.nowMs();
+    const active = this.activeStage() === id;
     switch (id) {
       case 'sefaz':
-        return this.store.global()?.mainNsu
-          ? `Último NSU ${this.store.global()?.mainNsu}`
-          : 'origem SEFAZ';
+        return active ? 'consultando origem' : 'origem';
       case 'consulta':
-        return this.store.global()?.mainNsu
-          ? `NSU ${this.store.global()?.mainNsu}`
-          : 'consultando…';
+        return active
+          ? this.store.global()?.mainNsu
+            ? `NSU ${this.store.global()?.mainNsu}`
+            : 'consultando…'
+          : 'por NSU';
       case 'temp': {
         const n = this.store.queues()?.tempBacklog ?? 0;
         return n > 0 ? `${n} aguardando` : '0 aguardando';
@@ -304,7 +304,7 @@ export class ReceptorAnatomyFlowComponent implements OnDestroy {
         return n > 0 ? `${n} na fila` : '0 na fila';
       }
       case 'arquivador':
-        return 'Arquivador';
+        return active ? 'recebendo lote' : 'destino';
     }
   }
 

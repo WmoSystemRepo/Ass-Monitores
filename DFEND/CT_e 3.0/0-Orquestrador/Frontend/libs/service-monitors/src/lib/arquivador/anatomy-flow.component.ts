@@ -234,6 +234,19 @@ export class ArquivadorAnatomyFlowComponent implements OnDestroy {
   /** true enquanto fila/temp estão diminuindo (processamento real). */
   readonly consuming = input(false);
 
+  /** Ligar: anima as plataformas em cascata enquanto o start está em andamento. */
+  readonly isBooting = computed(
+    () => this.store.actionBusy() && !this.running()
+  );
+
+  private readonly prevTemp = signal(0);
+  private readonly prevBroker = signal(0);
+  readonly tempMotion = signal<'idle' | 'rising' | 'draining'>('idle');
+  readonly brokerMotion = signal<'idle' | 'rising' | 'draining'>('idle');
+  private tempMotionTimer?: ReturnType<typeof setTimeout>;
+  private brokerMotionTimer?: ReturnType<typeof setTimeout>;
+
+
   /**
    * Esteira anda com NSU em trânsito OU enquanto as filas estão caindo.
    */
@@ -316,14 +329,64 @@ export class ArquivadorAnatomyFlowComponent implements OnDestroy {
   constructor() {
     // Mantém OnPush fresco para counts de fila/tmp via store pushes; tick leve.
     this.clock = setInterval(() => this.nowMs.set(Date.now()), 1000);
+
+    effect(() => {
+      const temp = Math.max(0, Math.floor(this.store.queues()?.tempBacklog ?? 0));
+      const prev = this.prevTemp();
+      if (temp !== prev) {
+        if (this.tempMotionTimer) clearTimeout(this.tempMotionTimer);
+        this.tempMotion.set(temp > prev ? 'rising' : 'draining');
+        this.prevTemp.set(temp);
+        this.tempMotionTimer = setTimeout(() => this.tempMotion.set('idle'), 700);
+      }
+    });
+
+    effect(() => {
+      const broker = Math.max(
+        0,
+        Math.floor(this.store.queues()?.serviceBrokerDepth ?? 0)
+      );
+      const prev = this.prevBroker();
+      if (broker !== prev) {
+        if (this.brokerMotionTimer) clearTimeout(this.brokerMotionTimer);
+        this.brokerMotion.set(broker > prev ? 'rising' : 'draining');
+        this.prevBroker.set(broker);
+        this.brokerMotionTimer = setTimeout(
+          () => this.brokerMotion.set('idle'),
+          700
+        );
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.clock) clearInterval(this.clock);
+    if (this.tempMotionTimer) clearTimeout(this.tempMotionTimer);
+    if (this.brokerMotionTimer) clearTimeout(this.brokerMotionTimer);
   }
 
   lanePercent(lane: number): number {
     return 10 + lane * 20;
+  }
+
+  depthOf(id: AnatomyStage): number {
+    this.nowMs();
+    if (id === 'temp') return this.store.queues()?.tempBacklog ?? 0;
+    if (id === 'fila') return this.store.queues()?.serviceBrokerDepth ?? 0;
+    return 0;
+  }
+
+  queueChips(id: AnatomyStage): number[] {
+    const d = Math.max(0, Math.floor(this.depthOf(id)));
+    if (d <= 0) return [];
+    const n = Math.min(8, Math.max(1, d));
+    return Array.from({ length: n }, (_, i) => i);
+  }
+
+  queueMotion(id: AnatomyStage): 'idle' | 'rising' | 'draining' {
+    if (id === 'temp') return this.tempMotion();
+    if (id === 'fila') return this.brokerMotion();
+    return 'idle';
   }
 
   count(id: AnatomyStage): string {
@@ -331,23 +394,23 @@ export class ArquivadorAnatomyFlowComponent implements OnDestroy {
     switch (id) {
       case 'fila': {
         const n = this.store.queues()?.serviceBrokerDepth ?? 0;
-        return n > 0 ? `${n} na fila` : '0 na fila';
+        return n > 0 ? `${n} na fila` : 'vazia';
       }
       case 'temp': {
         const n = this.store.queues()?.tempBacklog ?? 0;
-        return n > 0 ? `${n} aguardando` : '0 aguardando';
+        return n > 0 ? `${n} aguardando` : 'vazia';
       }
       case 'sintetizador': {
         const n = this.store.queues()?.sintetizadorDepth ?? 0;
-        return n > 0 ? `${n} na fila` : '0 na fila';
+        return n > 0 ? `${n} na fila` : 'vazia';
       }
       case 'analisador': {
         const n = this.store.queues()?.analisadorDepth ?? 0;
-        return n > 0 ? `${n} na fila` : '0 na fila';
+        return n > 0 ? `${n} na fila` : 'vazia';
       }
       case 'integrador': {
         const n = this.store.queues()?.integradorDepth ?? 0;
-        return n > 0 ? `${n} na fila` : '0 na fila';
+        return n > 0 ? `${n} na fila` : 'vazia';
       }
     }
   }

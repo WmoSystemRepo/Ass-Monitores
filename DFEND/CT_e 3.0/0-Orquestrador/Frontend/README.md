@@ -44,7 +44,7 @@ Hub SignalR: `{apiBaseUrl}/hubs/monitor` (`getHubUrl()` em `@orquestrador/monito
 |-------------|------|
 | **Dashboard** (ligar e acompanhar filas) | `/` |
 | Clique no estágio R/A/S/An/I/C | `/monitores/{servico}` |
-| Mais informações (Receptor) | `/monitores/receptor/mais-informacoes` |
+| Mais informações (todos os serviços) | `/monitores/{servico}/mais-informacoes` |
 | Threads / Logs / Tabelas / Config | `/monitores/{servico}/…` |
 | Resgate CT-e | `/resgate` |
 
@@ -56,7 +56,7 @@ Hub SignalR: `{apiBaseUrl}/hubs/monitor` (`getHubUrl()` em `@orquestrador/monito
 |-------|--------|
 | `@orquestrador/monitor-dashboard` | Cadeia: Ligar/Desligar, `ChainAnatomy`, `StationCard`, `QueueMeter`, legenda |
 | `@orquestrador/monitor-core` | `ChainOrchestratorStore`, `getApiBaseUrl()`, `getHubUrl()` |
-| `@orquestrador/service-monitors` | Monitor rico por serviço (paridade **CT_e 2.0** + SignalR) |
+| `@orquestrador/service-monitors` | Monitor rico por serviço (paridade **CT_e 2.0** + SignalR); `SharedServiceDetailsPageComponent` |
 | `@orquestrador/shared-ui` | `ConfirmDialog` (confirm / info com `detail` monoespaçado) |
 | `@orquestrador/resgate-cte` | Resgate |
 
@@ -84,6 +84,11 @@ CSS de anatomia/animações:
 
 Grid 2×2 sem scroll da página. Em eventos SQL de **erro**, botão **Ver erro** abre o texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
 Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API).
+
+### Padrão nos 6 monitores
+
+O mesmo layout/comportamento de **Mais informações**, copy leiga no painel e animações de fila/boot vale para Receptor, Arquivador, Sintetizador, Analisador, Integrador e Carga.  
+Fonte única: `SharedServiceDetailsPageComponent` (meta por `serviceId`).
 
 ## Observações
 

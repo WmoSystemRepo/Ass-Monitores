@@ -226,7 +226,7 @@ def patch_imports(text: str) -> str:
 
 
 def patch_class_body(text: str) -> str:
-    if "isBooting" in text:
+    if "readonly isBooting = computed" in text:
         return text
 
     insert_after = "  readonly packets = input<FlyingPacket[]>([]);\n"

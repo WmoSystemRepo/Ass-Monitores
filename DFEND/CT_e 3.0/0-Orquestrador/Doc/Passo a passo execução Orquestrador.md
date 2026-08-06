@@ -61,10 +61,11 @@ API base: `public/config.json` → `http://localhost:5000`.
 4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0; push SignalR + badge SignalR/REST)
 5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config/mais-informações nas rotas filhas
 6. Receptor → **Mais informações**: 4 cards na tela; em erro SQL use **Ver erro** para o texto original
-7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready)
+7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready). **Não limpa a fila**: se ainda houver documentos pendentes, a fase fica **Parada** com estágios em **NA FILA** (âmbar) e contadores “Com fila” / “Arquivos” > 0 — isso é normal. Religue com **Ligar as filas** para consumir o backlog.
 
 > Se engines não ficarem online no Ligar, a barra mostra a falha e **as filas daquele sistema não ligam**.  
-> Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).
+> Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  
+> Dúvida “Parada + NA FILA”: [Documentacao_Orquestrador_CTe.md §14](Documentacao_Orquestrador_CTe.md).
 
 ## B) Homologacao (smoke local)
 
@@ -109,5 +110,6 @@ Plugar sistema / Registry: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.
 - [ ] Badge do monitor indica SignalR (ou REST em fallback)
 - [ ] Start/Stop e threads/logs no monitor do serviço
 - [ ] Receptor → Mais informações: 4 cards visíveis; **Ver erro** em linha de erro SQL
+- [ ] Mesmo padrão de Mais informações / Ver erro nos outros monitores (A/S/An/I/C)
 - [ ] Com processo parado, card Avisos mostra alerta (após restart da API com `BuildHealthAlerts`)
 - [ ] Snapshot sem `unauthorized` com monitores/engines no ar

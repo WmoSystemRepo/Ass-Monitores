@@ -282,7 +282,7 @@ export class DashboardPageComponent {
     const ok = await this.confirmDialog.ask({
       title: 'Desligar as filas CT-e?',
       message:
-        'Os serviços param na ordem inversa e deixam de processar novos documentos até você ligar novamente.',
+        'Os serviços param na ordem inversa e deixam de processar até você ligar novamente. Documentos já na fila permanecem (a tela pode mostrar Fase Parada com NA FILA) — isso é normal; não apaga o backlog.',
       confirmLabel: 'Desligar filas',
       cancelLabel: 'Cancelar',
       tone: 'danger',

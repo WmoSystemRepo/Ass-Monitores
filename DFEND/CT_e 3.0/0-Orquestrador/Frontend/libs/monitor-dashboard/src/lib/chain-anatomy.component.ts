@@ -72,6 +72,13 @@ import {
       @if (busySystems().length > 0) {
         <div class="anatomy-live-rail anatomy-live-rail-sticky mx-4 mt-2 shrink-0">
           <p class="anatomy-live-rail-title">Foco agora</p>
+          @if (isStoppedWithBacklog()) {
+            <p class="mt-0.5 text-[11px] leading-snug text-amber-200/90">
+              Cadeia parada — a fila não foi apagada. Use
+              <span class="font-medium text-lime-300">Ligar as filas</span>
+              para retomar o consumo.
+            </p>
+          }
           <div class="anatomy-live-rail-cards">
             @for (sys of busySystems(); track sys.id) {
               <button
@@ -91,7 +98,9 @@ import {
                       sys.processHint ||
                         (sys.agora
                           ? 'Executando · drenando fila'
-                          : 'Arquivos na fila aguardando consumo')
+                          : isStoppedWithBacklog()
+                            ? 'Na fila · aguardando Ligar as filas'
+                            : 'Arquivos na fila aguardando consumo')
                     }}
                   </p>
                 </div>
@@ -250,6 +259,17 @@ export class ChainAnatomyComponent {
       !this.anyRunning() &&
       !this.hasQueueBusy() &&
       this.errorSystems().length === 0
+    );
+  });
+
+  /** Parada com backlog: Desligar não limpa fila — UI explica o estado. */
+  readonly isStoppedWithBacklog = computed(() => {
+    const phase = normalizePhase(this.store.cascadePhase());
+    return (
+      phase === 'idle' &&
+      !this.anyRunning() &&
+      this.store.processUpCount() === 0 &&
+      this.hasQueueBusy()
     );
   });
 

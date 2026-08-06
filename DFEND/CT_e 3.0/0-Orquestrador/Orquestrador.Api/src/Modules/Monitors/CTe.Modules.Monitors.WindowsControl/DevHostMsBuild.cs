@@ -20,7 +20,16 @@ public static class DevHostMsBuild
 
         if (!File.Exists(csprojPath))
         {
-            error = $"Projeto DevHost não encontrado: {csprojPath}";
+            var relative = csprojPath;
+            var orq = relative.IndexOf("0-Orquestrador", StringComparison.OrdinalIgnoreCase);
+            if (orq >= 0)
+            {
+                relative = relative[(orq + "0-Orquestrador".Length)..].TrimStart('\\', '/');
+            }
+
+            error =
+                $"Projeto DevHost não encontrado: {relative}. " +
+                @"Rode tools\build-devhosts.ps1 na pasta 0-Orquestrador deste clone.";
             return false;
         }
 

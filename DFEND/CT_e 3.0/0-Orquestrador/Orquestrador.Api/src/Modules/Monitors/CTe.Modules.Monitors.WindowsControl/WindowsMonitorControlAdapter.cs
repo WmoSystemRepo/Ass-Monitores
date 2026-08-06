@@ -46,7 +46,7 @@ public sealed class WindowsMonitorControlAdapter
                 return new ServiceControlResult(
                     true,
                     "Stopped",
-                    $"{_options.DisplayName} desligado. Pronto para ligar ({exePath}).");
+                    $"{_options.DisplayName} desligado. Pronto para ligar ({RepoRootResolver.ToPortableRelative(exePath)}).");
             }
 
             return new ServiceControlResult(
@@ -63,7 +63,10 @@ public sealed class WindowsMonitorControlAdapter
 
         if (TryFindExistingExe(out var path, out _))
         {
-            return new ServiceControlResult(true, "Stopped", $"SCM ausente; host POC disponível: {path}");
+            return new ServiceControlResult(
+                true,
+                "Stopped",
+                $"SCM ausente; host POC disponível: {RepoRootResolver.ToPortableRelative(path)}");
         }
 
         return new ServiceControlResult(false, "NotFound", "Nem host POC nem Windows Service disponíveis.");
@@ -335,8 +338,7 @@ public sealed class WindowsMonitorControlAdapter
         if (!File.Exists(full))
         {
             var devHostName = _options.ProcessName ?? Path.GetFileNameWithoutExtension(full);
-            error =
-                $"Host POC não encontrado: {full}. Compile tools\\{devHostName} (Debug) ou rode 0-Orquestrador\\tools\\build-devhosts.ps1.";
+            error = HostMissingMessage(full, null);
             return false;
         }
 
@@ -369,10 +371,7 @@ public sealed class WindowsMonitorControlAdapter
         string? buildError = null;
         if (csproj is null || !DevHostMsBuild.TryBuild(csproj, full, out buildError))
         {
-            error =
-                buildError
-                ?? error
-                ?? $"Host POC não encontrado: {full}. Compile tools\\{devHostName} (Debug) ou rode 0-Orquestrador\\tools\\build-devhosts.ps1.";
+            error = HostMissingMessage(full, buildError);
             exePath = string.Empty;
             return false;
         }
@@ -384,13 +383,26 @@ public sealed class WindowsMonitorControlAdapter
 
     private string? FindPackageRoot()
     {
-        if (!string.IsNullOrWhiteSpace(_options.RootPath) && Directory.Exists(_options.RootPath))
-        {
-            return Path.GetFullPath(_options.RootPath);
-        }
-
+        // Sempre ancora no processo (ContentRoot/BaseDirectory) — ignora RootPath de outro clone/usuário.
         var repoRoot = RepoRootResolver.FindRepoRoot(null, _searchStarts);
-        return repoRoot is null ? null : RepoRootResolver.FindPackageRoot(repoRoot, _options.PackageFolder);
+        return RepoRootResolver.ResolveConfiguredPackageRoot(
+            _options.RootPath,
+            repoRoot,
+            _options.PackageFolder);
+    }
+
+    private string HostMissingMessage(string? absoluteExePath, string? detail)
+    {
+        var relative = !string.IsNullOrWhiteSpace(absoluteExePath)
+            ? RepoRootResolver.ToPortableRelative(absoluteExePath)
+            : Path.Combine(
+                _options.PackageFolder ?? "engines",
+                _options.ExeRelativePath ?? "*.DevHost.exe");
+        var name = _options.ProcessName ?? "DevHost";
+        var suffix = string.IsNullOrWhiteSpace(detail) ? string.Empty : $" ({detail})";
+        return
+            $"Host POC não encontrado: {relative}{suffix}. " +
+            $"Compile tools\\{name} (Debug) ou rode tools\\build-devhosts.ps1 na pasta 0-Orquestrador deste clone.";
     }
 
     /// <summary>

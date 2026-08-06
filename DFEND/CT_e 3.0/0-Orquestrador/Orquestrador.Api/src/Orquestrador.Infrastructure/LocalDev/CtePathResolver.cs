@@ -28,6 +28,17 @@ internal static class CtePathResolver
         string? configuredRepoRoot,
         params string?[] searchRoots)
     {
+        // 1) Sempre ancora no processo atual — evita colar C:\Users\outra-máquina\...
+        string? discovered = null;
+        foreach (var start in EnumerateSearchStarts(searchRoots))
+        {
+            discovered = WalkUpForRepoRoot(start);
+            if (discovered is not null)
+            {
+                break;
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(configuredRepoRoot))
         {
             try
@@ -35,7 +46,14 @@ internal static class CtePathResolver
                 var configured = Path.GetFullPath(configuredRepoRoot.Trim());
                 if (Directory.Exists(configured) && LooksLikeRepoRoot(configured))
                 {
-                    return NormalizeRoot(configured);
+                    var normalized = NormalizeRoot(configured);
+                    if (discovered is null ||
+                        IsSameTree(discovered, normalized))
+                    {
+                        return normalized;
+                    }
+
+                    // Config aponta para outro clone/usuário — ignora.
                 }
             }
             catch
@@ -44,16 +62,29 @@ internal static class CtePathResolver
             }
         }
 
-        foreach (var start in EnumerateSearchStarts(searchRoots))
-        {
-            var found = WalkUpForRepoRoot(start);
-            if (found is not null)
-            {
-                return found;
-            }
-        }
+        return discovered;
+    }
 
-        return null;
+    private static bool IsSameTree(string a, string b)
+    {
+        try
+        {
+            var na = Path.GetFullPath(NormalizeRoot(a)).TrimEnd(Path.DirectorySeparatorChar);
+            var nb = Path.GetFullPath(NormalizeRoot(b)).TrimEnd(Path.DirectorySeparatorChar);
+            if (string.Equals(na, nb, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var pa = na + Path.DirectorySeparatorChar;
+            var pb = nb + Path.DirectorySeparatorChar;
+            return na.StartsWith(pb, StringComparison.OrdinalIgnoreCase) ||
+                   nb.StartsWith(pa, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>

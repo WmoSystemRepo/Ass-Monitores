@@ -44,8 +44,9 @@ Texto curto: [../COMO-USAR.txt](../COMO-USAR.txt).
 - **Raiz de trabalho** = pasta `0-Orquestrador` (contém `engines` + `Orquestrador.Api`).  
   O nome do pai (`CT_e`, `CT_e 2.0`, `CT_e 3.0`) não importa.
 - **PackageFolder** dos monitores: `engines\receptor`, `engines\arquivador`, … (relativo à raiz acima).
-- **`CtePathResolver` / `RepoRootResolver`**: sobem a partir do ContentRoot; paths absolutos de outra máquina são remapeados pelo sufixo estável (`0-Orquestrador`, `engines`, …).
-- **`LocalDev:RepoRoot`**: deixe **vazio**. Não grave `C:\Users\outro\...`.
+- **`CtePathResolver` / `RepoRootResolver`**: sobem a partir do ContentRoot/BaseDirectory do **processo atual**. Paths absolutos de outro usuário/clone (`C:\Users\outro\...`) são **ignorados ou remapeados** pelo sufixo estável (`engines\…`, `0-Orquestrador\…`) — a árvore do processo sempre vence.
+- **`LocalDev:RepoRoot`** e **`Monitors:*:RootPath`**: deixe **vazios**. Não grave `C:\Users\outro\...`.
+- Mensagens de erro do DevHost usam path **relativo** (`engines\receptor\tools\...`), nunca o prefixo da máquina.
 
 ## 4. Artefatos de build
 

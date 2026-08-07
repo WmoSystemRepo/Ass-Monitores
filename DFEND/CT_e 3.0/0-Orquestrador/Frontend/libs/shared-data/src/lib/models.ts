@@ -235,6 +235,10 @@ export interface TableDetailDto {
   logRows?: LogEntry[] | null;
   fila?: FilaDetailView | null;
   contextLogs?: LogEntry[] | null;
+  /** Take efetivamente aplicado pela API (1–1000). */
+  takeApplied?: number;
+  /** Quantidade de linhas retornadas neste detalhe. */
+  rowCount?: number;
 }
 
 export interface LiveTraceLine {
@@ -249,3 +253,33 @@ export interface ServiceControlResult {
   status: string;
   message?: string | null;
 }
+
+/** Resposta de GET /api/monitores/{servico}/queues/proof */
+export interface QueueProof {
+  serviceId: string;
+  domain: string;
+  verifiedAtUtc: string;
+  tempTable: string;
+  brokerQueue?: string | null;
+  tempCount: number;
+  brokerCount: number;
+  tempErrorCount: number;
+  isEmpty: boolean;
+  isClear: boolean;
+  ok: boolean;
+  errors: string[];
+}
+
+/** Resposta de GET /api/orchestrator/queues/proof */
+export interface ChainQueueProof {
+  verifiedAtUtc: string;
+  tempCount: number;
+  brokerCount: number;
+  tempErrorCount: number;
+  isEmpty: boolean;
+  isClear: boolean;
+  ok: boolean;
+  errors: string[];
+  services: QueueProof[];
+}
+

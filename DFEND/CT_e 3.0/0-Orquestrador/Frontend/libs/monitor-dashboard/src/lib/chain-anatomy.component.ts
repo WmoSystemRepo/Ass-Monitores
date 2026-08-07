@@ -16,11 +16,17 @@ import {
   StationCardComponent,
   type StationBadge,
 } from './station-card.component';
+import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component';
 
 @Component({
   selector: 'lib-chain-anatomy',
   standalone: true,
-  imports: [DatePipe, StatusLegendComponent, StationCardComponent],
+  imports: [
+    DatePipe,
+    StatusLegendComponent,
+    StationCardComponent,
+    ChainQueueProofChipComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -212,8 +218,8 @@ import {
               }
             </div>
 
-            @if (anyRunning() || hasQueueBusy()) {
-              <div class="anatomy-summary-bar anatomy-summary-bar-queue mt-3 shrink-0">
+            <div class="anatomy-summary-bar anatomy-summary-bar-queue mt-3 shrink-0">
+              @if (anyRunning() || hasQueueBusy()) {
                 <div>
                   <span class="anatomy-summary-label">Com fila</span>
                   <span class="anatomy-summary-value">{{ queueBusyCount() }}</span>
@@ -226,8 +232,9 @@ import {
                   <span class="anatomy-summary-label">Fase</span>
                   <span class="anatomy-summary-value">{{ phaseLabel() }}</span>
                 </div>
-              </div>
-            }
+              }
+              <lib-chain-queue-proof-chip />
+            </div>
           </div>
         </div>
       </div>

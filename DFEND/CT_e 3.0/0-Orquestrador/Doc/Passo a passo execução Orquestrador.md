@@ -60,12 +60,13 @@ API base: `public/config.json` → `http://localhost:5000`.
 3. **Ligar as filas** (só no header) → sobe engines (se preciso) → sobe workers **e** grava `Executar=1` na ordem (Receptor → … → Carga). Não existe estado “pausado” na cascata: ligado = processo + trabalho ativo. Estações animam em cascata durante o start.
 4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0; push SignalR + badge SignalR/REST)
 5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config/mais-informações nas rotas filhas
-6. Receptor → **Mais informações**: 4 cards (atividade, eventos, **Saúde dos bancos**, avisos); em erro SQL use **Ver erro** (frase clara + original)
-7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready). **Não limpa a fila**: se ainda houver documentos pendentes, a fase fica **Parada** com estágios em **NA FILA** (âmbar) e contadores “Com fila” / “Arquivos” > 0 — isso é normal. Religue com **Ligar as filas** para consumir o backlog.
+6. **Mais informações** (`/monitores/{servico}/mais-informacoes`): 4 cards — atividade, eventos, **Saúde dos bancos**, avisos. Em erro/aviso mapeado: **Ver erro** (frase clara + original + **Copiar texto**). CTA **Ver jornada dos lotes →** abre a Temporária. NSU/filas: painel anatomia; config: **Config →**.
+7. **Tabelas** (`/monitores/{servico}/tabelas/temporaria`): até **1000** lotes, filtros por coluna, colunas de jornada **inferidas** pelo serviço (não rastreio por chave).
+8. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready). **Não limpa a fila**: se ainda houver documentos pendentes, a fase fica **Parada** com estágios em **NA FILA** (âmbar) e contadores “Com fila” / “Arquivos” > 0 — isso é normal. Religue com **Ligar as filas** para consumir o backlog.
 
 > Se engines não ficarem online no Ligar, a barra mostra a falha e **as filas daquele sistema não ligam**.  
 > Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  
-> Dúvida “Parada + NA FILA”: [Documentacao_Orquestrador_CTe.md §14](Documentacao_Orquestrador_CTe.md).
+> FAQ (Parada + NA FILA, 215, card Saúde dos bancos): [Documentacao_Orquestrador_CTe.md §14](Documentacao_Orquestrador_CTe.md).
 
 ## B) Homologacao (smoke local)
 
@@ -109,7 +110,10 @@ Plugar sistema / Registry: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.
 - [ ] Clique no estágio → `/monitores/{servico}` com anatomia (não tela JSON)
 - [ ] Badge do monitor indica SignalR (ou REST em fallback)
 - [ ] Start/Stop e threads/logs no monitor do serviço
-- [ ] Receptor → Mais informações: 4 cards (inclui Saúde dos bancos); **Ver erro** em linha de erro SQL
-- [ ] Mesmo padrão de Mais informações / Ver erro nos outros monitores (A/S/An/I/C)
+- [ ] Receptor → Mais informações: 4 cards (atividade, eventos, **Saúde dos bancos**, avisos)
+- [ ] Saúde dos bancos: badge de conexão + linhas de `tableHealth`; links jornada/Tabelas/Config
+- [ ] Temporária: até 1000 lotes; filtros; Origem/Estágio/Próximo coerentes com o serviço
+- [ ] **Ver erro**: frase clara + original + **Copiar texto**; mesmo padrão nos outros monitores (A/S/An/I/C)
 - [ ] Com processo parado, card Avisos mostra alerta (após restart da API com `BuildHealthAlerts`)
 - [ ] Snapshot sem `unauthorized` com monitores/engines no ar
+- [ ] Após Desligar com backlog: Fase Parada + NA FILA (esperado)

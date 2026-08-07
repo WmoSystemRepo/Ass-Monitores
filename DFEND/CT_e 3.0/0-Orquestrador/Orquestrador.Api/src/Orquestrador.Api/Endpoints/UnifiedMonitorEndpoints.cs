@@ -37,7 +37,7 @@ public static class UnifiedMonitorEndpoints
                 .WithName($"Monitores_{tag}_Logs");
 
             group.MapGet("/tables/{key}", (string key, IMonitorModuleRegistry registry, int? take, CancellationToken ct) =>
-                    InvokeReadAsync(registry, servico, (m, c) => m.GetTableAsync(key, take ?? 100, c), ct))
+                    InvokeReadAsync(registry, servico, (m, c) => m.GetTableAsync(key, ClampTableTake(take), c), ct))
                 .RequireAuthorization(MonitorAuthPolicies.MonitorRead)
                 .WithName($"Monitores_{tag}_Table");
 
@@ -50,6 +50,11 @@ public static class UnifiedMonitorEndpoints
                     InvokeReadAsync(registry, servico, (m, c) => m.GetHealthAsync(c), ct))
                 .RequireAuthorization(MonitorAuthPolicies.MonitorRead)
                 .WithName($"Monitores_{tag}_Health");
+
+            group.MapGet("/queues/proof", (IMonitorModuleRegistry registry, CancellationToken ct) =>
+                    InvokeReadAsync(registry, servico, (m, c) => m.GetQueueProofAsync(c), ct))
+                .RequireAuthorization(MonitorAuthPolicies.MonitorRead)
+                .WithName($"Monitores_{tag}_QueuesProof");
 
             group.MapPost("/service/start", (HttpContext http, IMonitorModuleRegistry registry, CancellationToken ct) =>
                     InvokeActionAsync(registry, servico, "start", http, (m, c) => m.StartAsync(c), ct))
@@ -217,6 +222,10 @@ public static class UnifiedMonitorEndpoints
 
         return null;
     }
+
+    /// <summary>Contrato único de detalhe de tabela: take 1–1000 (default 1000).</summary>
+    private static int ClampTableTake(int? take) =>
+        Math.Clamp(take is null or <= 0 ? 1000 : take.Value, 1, 1000);
 
     private static string ToTag(string servico) =>
         servico.Length == 0 ? servico : char.ToUpperInvariant(servico[0]) + servico[1..];

@@ -394,7 +394,7 @@ export class SintetizadorDashboardPageComponent {
       return {
         mode: 'busy' as const,
         caption: 'próx. ciclo',
-        display: 'em andamento',
+        display: '--:--',
         secondsLeft: 0,
         hint: `Ciclo em andamento agora · intervalo configurado ${intervalo}s`,
       };

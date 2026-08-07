@@ -477,7 +477,7 @@ export class MonitorUnificadoPageComponent implements OnInit {
   readonly logsAfterSeq = signal(0);
   readonly logsTake = signal(300);
   readonly tableKey = signal('');
-  readonly tableTake = signal(100);
+  readonly tableTake = signal(1000);
 
   ngOnInit(): void {
     if (this.servicoValido()) {
@@ -561,7 +561,7 @@ export class MonitorUnificadoPageComponent implements OnInit {
       this.mensagem.set('Informe a key da tabela.');
       return;
     }
-    const params = { take: this.tableTake() ?? 100 };
+    const params = { take: this.tableTake() ?? 1000 };
     await this.run(
       'tables',
       this.http.get(this.url(`tables/${encodeURIComponent(key)}`), { params }),

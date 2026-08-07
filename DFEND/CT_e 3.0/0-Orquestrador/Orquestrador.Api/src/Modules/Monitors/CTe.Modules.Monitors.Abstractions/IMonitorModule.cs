@@ -27,4 +27,9 @@ public interface IMonitorModule
     Task<object?> StopAsync(CancellationToken ct);
 
     Task<object?> GetHealthAsync(CancellationToken ct);
+
+    /// <summary>
+    /// Validação estrita de fila/temporária vazia (sem READPAST), sob demanda.
+    /// </summary>
+    Task<object?> GetQueueProofAsync(CancellationToken ct);
 }

@@ -205,6 +205,7 @@ orchestrator.MapGet("/api/orchestrator/info", (IOptions<OrchestratorOptions> opt
             "/api/orchestrator/stop",
             "/api/orchestrator/ensure-stacks",
             "/api/orchestrator/systems/{id}/ensure-open",
+            "/api/orchestrator/queues/proof",
             "/api/orchestrator/info",
             "/api/v1/orchestrator/snapshot",
             "/api/v1/orchestrator/status",
@@ -225,6 +226,7 @@ orchestrator.MapGet("/api/orchestrator/info", (IOptions<OrchestratorOptions> opt
             "/api/monitores/{servico}/service/start",
             "/api/monitores/{servico}/service/stop",
             "/api/monitores/{servico}/health",
+            "/api/monitores/{servico}/queues/proof",
             "/hubs/monitor"
         }
     });
@@ -234,6 +236,14 @@ orchestrator.MapGet("/api/orchestrator/snapshot", async (ChainSnapshotAggregator
 {
     var snapshot = await aggregator.BuildAsync(ct);
     return Results.Ok(snapshot);
+});
+
+orchestrator.MapGet("/api/orchestrator/queues/proof", async (
+    CTe.Modules.Monitors.Abstractions.IMonitorModuleRegistry registry,
+    CancellationToken ct) =>
+{
+    var proof = await QueueProofAggregator.BuildAsync(registry, ct);
+    return Results.Ok(proof);
 });
 
 orchestrator.MapGet("/api/orchestrator/status", (CascadeControlService cascade) =>

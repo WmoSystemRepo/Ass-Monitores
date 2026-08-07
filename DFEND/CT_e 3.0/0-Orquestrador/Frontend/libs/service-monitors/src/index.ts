@@ -4,6 +4,7 @@ export * from './lib/service-monitor-shell.component';
 export * from './lib/service-monitor-home.component';
 export * from './lib/service-monitor-details-home.component';
 export * from './lib/shared-service-details-page.component';
+export * from './lib/service-queue-proof-chip.component';
 export * from './lib/dashboards';
 export * from './lib/receptor/details-page.component';
 export * from './lib/arquivador/details-page.component';

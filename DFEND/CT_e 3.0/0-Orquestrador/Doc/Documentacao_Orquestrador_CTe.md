@@ -1,7 +1,7 @@
 # Documentação — Orquestrador CT-e
 
 > Dashboard central da cadeia DFEND CT-e · registry, autenticação interna e multiambiente  
-> Atualizado: 06/08/2026 (SignalR · UX cadeia · FAQ Desligar + NA FILA)
+> Atualizado: 06/08/2026 (Tabelas take 1000 · jornada inferida · Saúde dos bancos · FAQ)
 
 ## 1. Objetivo
 
@@ -38,7 +38,7 @@ No dashboard (`:4220`):
 - **Clique em um estágio** → navega **in-app** para `/monitores/{servico}` (monitor rico com anatomia/animações, paridade CT_e 2.0).
 - Dados do monitor: **SignalR** `/hubs/monitor` (push ~1s) com **fallback REST** `/api/monitores/{servico}/*` no mesmo host `:5000`.
 - `FrontendUrl` / “front legado” é opcional; a operação principal é o Angular único.
-- Confirmações (Ligar/Desligar e “Ver erro”) usam o modal compartilhado `ConfirmDialog` — não `window.confirm`.
+- Confirmações (Ligar/Desligar e “Ver erro”) usam o modal compartilhado `ConfirmDialog` — não `window.confirm`. Em modo info com `detail`, há **Copiar texto**.
 
 Quem garante engines/DevHosts online antes do worker é o **Ligar as filas** (cascata) ou o **container** em Docker.
 
@@ -155,6 +155,7 @@ Arquivador em DEV: API `:5020` · UI `:4210`. Orquestrador UI: `:4220`.
 | GET | `/api/chain/health` | por sistema: `online` \| `offline` \| `disabled` \| `unauthorized` |
 | WS/HTTP | `/hubs/monitor` | **SignalR** — monitores ricos: `JoinService(servico)` → eventos `snapshot` / `logsAppend` (~1s) |
 | GET | `/api/monitores/{servico}/*` | REST do monitor unificado (snapshot, logs, start/stop, …) — fallback se SignalR cair |
+| GET | `/api/monitores/{servico}/tables/{key}?take=` | Detalhe de tabela (Temporária/Log/Config…). **take 1–1000** (default **1000**); BFF e Monitor.Api fazem clamp. Resposta inclui `takeApplied` e `rowCount`. Sem XML. |
 | GET | `/health` | liveness |
 | GET | `/health/ready` | readiness do BFF (config OK; monitores offline **não** derrubam) |
 
@@ -256,7 +257,7 @@ Não se aplica em Homolog/Prod (process spawn desligado — use deploy/container
 | Dados do monitor | SignalR `/hubs/monitor` + fallback REST `/api/monitores/{servico}/*` |
 | Ligar as filas | CTA **só no header** (evita duplicata no idle) → engines (DEV) → `service/start` |
 | Desligar filas | `ConfirmDialog` → `service/stop` (= `Executar=0` + parar processo), ordem inversa; **não limpa backlog** |
-| Modal | `ConfirmDialogService` / `ConfirmDialogComponent` (`shared-ui`) — confirm + modo `info` (erro original) |
+| Modal | `ConfirmDialog` — confirm + `info` (erro); `detail` / `detailLabel` / `copyText` (**Copiar texto**) |
 
 Homolog/Prod: publicar `config.json` (ou script inline) com a URL do Orquestrador daquele ambiente — **não** embutir host no build.  
 `FrontendUrl` no registry permanece só como link legado opcional.
@@ -293,8 +294,8 @@ O **Receptor** definiu o padrão; os outros 5 (Arquivador, Sintetizador, Analisa
 | Título do painel | `{Serviço} CT-e` + uma frase de negócio (sem “Monitor do…”) |
 | Anatomia | Copy leiga; fila/temp sobe/desce; boot em cascata ao Ligar; chips na profundidade |
 | Mais informações | **Uma** implementação: `SharedServiceDetailsPageComponent` (meta por `serviceId`) |
-| Layout detalhes | Grid 2×2 na viewport, sem scroll da página: atividade · eventos · **Saúde dos bancos** · avisos |
-| Erro SQL | Botão **Ver erro** → `ConfirmDialog` `mode: 'info'` + texto original |
+| Layout detalhes | Grid 2×2 na viewport, sem scroll da página (ver §8.2.1) |
+| Erro / aviso mapeado | **Ver erro** / **Ver detalhes** → frase clara (catálogo) + texto original + **Copiar texto** |
 | Avisos | `snapshot.alerts` via `BuildHealthAlerts` (mensagens genéricas da fila) |
 | Desligar | `ConfirmDialog` (sem `window.confirm`) |
 
@@ -303,6 +304,48 @@ Rotas: `/monitores/{servico}` e `/monitores/{servico}/mais-informacoes`.
 Aliases finos (`ReceptorDetailsPageComponent`, …) só reexportam o shared — **não** duplicar layout por serviço.
 
 Script de sync de anatomia (dev): `Frontend/tools/sync-receptor-anatomy-ux.py` + `fix-anatomy-motion-body.py`.
+
+#### 8.2.1 Mais informações — grid 2×2
+
+| Card | Conteúdo |
+|------|----------|
+| **O que aconteceu agora** | Feed misturando `liveTrace` (passo) e logs SQL (banco) |
+| **Últimos eventos do banco** | Lista de logs com severidade; em erro/aviso do catálogo abre o modal |
+| **Saúde dos bancos** | Badge `connectionHealth` + lista compacta de `tableHealth` (status, idade, ms). Links **Ver jornada dos lotes →** (`/tabelas/temporaria`), **Tabelas →** e **Config →**. Clique na linha → `/monitores/{id}/tabelas/{key}` |
+| **Avisos e saúde** | `snapshot.alerts` (processo, batida, backlog) |
+
+O card antigo **Configuração e lotes** (NSU / intervalo / temporária / lotes) foi **substituído** por **Saúde dos bancos**. NSU e filas continuam no painel (anatomia) e nas rotas Config/Tabelas.
+
+Sem `tableHealth` no snapshot: empty state com CTA **Ver jornada dos lotes →** e orientação de connection string / SQL.
+
+#### 8.2.1b Tabelas — detalhe e jornada (Fase 1)
+
+Rotas: `/monitores/{servico}/tabelas` e `/monitores/{servico}/tabelas/{key}`.
+
+| Item | Comportamento |
+|------|----------------|
+| Limite | Até **1000** linhas (`take`); rodapé mostra N linhas · filtros · máx. 1000 · sem XML |
+| Filtros | Por coluna no thead (debounce); sticky header; highlight de erro |
+| Temporária | Colunas de lote + **Origem / Estágio atual / Próximo / Situação** |
+| Jornada | **Inferida pelo serviço atual** na cadeia R→A→S→An→I→C (mapa estático no front). **Não** é rastreio por chave CT-e entre bancos |
+| Situação | Heurística: `hasError` → Com erro; fila > 0 → Enfileirado; senão → Na temp |
+| Log / Config | Filtros básicos nas colunas principais |
+| Índice SQL | Recomendado nas temps: `dtc_atualizacao DESC` (e equivalente em logs). Sem migration nesta fase |
+| In-process | Detalhe de tabelas no Orquestrador exige Monitor.Api via HTTP (`UseHttpFallback`); in-process sem SQL de tabelas retorna 404 |
+
+**Fase 2 (fora do escopo):** rastreio por chave de acesso CT-e entre temps/filas; XML no grid.
+
+#### 8.2.2 Catálogo de erros (linguagem clara)
+
+Arquivo: `Frontend/libs/shared-utils/src/lib/log-error-catalog.ts`.
+
+- A lista de eventos usa o **título** do catálogo quando o log casa (ex.: cStat **215** → “SEFAZ rejeitou o XML…”).
+- O modal mostra **explicação + o que podemos fazer** e, abaixo, o **texto original (banco)**.
+- **Copiar texto** cola traduzido + original (`copyText` no `ConfirmDialog`).
+- Casos ainda sem mapeamento: modal avisa “ainda sem tradução no histórico” e mostra só o original.
+- **Como evoluir:** ao aparecer um erro novo na operação, acrescentar entrada no `CATALOG` (id estável, `match`, `title`, `explanation`, `whatWeCanDo`).
+
+Códigos já mapeados (histórico inicial): 215, 108, 117, 118, 146, 285, retorno inesperado de WebService, SVC_STALE.
 
 ### 8.3 Alertas de saúde (API)
 
@@ -411,9 +454,11 @@ SQL worker↔Monitor = integração **transitória**.
       src/service-monitor-extras.css   # anatomia Receptor / plataformas / fila
     libs/
       monitor-dashboard/               # Dashboard cadeia (station-card, queue-meter)
-      service-monitors/                # Monitores ricos (receptor…carga)
-      shared-ui/                       # ConfirmDialog (+ severity helpers)
+      service-monitors/                # Monitores ricos (receptor…carga) + shared Mais informações
+      shared-ui/                       # ConfirmDialog (+ Copiar texto / detailLabel)
+      shared-utils/                    # format, pipeline-activity, log-error-catalog
       monitor-core/                    # ChainOrchestratorStore, getHubUrl()
+      shared-data/                     # modelos (tableHealth, LogEntry, …)
   Orquestrador.Api/                    # BFF :5000 / Swagger :7100
     …/Realtime/                        # MonitorHub + push ~1s
     …/Monitors/.../InProcessMonitorModule.cs  # BuildHealthAlerts
@@ -444,6 +489,8 @@ Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 | 06/08/2026 | Padrão Receptor replicado nos 6 monitores: shared Mais informações, animações fila/boot, copy leiga, docs |
 | 06/08/2026 | Mais informações: card **Saúde dos bancos** (conexão + `tableHealth`) no lugar de Configuração e lotes |
 | 06/08/2026 | Doc + UX: após **Desligar**, Fase Parada com **NA FILA** / backlog pendente é esperado (não limpa fila) |
+| 06/08/2026 | Catálogo `log-error-catalog` (215…) + **Copiar texto** no modal Ver erro |
+| 06/08/2026 | Tabelas: take até **1000**, filtros, jornada inferida (Origem/Estágio/Próximo); CTA jornada em Mais informações |
 
 ## 14. Dúvidas frequentes (operação)
 
@@ -468,6 +515,21 @@ Não. Ligar/Desligar controla **processo + flag Executar**. Lotes, NSU e profund
 É rejeição da **SEFAZ**: o XML enviado na chamada (ex.: `retDistCTeSVD` / Carga `ProcessarDownload`) não passou na validação do schema oficial.  
 No monitor, **Mais informações → Ver erro** mostra a **frase clara** (catálogo) + o **texto original** do banco.  
 Histórico de traduções: `Frontend/libs/shared-utils/src/lib/log-error-catalog.ts` — acrescentar novas entradas quando aparecerem casos novos.
+
+### Sumiu o card “Configuração e lotes” — onde vejo NSU e lotes?
+
+Foi trocado de propósito pelo card **Saúde dos bancos** (conexão SQL + tabelas).  
+- **NSU / temporária / fila:** painel do serviço (anatomia) e chips de fila.  
+- **Configuração:** link **Config →** no card de saúde, ou menu Config do monitor.  
+- **Detalhe de tabelas/lotes:** **Tabelas →**, **Ver jornada dos lotes →** ou `/monitores/{servico}/tabelas/temporaria` (até 1000 lotes, filtros, colunas de jornada).
+
+### As colunas Origem / Estágio / Próximo rastream a chave CT-e entre serviços?
+
+**Não (Fase 1).** Elas mostram onde o **serviço atual** está na cadeia (R→A→S→An→I→C), inferidas no front pelo `serviceId`. Não há JOIN entre temps nem coluna de chave de acesso no DTO. Rastreio por chave CT-e fica para Fase 2.
+
+### O modal de erro tem “Copiar texto”?
+
+Sim. Com bloco `detail` (e/ou `copyText`), o `ConfirmDialog` oferece **Copiar texto** — no Ver erro costuma copiar linguagem clara + original.
 
 ## 15. Documentos relacionados
 

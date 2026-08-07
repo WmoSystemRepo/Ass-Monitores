@@ -82,9 +82,17 @@ CSS de anatomia/animações:
 
 ### Receptor — Mais informações
 
-Grid 2×2 sem scroll da página: atividade · eventos · **Saúde dos bancos** (conexão SQL + `tableHealth`) · avisos.  
-Em eventos SQL de **erro**, botão **Ver erro** abre explicação leiga + texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
-Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API). Links **Tabelas →** / **Config →** no card de saúde.
+Grid 2×2 sem scroll da página:
+
+| Card | Função |
+|------|--------|
+| O que aconteceu agora | Passos + logs recentes |
+| Últimos eventos do banco | Severidade; **Ver erro** / **Ver detalhes** |
+| **Saúde dos bancos** | `connectionHealth` + `tableHealth`; **Ver jornada dos lotes →** / **Tabelas →** / **Config →** |
+| Avisos e saúde | `snapshot.alerts` (`BuildHealthAlerts`) |
+
+**Ver erro** abre explicação leiga (`log-error-catalog.ts`) + texto original; **Copiar texto** no modal.  
+NSU/filas/lotes: painel (anatomia) e rotas Config/Tabelas — não ficam mais neste card.
 
 ### Padrão nos 6 monitores
 

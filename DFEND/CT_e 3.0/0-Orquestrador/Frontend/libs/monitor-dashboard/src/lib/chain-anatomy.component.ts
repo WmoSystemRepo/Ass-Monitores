@@ -54,7 +54,7 @@ import { PresentationTourStore } from './presentation-tour.store';
           </p>
           @if (tour.isSimulating()) {
             <p class="mt-1 text-[11px] font-semibold text-amber-300">
-              Apresentação · dados simulados
+              Demonstração visual — não são documentos reais
             </p>
           }
           <lib-status-legend />

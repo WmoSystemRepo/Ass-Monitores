@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "/ICpuWMhAhE=",
+  "dgSpecHash": "hvErDnszUTw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\CT_e\\5-Integrador\\Integrador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
+  "projectFilePath": "C:\\Users\\Mendes\\Desktop\\Clones\\Assefaz\\DFEND\\Ass-Monitores\\DFEND\\CT_e 2.0\\5-Integrador\\Integrador.Api\\src\\Monitor.Application\\Monitor.Application.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\cadc959cf56e86746c4ed38f5bfd5c0c\\nuget\\microsoft.extensions.dependencyinjection.abstractions\\10.0.10\\microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512",
-    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\cadc959cf56e86746c4ed38f5bfd5c0c\\nuget\\microsoft.extensions.options\\10.0.10\\microsoft.extensions.options.10.0.10.nupkg.sha512",
-    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\cadc959cf56e86746c4ed38f5bfd5c0c\\nuget\\microsoft.extensions.primitives\\10.0.10\\microsoft.extensions.primitives.10.0.10.nupkg.sha512"
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\1fc8a584a8527ac0cf0a8c8663bfd19e\\nuget\\microsoft.extensions.dependencyinjection.abstractions\\10.0.10\\microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512",
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\1fc8a584a8527ac0cf0a8c8663bfd19e\\nuget\\microsoft.extensions.options\\10.0.10\\microsoft.extensions.options.10.0.10.nupkg.sha512",
+    "C:\\Users\\Mendes\\AppData\\Local\\Temp\\cursor-sandbox-cache\\1fc8a584a8527ac0cf0a8c8663bfd19e\\nuget\\microsoft.extensions.primitives\\10.0.10\\microsoft.extensions.primitives.10.0.10.nupkg.sha512"
   ],
   "logs": []
 }

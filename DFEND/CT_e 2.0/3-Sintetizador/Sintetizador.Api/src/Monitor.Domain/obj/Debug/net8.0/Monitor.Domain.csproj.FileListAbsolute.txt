@@ -9,3 +9,15 @@ C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\3-Sintetizador\Sintetizador.Api\src\
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\refint\Monitor.Domain.dll
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.pdb
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\ref\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.sourcelink.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\refint\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\3-Sintetizador\Sintetizador.Api\src\Monitor.Domain\obj\Debug\net8.0\ref\Monitor.Domain.dll

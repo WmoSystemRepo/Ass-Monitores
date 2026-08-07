@@ -13,3 +13,19 @@ C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\6-Carga\Carga.Api\src\Monitor.Applic
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\refint\Monitor.Application.dll
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.pdb
 C:\Users\Mendes\Desktop\Clones\Assefaz\CT_e\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\ref\Monitor.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\bin\Debug\net8.0\Monitor.Application.deps.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\bin\Debug\net8.0\Monitor.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\bin\Debug\net8.0\Monitor.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\bin\Debug\net8.0\Monitor.Domain.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\bin\Debug\net8.0\Monitor.Domain.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.csproj.AssemblyReference.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.AssemblyInfoInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.AssemblyInfo.cs
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.csproj.CoreCompileInputs.cache
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.sourcelink.json
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor..A484DC40.Up2Date
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\refint\Monitor.Application.dll
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\Monitor.Application.pdb
+C:\Users\Mendes\Desktop\Clones\Assefaz\DFEND\Ass-Monitores\DFEND\CT_e 2.0\6-Carga\Carga.Api\src\Monitor.Application\obj\Debug\net8.0\ref\Monitor.Application.dll

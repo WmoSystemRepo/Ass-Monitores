@@ -102,7 +102,9 @@ public sealed record TableDetailDto(
     IReadOnlyList<RecentDocument>? TempRows,
     IReadOnlyList<LogEntry>? LogRows,
     FilaDetailView? Fila,
-    IReadOnlyList<LogEntry>? ContextLogs);
+    IReadOnlyList<LogEntry>? ContextLogs,
+    int TakeApplied = 0,
+    int RowCount = 0);
 
 public sealed record ServiceDetailRow(
     string? DesServico,

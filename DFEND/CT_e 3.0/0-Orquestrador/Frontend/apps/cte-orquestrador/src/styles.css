@@ -275,8 +275,9 @@ body {
 }
 
 .anatomy-legend-stopped {
-  background: #334155;
-  border-color: #64748b;
+  background: #94a3b8;
+  border-color: #cbd5e1;
+  box-shadow: 0 0 6px rgba(148, 163, 184, 0.55);
 }
 
 .anatomy-path-line {
@@ -1357,7 +1358,7 @@ body.presentation-tour-active::before {
   inset: 0;
   z-index: 35;
   pointer-events: none;
-  background: rgba(2, 6, 23, 0.62);
+  background: rgba(2, 6, 23, 0.55);
 }
 
 body.presentation-tour-active [data-tour] {
@@ -1368,41 +1369,14 @@ body.presentation-tour-active [data-tour] {
     transform 0.25s ease;
 }
 
+/* Alvo sobe acima do overlay; anel + título ficam no panel (position:fixed). */
 body.presentation-tour-active .tour-target-active {
   position: relative;
   z-index: 45;
-  outline: 3px solid #fbbf24;
-  outline-offset: 5px;
   border-radius: 0.65rem;
-  box-shadow:
-    0 0 0 8px rgba(251, 191, 36, 0.22),
-    0 0 36px rgba(251, 191, 36, 0.45),
-    0 12px 28px rgba(2, 6, 23, 0.45);
   filter: none !important;
-  animation: tour-target-pulse 1.8s ease-in-out infinite;
-}
-
-body.presentation-tour-active .tour-target-active::after {
-  content: attr(data-tour-label);
-  position: absolute;
-  left: 50%;
-  top: -0.35rem;
-  transform: translate(-50%, -100%);
-  z-index: 46;
-  max-width: min(16rem, 70vw);
-  padding: 0.35rem 0.65rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(251, 191, 36, 0.75);
-  background: #78350f;
-  color: #fffbeb;
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.45);
-  pointer-events: none;
+  opacity: 1 !important;
+  isolation: isolate;
 }
 
 @keyframes tour-target-pulse {
@@ -1422,8 +1396,9 @@ body.presentation-tour-active .tour-target-active::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.presentation-tour-active .tour-target-active {
-    animation: none;
+  body.presentation-tour-active .tour-target-active,
+  .tour-spotlight-ring {
+    animation: none !important;
   }
 }
 

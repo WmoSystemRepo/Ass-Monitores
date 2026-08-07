@@ -235,7 +235,7 @@ const META: Record<string, ServiceDetailsMeta> = {
                 [routerLink]="'/monitores/' + serviceId() + '/config'"
                 class="text-[10px] hover:underline"
                 [ngClass]="meta().accentLink"
-                >Config →</a
+                >Configuração →</a
               >
             </div>
           </div>

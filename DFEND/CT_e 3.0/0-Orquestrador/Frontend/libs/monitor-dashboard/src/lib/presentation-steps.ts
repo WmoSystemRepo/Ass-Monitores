@@ -14,6 +14,8 @@ export interface PresentationStep {
   route?: string;
   /** Overlay visual na cadeia. */
   simulate?: PresentationSimulateMode;
+  /** Onde fixar o flash card para não cobrir o alvo. */
+  panelPlacement?: 'top' | 'bottom';
 }
 
 /**
@@ -30,7 +32,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Esta é a tela principal do Orquestrador.',
       'Aqui você acompanha o caminho do CT-e pelos 6 serviços.',
-      'Pense nela como um painel de controle da fila.',
+      'Pense nela como um painel de controle do processo.',
     ],
     target: '[data-tour="overview"]',
     route: '/',
@@ -54,10 +56,13 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Resumo rápido',
     lines: [
       'Esta faixa mostra o estado geral, em números.',
+      'Orquestrador = se o painel está online e recebendo dados.',
+      'Serviços ativos = quantos dos 6 serviços estão ligados.',
+      'Processos no ar = quantos processos Windows estão rodando.',
       'Fase diz se a cadeia está ligada ou parada.',
       'Com fila e Arquivos mostram se há CT-e esperando.',
       'Verde = ligado e saudável.',
-      'Laranja = parado, mas ainda há documentos na fila.',
+      'Amarelo = parado, mas ainda há documentos na fila.',
     ],
     target: '[data-tour="health"]',
     route: '/',
@@ -69,7 +74,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Vermelho = erro, precisa de atenção.',
       'Azul = está processando agora.',
-      'Laranja = há documentos na fila.',
+      'Amarelo = há documentos na fila.',
       'Verde = ligado, mas sem movimento no momento.',
       'Cinza = parado.',
     ],
@@ -80,6 +85,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'stations',
     title: 'Os 6 serviços',
     spotlightLabel: 'Cadeia de serviços',
+    panelPlacement: 'top',
     lines: [
       'Cada caixa é uma etapa do caminho do CT-e.',
       'A ordem é: Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga.',
@@ -93,6 +99,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'simulate-flow',
     title: 'Como o CT-e caminha',
     spotlightLabel: 'Simulação do fluxo',
+    panelPlacement: 'top',
     lines: [
       'Agora estamos só demonstrando — não é CT-e real.',
       'Veja o destaque azul “AGORA” passando de etapa em etapa.',
@@ -107,8 +114,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     title: 'Parou, mas a fila ficou',
     spotlightLabel: 'Foco · fila parada',
     lines: [
-      'Se alguém desligar com documentos ainda na fila…',
-      '…o serviço fica com o selo laranja “NA FILA”.',
+      'Se alguém desligar com documentos ainda na fila, o serviço fica com o selo amarelo “NA FILA”.',
       'Isso não é erro: os documentos estão esperando.',
       'Para continuar, use Ligar as filas.',
     ],
@@ -123,7 +129,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Use quando quiser ter certeza de que a fila está vazia.',
       'Se estiver tudo limpo, aparece “Validada vazia”.',
-      'Se ainda houver documentos, ele mostra quanto sobrou.',
+      'Se ainda houver documentos na fila, ele mostra quantos sobraram.',
     ],
     target: '[data-tour="validate"]',
     route: '/',
@@ -132,8 +138,10 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'nav-monitor',
     title: 'Abrir o monitor do Receptor',
     spotlightLabel: 'Cadeia de serviços',
+    panelPlacement: 'top',
     lines: [
       'Vamos entrar no Receptor — é o “zoom” de uma etapa.',
+      'Dentro dele você vê como funciona o fluxo dentro de cada fila.',
       'Arquivador, Sintetizador e os demais têm a mesma organização de telas.',
       'Avançar abre o monitor do Receptor.',
     ],
@@ -159,7 +167,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Título do Receptor',
     lines: [
       'Aqui fica o nome do serviço e o que ele faz, em uma frase.',
-      'No Receptor: buscar CT-e novo e enviar para o próximo da fila.',
+      'Busca documentos novos na SEFAZ e envia para o próximo serviço da fila.',
     ],
     target: '[data-tour="dash-header"]',
     route: '/monitores/receptor',
@@ -170,7 +178,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Online / offline',
     lines: [
       'Mostra se a tela está recebendo atualizações.',
-      'Verde = conectado. Amarelo = sem atualização recente.',
+      'Verde = Orquestrador online. Amarelo = Orquestrador offline.',
     ],
     target: '[data-tour="dash-live"]',
     route: '/monitores/receptor',
@@ -192,8 +200,10 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     title: 'Resumo do serviço',
     spotlightLabel: 'Faixa de status',
     lines: [
-      'Mostra se o Receptor está ligado, se a recepção está ativa,',
-      'e se o banco e o servidor estão respondendo.',
+      'Receptor = se este serviço está ligado ou parado.',
+      'Recepção = se a busca de CT-e está ativa.',
+      'Banco = se a conexão SQL está respondendo.',
+      'Servidor = qual máquina e se a batida (heartbeat) está em dia.',
     ],
     target: '[data-tour="dash-health"]',
     route: '/monitores/receptor',
@@ -214,6 +224,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'anatomy',
     title: 'Caminho do CT-e',
     spotlightLabel: 'Desenho do fluxo',
+    panelPlacement: 'top',
     lines: [
       'Este quadro mostra o caminho do documento neste serviço.',
       'É a “história visual” do que o Receptor faz.',
@@ -228,7 +239,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Azul = etapa ativa agora.',
       'Verde = já passou.',
-      'Cinza = parado ou aguardando.',
+      'Cinza claro = parado ou aguardando.',
     ],
     target: '[data-tour="anatomy-legend"]',
     route: '/monitores/receptor',
@@ -237,8 +248,9 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'anatomy-stages',
     title: 'Etapas do Receptor',
     spotlightLabel: 'Etapas do fluxo',
+    panelPlacement: 'top',
     lines: [
-      'Cada plataforma é um passo: SEFAZ, consulta, temporária, fila, próximo serviço.',
+      'Cada plataforma é um passo: SEFAZ, consulta, temporária, fila e Arquivador.',
       'O documento “anda” da esquerda para a direita.',
     ],
     target: '[data-tour="anatomy-stages"]',
@@ -248,10 +260,12 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'anatomy-summary',
     title: 'Números do ciclo',
     spotlightLabel: 'NSU, temporária e fila',
+    panelPlacement: 'top',
     lines: [
       'NSU = posição da busca na SEFAZ.',
       'Na temporária = lotes ainda neste serviço.',
       'Na fila = esperando o próximo serviço.',
+      'Linhas de trabalho = quantas threads buscam na SEFAZ ao mesmo tempo (até 5).',
     ],
     target: '[data-tour="anatomy-summary"]',
     route: '/monitores/receptor',
@@ -309,8 +323,9 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     title: 'Últimos eventos do banco',
     spotlightLabel: 'Eventos do banco',
     lines: [
-      'Mostra sucessos, avisos e erros gravados.',
-      'Em erro, dá para abrir uma explicação mais clara.',
+      'Cada evento tem um tipo: sucesso (verde), aviso (amarelo) ou erro (vermelho).',
+      'Ex.: sucesso = lote gravado; aviso = fila acumulando; erro = falha na consulta.',
+      'Em erro ou aviso mapeado, dá para abrir uma explicação mais clara.',
     ],
     target: '[data-tour="details-events"]',
     route: '/monitores/receptor/mais-informacoes',
@@ -319,10 +334,11 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'details-db-health',
     title: 'Saúde dos bancos',
     spotlightLabel: 'Saúde dos bancos',
+    panelPlacement: 'top',
     lines: [
       'Diz se a conexão com o banco está ok.',
       'Lista as tabelas deste serviço e o estado de cada uma.',
-      'Daqui também dá para ir a Tabelas e Config.',
+      'Daqui também dá para ir a Tabelas e Configuração.',
     ],
     target: '[data-tour="details-db-health"]',
     route: '/monitores/receptor/mais-informacoes',
@@ -331,6 +347,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'details-alerts',
     title: 'Avisos e saúde',
     spotlightLabel: 'Avisos',
+    panelPlacement: 'top',
     lines: [
       'Aqui aparecem alertas que pedem atenção.',
       'Se estiver vazio, normalmente está tudo bem.',
@@ -424,7 +441,8 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
   {
     id: 'threads-cards',
     title: 'Cartões das linhas',
-    spotlightLabel: 'Cartões',
+    spotlightLabel: 'Cartões das linhas',
+    panelPlacement: 'top',
     lines: [
       'Cada cartão é uma linha: o que ela busca e se está ativa.',
       'Histórico → abre os eventos daquela linha.',
@@ -482,6 +500,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     id: 'logs-timeline',
     title: 'Linha do tempo',
     spotlightLabel: 'Eventos',
+    panelPlacement: 'top',
     lines: [
       'Cada bolinha é um evento.',
       'Leia de cima para baixo o que aconteceu.',
@@ -508,6 +527,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Tabela de configuração',
     lines: [
       'Lista as configurações ativas do serviço.',
+      'O texto abaixo do título indica a origem (ex.: SQL DEV · sts_ativo=1).',
       'É só para consulta — não se altera por aqui.',
     ],
     target: '[data-tour="config-table"]',
@@ -520,7 +540,8 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Com isso você já viu as telas do monitor.',
       'Os outros 5 serviços seguem o mesmo mapa de telas.',
-      'Avançar volta ao painel da cadeia.',
+      'Este link (Voltar ao painel) retorna à cadeia com os 6 serviços.',
+      'Avançar segue para o menu Resgate CT-e.',
     ],
     target: '[data-tour="shell-back"]',
     route: '/monitores/receptor/config',
@@ -534,7 +555,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'No menu à esquerda fica o Resgate.',
       'Serve para buscar de novo um CT-e que faltou.',
-      'Depois ele entra na fila da Carga.',
+      'Depois da busca, ele entra na fila da Carga.',
     ],
     target: '[data-tour="nav-resgate"]',
     route: '/resgate',
@@ -546,7 +567,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     lines: [
       'Pronto — você conhece a cadeia e as telas do monitor.',
       'Clique em Sair para voltar à tela ao vivo.',
-      'Pode reiniciar pelo botão Apresentação.',
+      'Para ver de novo, use Reiniciar neste card.',
     ],
     target: '[data-tour="overview"]',
     route: '/',

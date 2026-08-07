@@ -55,13 +55,25 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
             <p class="mt-3 text-xs text-cyan-400">Ver dados →</p>
           </a>
         } @empty {
-          <a
-            routerLink="servico"
-            class="rounded-lg border border-dashed border-slate-600 bg-slate-900/30 p-4 text-sm text-slate-400"
-            data-tour="nav-table-detail"
-          >
-            Abrir tabela Serviço (exemplo) →
-          </a>
+          @for (sample of emptySamples; track sample.key) {
+            <a
+              [routerLink]="sample.key"
+              class="rounded-lg border border-dashed border-slate-600 bg-slate-900/30 p-4 transition hover:border-cyan-500/40"
+              [attr.data-tour]="sample.key === 'servico' ? 'nav-table-detail' : null"
+            >
+              <div class="flex items-center justify-between">
+                <h2 class="font-medium text-slate-100">{{ sample.label }}</h2>
+                <span
+                  class="rounded px-2 py-0.5 text-[10px] font-semibold uppercase"
+                  [ngClass]="badgeClass(sample.status)"
+                >
+                  {{ statusLabel(sample.status) }}
+                </span>
+              </div>
+              <p class="mt-2 text-sm text-slate-400">{{ sample.hint }}</p>
+              <p class="mt-3 text-xs text-cyan-400">Ver dados →</p>
+            </a>
+          }
         }
       </div>
     </section>
@@ -70,6 +82,22 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
 export class TablesHubPageComponent {
   private readonly store = inject(ServiceMonitorStore);
   readonly cards = computed(() => this.store.tableHealth());
+
+  /** Exemplos visíveis quando ainda não há telemetria — status + Ver dados. */
+  readonly emptySamples = [
+    {
+      key: 'servico',
+      label: 'Serviço',
+      status: 'ok',
+      hint: 'Exemplo — status ok quando a tabela responde.',
+    },
+    {
+      key: 'log',
+      label: 'Log',
+      status: 'atencao',
+      hint: 'Exemplo — status atenção quando algo precisa de olho.',
+    },
+  ] as const;
 
   statusLabel(s: string): string {
     return tableHealthStatusLabel(s);

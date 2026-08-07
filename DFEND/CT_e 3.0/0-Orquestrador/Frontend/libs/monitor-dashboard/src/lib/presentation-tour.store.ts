@@ -47,6 +47,7 @@ export class PresentationTourStore {
   private readonly router = inject(Router);
   private flowTimer?: ReturnType<typeof setInterval>;
   private flowStage = 0;
+  private applyGeneration = 0;
 
   readonly active = signal(false);
   readonly stepIndex = signal(0);
@@ -74,11 +75,20 @@ export class PresentationTourStore {
     return s === 'flow' || s === 'stoppedBacklog';
   });
 
+  readonly panelPlacement = computed((): 'top' | 'bottom' => {
+    return this.step()?.panelPlacement === 'top' ? 'top' : 'bottom';
+  });
+
   start(): void {
     this.stopFlowTimer();
     this.active.set(true);
     this.stepIndex.set(0);
     void this.applyStep(0);
+  }
+
+  /** Reinicia a apresentação do primeiro passo (disponível a qualquer momento). */
+  restart(): void {
+    this.start();
   }
 
   exit(): void {
@@ -107,12 +117,14 @@ export class PresentationTourStore {
     const step = this.steps[index];
     if (!step) return;
 
+    const gen = ++this.applyGeneration;
     this.stopFlowTimer();
     this.simulation.set(null);
 
     if (step.route) {
       await this.router.navigateByUrl(step.route);
     }
+    if (gen !== this.applyGeneration) return;
 
     const mode = step.simulate ?? 'none';
     if (mode === 'flow') {
@@ -126,7 +138,10 @@ export class PresentationTourStore {
       this.simulation.set(this.buildStoppedBacklog());
     }
 
-    queueMicrotask(() => this.scrollTarget(step.target));
+    queueMicrotask(() => {
+      if (gen !== this.applyGeneration) return;
+      this.scrollTarget(step.target);
+    });
   }
 
   private pushFlowFrame(stage: number): void {

@@ -181,13 +181,15 @@ import {
         </span>
       </div>
 
-      @if (store.tableHealth().length) {
-        <lib-table-health-cards
-          class="block shrink-0"
-          data-tour="dash-tables"
-          [items]="store.tableHealth()"
-        />
-      }
+      <div class="block shrink-0" data-tour="dash-tables">
+        @if (store.tableHealth().length) {
+          <lib-table-health-cards [items]="store.tableHealth()" />
+        } @else {
+          <p class="rounded-md border border-dashed border-slate-600/70 bg-slate-900/40 px-3 py-2 text-[11px] text-slate-400">
+            Cartões de saúde das tabelas aparecem aqui quando houver telemetria do banco.
+          </p>
+        }
+      </div>
 
       <div class="min-h-0 flex-1 overflow-hidden">
         <lib-receptor-anatomy-flow

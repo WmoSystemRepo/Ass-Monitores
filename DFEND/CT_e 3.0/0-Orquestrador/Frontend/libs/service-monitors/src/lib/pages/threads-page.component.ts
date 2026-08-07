@@ -136,6 +136,9 @@ interface ThreadCardVm {
         class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
         data-tour="threads-cards"
       >
+        <p class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Cartões das linhas
+        </p>
         @for (card of cards(); track card.thread.threadId) {
           @if (card.isHero) {
             <article

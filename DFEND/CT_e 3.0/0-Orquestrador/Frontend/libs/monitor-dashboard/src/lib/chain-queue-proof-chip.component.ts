@@ -17,6 +17,9 @@ import type { ChainQueueProof } from '@orquestrador/shared-data';
   standalone: true,
   imports: [QueueProofChipComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'data-tour': 'validate',
+  },
   template: `
     <lib-queue-proof-chip
       idleLabel="Validar cadeia"

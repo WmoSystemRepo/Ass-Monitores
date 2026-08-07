@@ -5,3 +5,6 @@ export { DetailsPageComponent } from './lib/details-page.component';
 export { QueueMeterComponent } from './lib/queue-meter.component';
 export { StatusLegendComponent } from './lib/status-legend.component';
 export { StationCardComponent } from './lib/station-card.component';
+export { PresentationTourStore } from './lib/presentation-tour.store';
+export { PresentationTourPanelComponent } from './lib/presentation-tour.panel.component';
+export { PRESENTATION_STEPS } from './lib/presentation-steps';

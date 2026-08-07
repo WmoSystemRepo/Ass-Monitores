@@ -275,8 +275,9 @@ body {
 }
 
 .anatomy-legend-stopped {
-  background: #334155;
-  border-color: #64748b;
+  background: #94a3b8;
+  border-color: #cbd5e1;
+  box-shadow: 0 0 6px rgba(148, 163, 184, 0.55);
 }
 
 .anatomy-path-line {
@@ -627,6 +628,18 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: #e2e8f0;
+}
+
+.anatomy-summary-value-live {
+  color: var(--monitor-success);
+}
+
+.anatomy-summary-value-wait {
+  color: var(--monitor-wait);
+}
+
+.anatomy-summary-value-warn {
+  color: var(--monitor-queue);
 }
 
 /* Letter symbols R / A / S / An / I / C */
@@ -1334,6 +1347,57 @@ body {
   .chain-anatomy .anatomy-platform-queued,
   .chain-anatomy .anatomy-now,
   .chain-anatomy .anatomy-step-arrow-hot {
+    animation: none !important;
+  }
+}
+
+/* —— Modo Apresentação (spotlight bem evidente) —— */
+body.presentation-tour-active::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background: rgba(2, 6, 23, 0.55);
+}
+
+body.presentation-tour-active [data-tour] {
+  transition:
+    box-shadow 0.25s ease,
+    outline 0.25s ease,
+    filter 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Alvo sobe acima do overlay; anel + título ficam no panel (position:fixed). */
+body.presentation-tour-active .tour-target-active {
+  position: relative;
+  z-index: 45;
+  border-radius: 0.65rem;
+  filter: none !important;
+  opacity: 1 !important;
+  isolation: isolate;
+}
+
+@keyframes tour-target-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 8px rgba(251, 191, 36, 0.18),
+      0 0 28px rgba(251, 191, 36, 0.35),
+      0 12px 28px rgba(2, 6, 23, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(251, 191, 36, 0.28),
+      0 0 42px rgba(251, 191, 36, 0.5),
+      0 12px 28px rgba(2, 6, 23, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.presentation-tour-active .tour-target-active,
+  .tour-spotlight-ring {
     animation: none !important;
   }
 }

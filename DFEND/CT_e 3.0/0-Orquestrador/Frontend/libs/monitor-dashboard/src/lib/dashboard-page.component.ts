@@ -1,25 +1,33 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   inject,
 } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import {
   ChainOrchestratorStore,
   normalizePhase,
 } from '@orquestrador/monitor-core';
 import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ChainAnatomyComponent } from './chain-anatomy.component';
+import { PresentationTourStore } from './presentation-tour.store';
 
 @Component({
   selector: 'lib-dashboard-page',
   standalone: true,
-  imports: [DatePipe, NgClass, ChainAnatomyComponent],
+  imports: [
+    DatePipe,
+    NgClass,
+    ChainAnatomyComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section
       class="dashboard-fit flex h-full max-h-full flex-col gap-1.5 overflow-hidden"
+      data-tour="overview"
     >
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div class="min-w-0">
@@ -30,7 +38,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
             Ligue ou desligue as filas e acompanhe os 6 sistemas em tempo real.
           </p>
         </div>
-        <div class="flex flex-wrap items-center gap-1.5">
+        <div class="flex flex-wrap items-center gap-1.5" data-tour="controls">
           <span
             class="inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[11px]"
             [class.border-lime-500]="store.live()"
@@ -51,6 +59,18 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
               · {{ t | date: 'HH:mm:ss' }}
             }
           </span>
+          <button
+            type="button"
+            class="rounded-md border border-indigo-500/50 px-2.5 py-2 text-xs font-medium text-indigo-200 transition hover:bg-indigo-900/50"
+            [attr.title]="
+              tour.active()
+                ? 'Apresentação em andamento'
+                : 'Tour guiado + simulação visual (sem CT-e real)'
+            "
+            (click)="tour.active() ? tour.exit() : tour.start()"
+          >
+            {{ tour.active() ? 'Sair da apresentação' : 'Apresentação' }}
+          </button>
           <button
             type="button"
             class="cta-start rounded-md bg-lime-500 px-3.5 py-2 text-sm font-semibold text-indigo-950 shadow-md shadow-lime-900/30 transition hover:bg-lime-400 disabled:opacity-40"
@@ -100,6 +120,7 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
       <div
         class="health-strip flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-indigo-800/80 bg-indigo-950/50 px-3 py-1.5 text-[11px]"
         [class.health-strip-live]="store.anyRunning()"
+        data-tour="health"
       >
         <span class="inline-flex items-baseline gap-1.5">
           <span class="text-slate-400">Orquestrador</span>
@@ -137,13 +158,37 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
           <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
           <span class="inline-flex items-baseline gap-1.5">
             <span class="text-slate-400">Com fila</span>
-            <span class="font-medium text-amber-300">{{ queueBusyCount() }}</span>
+            <span
+              class="font-medium"
+              [class.text-lime-300]="store.anyRunning()"
+              [class.text-amber-300]="!store.anyRunning()"
+              [attr.title]="
+                store.anyRunning()
+                  ? 'Serviços com backlog enquanto a cadeia está ligada (ativo)'
+                  : 'Backlog com cadeia parada — use Ligar as filas'
+              "
+            >
+              {{ queueBusyCount() }}
+            </span>
           </span>
           <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
           <span class="inline-flex items-baseline gap-1.5">
             <span class="text-slate-400">Arquivos</span>
-            <span class="font-medium text-sky-300">{{ totalQueueFiles() }}</span>
+            <span
+              class="font-medium"
+              [class.text-lime-300]="store.anyRunning()"
+              [class.text-amber-300]="!store.anyRunning()"
+            >
+              {{ totalQueueFiles() }}
+            </span>
           </span>
+          @if (store.anyRunning() && totalQueueFiles() === 0) {
+            <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
+            <span class="inline-flex items-baseline gap-1.5" title="Cadeia ligada e consumindo; nenhum CT-e na fila no momento">
+              <span class="text-slate-400">Fluxo</span>
+              <span class="font-medium text-lime-300">ativo · sem fila</span>
+            </span>
+          }
         }
       </div>
 
@@ -164,9 +209,18 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
     </section>
   `,
 })
-export class DashboardPageComponent {
+export class DashboardPageComponent implements OnInit {
   readonly store = inject(ChainOrchestratorStore);
+  readonly tour = inject(PresentationTourStore);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly route = inject(ActivatedRoute);
+
+  ngOnInit(): void {
+    const q = this.route.snapshot.queryParamMap;
+    if (q.get('apresentacao') === '1' || q.get('apresentacao') === 'true') {
+      this.tour.start();
+    }
+  }
 
   readonly connectionLabel = computed(() =>
     this.store.live() ? 'Orquestrador online' : 'Orquestrador offline'

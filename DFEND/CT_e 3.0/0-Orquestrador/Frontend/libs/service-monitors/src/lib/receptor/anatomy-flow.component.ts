@@ -36,9 +36,10 @@ export interface FlyingPacket {
       [class.anatomy-poster-live]="running()"
       [class.anatomy-poster-busy]="!!activeStage()"
       [class.anatomy-poster-starting]="isBooting()"
+      data-tour="anatomy"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
-        <div class="min-w-0">
+        <div class="min-w-0" data-tour="anatomy-legend">
           <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
             Como o documento anda
           </p>
@@ -82,6 +83,7 @@ export interface FlyingPacket {
           <a
             routerLink="/monitores/receptor/mais-informacoes"
             class="rounded border border-slate-600 bg-slate-900/60 px-2.5 py-1 text-[11px] font-medium text-sky-300 hover:bg-slate-800"
+            data-tour="nav-mais-informacoes"
           >
             Mais informações →
           </a>
@@ -133,7 +135,10 @@ export interface FlyingPacket {
               </div>
             }
 
-            <div class="anatomy-stages relative z-[1] shrink-0 py-1">
+            <div
+              class="anatomy-stages relative z-[1] shrink-0 py-1"
+              data-tour="anatomy-stages"
+            >
               @for (step of steps; track step.id; let i = $index) {
                 <div
                   class="anatomy-stage"
@@ -193,7 +198,7 @@ export interface FlyingPacket {
               }
             </div>
 
-            <div class="anatomy-summary-bar mt-3 shrink-0">
+            <div class="anatomy-summary-bar mt-3 shrink-0" data-tour="anatomy-summary">
               <div>
                 <span class="anatomy-summary-label">NSU</span>
                 <span class="anatomy-summary-value">{{ store.global()?.mainNsu || '—' }}</span>
@@ -214,7 +219,7 @@ export interface FlyingPacket {
                 >
                 <span class="anatomy-summary-value">{{ store.global()?.configuredThreads ?? '—' }}</span>
               </div>
-              <lib-service-queue-proof-chip />
+              <lib-service-queue-proof-chip data-tour="anatomy-validate" />
             </div>
           </div>
         </div>

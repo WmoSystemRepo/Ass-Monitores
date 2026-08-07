@@ -33,7 +33,7 @@ import {
   template: `
     <section class="dashboard-fit flex h-full max-h-full flex-col gap-1.5 overflow-hidden">
       <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <div class="min-w-0">
+        <div class="min-w-0" data-tour="dash-header">
           <h1 class="text-base font-semibold leading-tight text-slate-50">
             Receptor CT-e
           </h1>
@@ -41,8 +41,9 @@ import {
             Busca documentos novos na SEFAZ e envia para o próximo serviço da fila.
           </p>
         </div>
-        <div class="flex flex-wrap items-center gap-1.5">
+        <div class="flex flex-wrap items-center gap-1.5" data-tour="dash-controls">
           <span
+            data-tour="dash-live"
             class="inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[11px]"
             [class.border-emerald-500]="store.live()"
             [class.text-emerald-400]="store.live()"
@@ -130,6 +131,7 @@ import {
       <div
         class="health-strip flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-slate-700/80 bg-slate-900/50 px-3 py-1.5 text-[11px]"
         [class.health-strip-live]="isRunning()"
+        data-tour="dash-health"
       >
         <span class="inline-flex items-baseline gap-1.5">
           <span class="text-slate-500">Receptor</span>
@@ -179,9 +181,15 @@ import {
         </span>
       </div>
 
-      @if (store.tableHealth().length) {
-        <lib-table-health-cards class="block shrink-0" [items]="store.tableHealth()" />
-      }
+      <div class="block shrink-0" data-tour="dash-tables">
+        @if (store.tableHealth().length) {
+          <lib-table-health-cards [items]="store.tableHealth()" />
+        } @else {
+          <p class="rounded-md border border-dashed border-slate-600/70 bg-slate-900/40 px-3 py-2 text-[11px] text-slate-400">
+            Cartões de saúde das tabelas aparecem aqui quando houver telemetria do banco.
+          </p>
+        }
+      </div>
 
       <div class="min-h-0 flex-1 overflow-hidden">
         <lib-receptor-anatomy-flow

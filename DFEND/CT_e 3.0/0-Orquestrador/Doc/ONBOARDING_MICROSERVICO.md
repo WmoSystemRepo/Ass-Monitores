@@ -22,7 +22,7 @@ O Orquestrador **nunca grava** estado do worker; só consulta e dispara comandos
 
 ## Contrato mínimo (obrigatório)
 
-Espelho de [`CONTRATO_MICROSERVICO_MONITOR.md`](../../1-Receptor/Doc/CONTRATO_MICROSERVICO_MONITOR.md):
+Espelho de [`CONTRATO_MICROSERVICO_MONITOR.md`](../../../CT_e%202.0/docs/CONTRATO_MICROSERVICO_MONITOR.md) (também em cada `Doc/` de monitor na 2.0):
 
 | Método | Path | Auth | Papel |
 |--------|------|------|-------|

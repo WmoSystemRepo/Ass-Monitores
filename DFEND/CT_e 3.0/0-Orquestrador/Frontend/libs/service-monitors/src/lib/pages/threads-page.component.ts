@@ -56,7 +56,10 @@ interface ThreadCardVm {
     <section
       class="threads-fit flex h-[calc(100vh-3rem)] max-h-[calc(100vh-3rem)] flex-col gap-2 overflow-hidden"
     >
-      <header class="flex shrink-0 flex-wrap items-end justify-between gap-2">
+      <header
+        class="flex shrink-0 flex-wrap items-end justify-between gap-2"
+        data-tour="threads-header"
+      >
         <div class="min-w-0">
           <p
             class="text-[10px] font-medium uppercase tracking-[0.14em]"
@@ -74,20 +77,30 @@ interface ThreadCardVm {
             }
           </p>
         </div>
-        @if (!receptionRunning()) {
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
           <a
-            routerLink=".."
-            class="shrink-0 rounded border border-cyan-700/60 bg-cyan-950/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-500"
+            routerLink="../logs"
+            class="rounded border border-slate-600 bg-slate-900/60 px-2.5 py-1.5 text-xs text-cyan-200 hover:border-cyan-500"
+            data-tour="nav-historico"
           >
-            Abrir Monitor →
+            Histórico →
           </a>
-        }
+          @if (!receptionRunning()) {
+            <a
+              routerLink=".."
+              class="rounded border border-cyan-700/60 bg-cyan-950/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-500"
+            >
+              Abrir Monitor →
+            </a>
+          }
+        </div>
       </header>
 
       @if (!receptionRunning()) {
         <div
           class="flex shrink-0 items-center justify-between gap-3 rounded border border-slate-600 bg-slate-900/70 px-3 py-2 text-xs text-slate-200"
           role="status"
+          data-tour="threads-summary"
         >
           <p class="min-w-0 truncate">
             O Receptor não está recebendo. Cards mostram só configuração e última posição.
@@ -98,6 +111,7 @@ interface ThreadCardVm {
         <div
           class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-0.5 rounded border border-slate-700/80 bg-slate-950/60 px-3 py-1.5 text-xs text-slate-300"
           aria-label="Resumo das linhas"
+          data-tour="threads-summary"
         >
           <span title="Há sinal recente de consulta ou avanço">
             <span class="font-semibold text-emerald-300">{{ summary().inCycle }}</span>
@@ -118,7 +132,13 @@ interface ThreadCardVm {
         </div>
       }
 
-      <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+      <div
+        class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
+        data-tour="threads-cards"
+      >
+        <p class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Cartões das linhas
+        </p>
         @for (card of cards(); track card.thread.threadId) {
           @if (card.isHero) {
             <article

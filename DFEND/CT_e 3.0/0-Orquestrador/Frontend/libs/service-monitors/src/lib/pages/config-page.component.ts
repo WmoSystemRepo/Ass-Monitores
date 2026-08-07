@@ -6,7 +6,7 @@ import { ServiceMonitorStore } from '../service-monitor.store';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="space-y-4">
+    <section class="space-y-4" data-tour="config-table">
       <h1 class="text-2xl font-semibold text-slate-50">Configurações</h1>
       <p class="text-sm text-slate-400">
         Somente leitura das configurações de origem do Receptor (SQL DEV · sts_ativo=1).

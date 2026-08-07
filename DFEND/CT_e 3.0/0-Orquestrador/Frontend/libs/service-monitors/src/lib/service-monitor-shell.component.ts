@@ -22,7 +22,12 @@ export type ServiceMonitorId = keyof typeof SERVICE_MONITORS;
   template: `
     <div class="flex h-full min-h-0 flex-col overflow-hidden">
       <header class="mb-1.5 flex shrink-0 items-center gap-2">
-        <a routerLink="/" class="text-xs text-sky-300 hover:text-sky-100">← Voltar ao painel</a>
+        <a
+          routerLink="/"
+          class="text-xs text-sky-300 hover:text-sky-100"
+          data-tour="shell-back"
+          >← Voltar ao painel</a
+        >
         <span class="text-slate-700">|</span>
         <h1 class="text-xs font-semibold text-slate-100">Monitor do {{ label() }}</h1>
       </header>

@@ -302,7 +302,7 @@ export class DashboardPageComponent {
       return `Sintetizando CT-e em tempo real — fila ${broker} · temp ${temp}`;
     }
     if (!stage) {
-      return 'Analisador ligado — aguardando próximo ciclo de síntese.';
+      return 'Analisador ligado — aguardando próximo ciclo de análise.';
     }
 
     const nsuBit =
@@ -334,7 +334,7 @@ export class DashboardPageComponent {
     }
   });
 
-  /** Contagem regressiva até o próximo ciclo de síntese. */
+  /** Contagem regressiva até o próximo ciclo de análise. */
   readonly cycleCountdown = computed(() => {
     if (!this.isRunning()) return null;
     const now = this.nowMs();
@@ -357,7 +357,7 @@ export class DashboardPageComponent {
         caption: 'próx. ciclo',
         display: this.formatMmSs(intervalo),
         secondsLeft: intervalo,
-        hint: `Próximo ciclo de síntese · a cada ${intervalo}s`,
+        hint: `Próximo ciclo de análise · a cada ${intervalo}s`,
       };
     }
 
@@ -380,12 +380,12 @@ export class DashboardPageComponent {
       caption: 'próx. ciclo',
       display: this.formatMmSs(left),
       secondsLeft: left,
-      hint: `Próximo ciclo de síntese em ${left}s (a cada ${intervalo}s)`,
+      hint: `Próximo ciclo de análise em ${left}s (a cada ${intervalo}s)`,
     };
   });
 
   /**
-   * Cronômetro de movimentação: sobe desde o último lote até nova síntese.
+   * Cronômetro de movimentação: sobe desde o último lote até nova análise.
    * Zera quando o “Último lote” muda.
    */
   readonly fileWaitChrono = computed(() => {
@@ -395,7 +395,7 @@ export class DashboardPageComponent {
     const loteAt = lote?.dtcAtualizacao ? new Date(lote.dtcAtualizacao).getTime() : NaN;
     const hasLote = Number.isFinite(loteAt) && loteAt > 0;
 
-    // Filas caindo = síntese em andamento (não “sem síntese”).
+    // Filas caindo = análise em andamento (não “sem análise”).
     if (this.queuesConsuming() || (this.visualStage() && hasLote && now - loteAt < 20_000)) {
       const broker = this.queues()?.serviceBrokerDepth ?? 0;
       const temp = this.queues()?.tempBacklog ?? 0;
@@ -412,10 +412,10 @@ export class DashboardPageComponent {
 
     return {
       mode: (elapsed === 0 ? 'fresh' : 'waiting') as 'fresh' | 'waiting',
-      caption: 'sem síntese',
+      caption: 'sem análise',
       display: this.formatElapsedClock(elapsed),
       hint: hasLote
-        ? `Há ${elapsed}s sem síntese · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`
+        ? `Há ${elapsed}s sem análise · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`
         : `Aguardando o primeiro ciclo · ${elapsed}s`,
     };
   });

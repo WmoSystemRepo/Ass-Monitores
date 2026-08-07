@@ -143,30 +143,47 @@ internal static class MonitorTelemetrySql
                 "des_mensagem")
         };
 
+    /// <summary>
+    /// Temp + fila de entrada por domínio — alinhado ao SqlMonitorRepository CT_e 2.0
+    /// (âncora do cronômetro de “último lote” / queuesConsuming).
+    /// </summary>
+    private static (string TempTable, string? BrokerQueue) ResolveTempAndBroker(string domain) =>
+        domain.Trim().ToLowerInvariant() switch
+        {
+            "receptor" or "arquivador" => (
+                "tmp_documento_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_arquivador"),
+            "sintetizador" => (
+                "tmp_sintetizador_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_sintetizador"),
+            "analisador" => (
+                "tmp_analise_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_analisador"),
+            "integrador" or "carga" => (
+                "tmp_integracao_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_integrador"),
+            _ => (
+                "tmp_documento_conhecimento_transporte_eletronico",
+                null)
+        };
+
     private static async Task<(long Temp, long Broker, DateTimeOffset? Oldest)> ReadQueuesAsync(
         SqlConnection conn,
         string domain,
         int timeoutSeconds,
         CancellationToken ct)
     {
-        var (tempSql, brokerSql) = domain.Trim().ToLowerInvariant() switch
-        {
-            "receptor" or "arquivador" or "carga" => (
-                """
-                SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
-                FROM cte.tmp_documento_conhecimento_transporte_eletronico WITH (READPAST)
-                """,
-                """
+        var (tempTable, brokerQueue) = ResolveTempAndBroker(domain);
+        var tempSql = $"""
+            SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
+            FROM cte.{tempTable} WITH (READPAST)
+            """;
+        var brokerSql = brokerQueue is null
+            ? null
+            : $"""
                 SELECT COUNT(1)
-                FROM fila_alvo_cte_arquivador WITH (READPAST)
-                """),
-            _ => (
-                """
-                SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
-                FROM cte.tmp_sintetico_conhecimento_transporte_eletronico WITH (READPAST)
-                """,
-                (string?)null)
-        };
+                FROM {brokerQueue} WITH (READPAST)
+                """;
 
         long temp = 0;
         DateTimeOffset? oldest = null;
@@ -285,9 +302,7 @@ internal static class MonitorTelemetrySql
         int timeoutSeconds,
         CancellationToken ct)
     {
-        var table = domain.Trim().ToLowerInvariant() is "receptor" or "arquivador" or "carga"
-            ? "tmp_documento_conhecimento_transporte_eletronico"
-            : "tmp_sintetico_conhecimento_transporte_eletronico";
+        var (table, _) = ResolveTempAndBroker(domain);
 
         var list = new List<object>();
         try

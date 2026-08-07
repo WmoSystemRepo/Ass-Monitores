@@ -365,7 +365,7 @@ export class ReceptorDashboardPageComponent {
       return {
         mode: 'busy' as const,
         caption: 'próxima consulta',
-        display: 'em andamento',
+        display: '--:--',
         secondsLeft: 0,
         hint: `Consulta em andamento agora · intervalo configurado ${intervalo}s`,
       };
@@ -419,8 +419,8 @@ export class ReceptorDashboardPageComponent {
     if (this.visualStage() && hasLote && now - loteAt < 20_000) {
       return {
         mode: 'found' as const,
-        caption: 'CT-e novo',
-        display: 'agora',
+        caption: 'achou CT-e',
+        display: '00:00',
         hint: hasLote
           ? `Lote novo (NSU ${lote?.nsu}) — espera por arquivo reinicia`
           : 'CT-e em movimentação no fluxo',
@@ -432,7 +432,7 @@ export class ReceptorDashboardPageComponent {
 
     return {
       mode: (elapsed === 0 ? 'fresh' : 'waiting') as 'fresh' | 'waiting',
-      caption: 'sem documento',
+      caption: 'sem CT-e novo',
       display: this.formatElapsedClock(elapsed),
       hint: hasLote
         ? `Há ${elapsed}s sem CT-e novo · último lote às ${new Date(loteAt).toLocaleTimeString('pt-BR')}`

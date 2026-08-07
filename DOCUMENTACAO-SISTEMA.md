@@ -29,7 +29,7 @@ SEFAZ → Receptor → Arquivador → Sintetizador → Analisador → Integrador
 | Sintetizador | **8** | **5030** | **4230** | **7136** |
 | Analisador | **6** | **5040** | **4240** | **7146** |
 | Integrador | **7** | **5050** | **4250** | **7156** |
-| Carga | **99** | **5060** | **4260** | **7166** |
+| Carga | **99** | **5080** | **4260** | **7166** |
 | Resgate | — | **5070** | UI em `/resgate` (Orq. `:4220`) | — |
 | Gateway (Docker) | — | **8080** | — | — |
 
@@ -153,3 +153,5 @@ Ver README do módulo: API F5 + `npm.cmd start` no Frontend + **Ligar** pela UI 
 - Pastas `Doc/` recriadas onde faltavam (Orquestrador 2.0, Receptor, Arquivador, Sintetizador, Carga)
 - Contrato compartilhado em `CT_e 2.0/docs/`
 - Correção do README do `Analisador.Api`
+- Porta real da **Carga API = 5080** (não 5060) alinhada em docs + `Carga.Api/README`
+- Link do ONBOARDING 3.0 apontando para o contrato compartilhado (não mais Doc Receptor ausente)

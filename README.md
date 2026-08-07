@@ -42,7 +42,7 @@ Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga
 |-------|---------|
 | 4220 / 5000 | Orquestrador UI / API |
 | 4200–4260 | Fronts dos monitores |
-| 5010–5060 | APIs dos monitores |
+| 5010–5050 · 5080 | APIs dos monitores (Carga = **5080**) |
 | 5070 | Resgate API |
 | 8080 | Gateway Docker |
 

@@ -12,7 +12,7 @@ Espelho: [../../docs/CONTRATO_MICROSERVICO_MONITOR.md](../../docs/CONTRATO_MICRO
 | domain | `carga` |
 | monitoredService | `DFEND_CTe_Carga` |
 | CodServico | `99` |
-| API / UI / Swagger | **5060** / **4260** / **7166** |
+| API / UI / Swagger | **5080** / **4260** / **7166** |
 
 Negócio: download pontual por chave (`cteConsultaDFe`), não pipeline contínuo.  
 Auth: `X-Cte-Internal-Api-Key`.

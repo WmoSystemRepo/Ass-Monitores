@@ -52,7 +52,7 @@ Headers de identidade: `X-Monitor-Service` · `X-Monitor-Version`.
 | sintetizador | 5030 | 4230 | 7136 | 8 |
 | analisador | 5040 | 4240 | 7146 | 6 |
 | integrador | 5050 | 4250 | 7156 | 7 |
-| carga | 5060 | 4260 | 7166 | 99 |
+| carga | 5080 | 4260 | 7166 | 99 |
 | orquestrador | 5000 | 4220 | 7100 | — |
 | resgate | 5070 | /resgate no Orq. | — | — |
 

@@ -2,7 +2,7 @@
 
 ## 1. API
 
-`Carga.Api/Monitor.sln` → perfil `http` (`:5060`) / Swagger `:7166`.
+`Carga.Api/Monitor.sln` → perfil `http` (`:5080`) / Swagger `:7166`.
 
 Key DEV: `dev-cte-chain-key` · CodServico **99**.
 

@@ -14,7 +14,7 @@ O **Resgate** apenas informa chaves; a Carga executa o download e devolve o docu
 |---------|--------|
 | CodServico | **99** |
 | Front | `:4260` |
-| BFF | `:5060` / Swagger `:7166` |
+| BFF | `:5080` / Swagger `:7166` |
 | Host POC | `tools/Carga.DevHost` |
 | serviceId | `dfend-cte-monitor-carga` |
 | Accent | `#0f766e` (teal) |

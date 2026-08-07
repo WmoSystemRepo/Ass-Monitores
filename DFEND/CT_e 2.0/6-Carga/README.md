@@ -9,7 +9,7 @@ Negócio: **download pontual por chave** (não fluxo contínuo) via WS `cteConsu
 | Peça | Porta | Pasta |
 |------|-------|-------|
 | Front (Nx `cte-carga`) | **4260** | `Frontend/` |
-| BFF (`Carga.Api`) | **5060** / Swagger **7166** | `Carga.Api/` |
+| BFF (`Carga.Api`) | **5080** / Swagger **7166** | `Carga.Api/` |
 | Host POC | — | `tools/Carga.DevHost/` |
 | Windows Service (congelado pós-RESUMO) | — | `dfend-cte-carga-windowsservices/` |
 
@@ -20,7 +20,7 @@ Negócio: **download pontual por chave** (não fluxo contínuo) via WS `cteConsu
 
 ## Subir em DEV
 
-1. BFF: abrir `Carga.Api/Monitor.sln` → profile `http` (`:5060`)
+1. BFF: abrir `Carga.Api/Monitor.sln` → profile `http` (`:5080`)
 2. Front: `cd Frontend` → `npm install` → `npm start` (`:4260`)
 3. Ligar Carga pela UI (sobe `Carga.DevHost` + `Executar=1` no cod **99**)
 

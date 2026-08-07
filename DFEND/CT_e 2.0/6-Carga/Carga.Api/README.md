@@ -1,13 +1,13 @@
 # Carga.Api — BFF Monitor CT-e Carga
 
-Pasta irmã de `Frontend/`, `tools/Carga.DevHost/` e `dfend-cte-Carga-windowsservices/`, dentro de **`2-Carga/`**.
+Pasta irmã de `Frontend/`, `tools/Carga.DevHost/` e `dfend-cte-carga-windowsservices/`, dentro de **`6-Carga/`**.
 
 ## Rodar (VS 2022)
 
 1. Abrir `Monitor.sln`
-2. Startup **Monitor.Api** · perfil **https**
+2. Startup **Monitor.Api** · perfil **https** ou **http**
 3. F5 → `https://localhost:7166/swagger`
-4. HTTP (front): `http://localhost:5060`
+4. HTTP (front): `http://localhost:5080`
 
 ```powershell
 cd Carga.Api
@@ -18,14 +18,13 @@ dotnet run --project src/Monitor.Api --launch-profile https
 
 `src/Monitor.Api/appsettings.Development.json`:
 
-- Connection string → SQL DEV `bd_cte_recepcao`
+- Connection strings → SQL DEV recepção + sintético (conforme appsettings)
 - `PreferLocalProcess: true`
 - `InternalApiKey: dev-cte-chain-key`
-- `CodServicoCarga: 3`
+- `CodServicoCarga: 99`
 - `CargaExeRelativePath: tools\Carga.DevHost\bin\Debug\Carga.DevHost.exe`
 - `SnapshotIntervalMs: 1000`
 - `RecentLogsTake: 300`
-- `ConnectionStringSintetico` opcional (filas destino em outro BD)
 
 Cliente: `dotnet user-secrets set "Monitor:ConnectionString" "..."` (não commitar segredo).  
 Homolog/Prod: `PreferLocalProcess=false` + `Monitor__InternalApiKey` via secret store.
@@ -34,15 +33,15 @@ Homolog/Prod: `PreferLocalProcess=false` + `Monitor__InternalApiKey` via secret 
 
 | Endpoint | Nota |
 |----------|------|
-| `GET /api/monitor/info` | Identidade + endpoints · `domain=Carga` |
-| `GET /api/monitor/snapshot` | + `liveTrace`, `tableHealth` (8), filas destino |
+| `GET /api/monitor/info` | Identidade · `domain=carga` |
+| `GET /api/monitor/snapshot` | telemetria / liveTrace / tableHealth |
 | `GET /api/monitor/logs` | afterSeq / take |
-| `GET /api/monitor/tables/{key}` | 8 keys (fila_entrada + 3 destinos) |
+| `GET /api/monitor/tables/{key}` | tabelas vigiladas |
 | `GET /api/monitor/service/status` | |
-| `POST .../start` · `POST .../stop` | DevHost + `UPDATE Executar` (cod 3) |
+| `POST .../start` · `POST .../stop` | DevHost + `UPDATE Executar` (cod **99**) |
 | Hub `/hubs/monitor` | `snapshot`, `logsAppend` |
 | `GET /health` · `/health/live` | Liveness (público) |
-| `GET /health/ready` | Dual ping primary + sintético · 503 se down |
+| `GET /health/ready` | Readiness · 503 se down |
 | `/api/v1/monitor/*` | Aliases versionados |
 
 Auth em `/api/monitor/*`: header `X-Cte-Internal-Api-Key`.  
@@ -55,4 +54,4 @@ cd Carga.Api
 dotnet test
 ```
 
-Host POC (Debug online): `../tools/Carga.DevHost/Program.cs` → `monitor-live.log`.
+Host POC: `../tools/Carga.DevHost`. Negócio: download pontual por chave — ver também `../README.md` e `../../7-Resgate/`.

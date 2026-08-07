@@ -15,7 +15,7 @@ CT_e 2.0/
 ├── 3-Sintetizador/     # Sintético (CodServico 8) :4230 / :5030
 ├── 4-Analisador/       # Análise (CodServico 6) :4240 / :5040
 ├── 5-Integrador/       # Netezza / DocVinc / FICS (CodServico 7) :4250 / :5050
-├── 6-Carga/            # Download pontual por chave (CodServico 99) :4260 / :5060
+├── 6-Carga/            # Download pontual por chave (CodServico 99) :4260 / :5080
 ├── 7-Resgate/          # Enfileira chaves → Carga :5070
 ├── gateway/            # nginx entrada única :8080
 ├── docker-compose.chain.yml

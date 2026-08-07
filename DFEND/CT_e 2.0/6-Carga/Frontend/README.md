@@ -9,7 +9,7 @@ Plano / ata: `CT_e/.cursor/plans/monitor_realtime_receptor_fded97f7.plan.md`.
 ### API (BFF) — fora desta pasta
 
 Abrir `../Carga.Api/Monitor.sln` no VS 2022 · perfil **https** · F5 → Swagger `https://localhost:7166/swagger`.  
-Front consome `http://localhost:5060`.
+Front consome `http://localhost:5080`.
 
 ### Front (esta pasta)
 

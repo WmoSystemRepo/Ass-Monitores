@@ -146,7 +146,7 @@ No Ligar (DEV): paths do registry sobem engines/DevHosts em silêncio. Em Docker
 ### UX recente (resumo)
 
 - Dashboard: foco em **AGORA** e profundidade de fila; medidor sobe/desce; boot visual ao Ligar; após Desligar, **Parada + NA FILA** com backlog é esperado
-- **Todos os monitores** (R→C): Mais informações 2×2 com **Saúde dos bancos** (`connectionHealth` + `tableHealth`); catálogo de erros leigo + **Copiar texto**; avisos; fila/boot
+- **Todos os monitores** (R→C): Mais informações 2×2 com **Saúde dos bancos** (`connectionHealth` + `tableHealth`); CTA jornada dos lotes; catálogo de erros leigo + **Copiar texto**; Tabelas com take até **1000**, filtros e jornada inferida
 - Confirmações via `ConfirmDialog` (shared-ui)
 
 Detalhes: [Doc/Documentacao_Orquestrador_CTe.md](Doc/Documentacao_Orquestrador_CTe.md) §8.2 e §14.

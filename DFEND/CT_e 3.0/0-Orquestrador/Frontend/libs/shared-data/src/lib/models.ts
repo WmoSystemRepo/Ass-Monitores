@@ -235,6 +235,10 @@ export interface TableDetailDto {
   logRows?: LogEntry[] | null;
   fila?: FilaDetailView | null;
   contextLogs?: LogEntry[] | null;
+  /** Take efetivamente aplicado pela API (1–1000). */
+  takeApplied?: number;
+  /** Quantidade de linhas retornadas neste detalhe. */
+  rowCount?: number;
 }
 
 export interface LiveTraceLine {

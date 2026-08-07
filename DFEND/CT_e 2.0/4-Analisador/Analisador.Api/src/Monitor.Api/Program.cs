@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.Options;
 using Monitor.Api.Security;
 using Monitor.Application.Abstractions;
@@ -106,7 +106,7 @@ app.MapGet("/api/monitor/tables/{key}", async (
     int? take,
     CancellationToken ct) =>
 {
-    var detail = await tables.GetAsync(key, take ?? 100, ct);
+    var detail = await tables.GetAsync(key, take ?? 1000, ct);
     return detail is null ? Results.NotFound(new { message = $"Tabela '{key}' nÃ£o encontrada." }) : Results.Ok(detail);
 });
 

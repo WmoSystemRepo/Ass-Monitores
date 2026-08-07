@@ -106,7 +106,7 @@ app.MapGet("/api/monitor/tables/{key}", async (
     int? take,
     CancellationToken ct) =>
 {
-    var detail = await tables.GetAsync(key, take ?? 100, ct);
+    var detail = await tables.GetAsync(key, take ?? 1000, ct);
     return detail is null ? Results.NotFound(new { message = $"Tabela '{key}' não encontrada." }) : Results.Ok(detail);
 });
 

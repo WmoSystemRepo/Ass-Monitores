@@ -1,7 +1,7 @@
 # Documentação — Orquestrador CT-e
 
 > Dashboard central da cadeia DFEND CT-e · registry, autenticação interna e multiambiente  
-> Atualizado: 06/08/2026 (Saúde dos bancos · catálogo de erros · Copiar · FAQ Desligar)
+> Atualizado: 06/08/2026 (Tabelas take 1000 · jornada inferida · Saúde dos bancos · FAQ)
 
 ## 1. Objetivo
 
@@ -155,6 +155,7 @@ Arquivador em DEV: API `:5020` · UI `:4210`. Orquestrador UI: `:4220`.
 | GET | `/api/chain/health` | por sistema: `online` \| `offline` \| `disabled` \| `unauthorized` |
 | WS/HTTP | `/hubs/monitor` | **SignalR** — monitores ricos: `JoinService(servico)` → eventos `snapshot` / `logsAppend` (~1s) |
 | GET | `/api/monitores/{servico}/*` | REST do monitor unificado (snapshot, logs, start/stop, …) — fallback se SignalR cair |
+| GET | `/api/monitores/{servico}/tables/{key}?take=` | Detalhe de tabela (Temporária/Log/Config…). **take 1–1000** (default **1000**); BFF e Monitor.Api fazem clamp. Resposta inclui `takeApplied` e `rowCount`. Sem XML. |
 | GET | `/health` | liveness |
 | GET | `/health/ready` | readiness do BFF (config OK; monitores offline **não** derrubam) |
 
@@ -310,12 +311,29 @@ Script de sync de anatomia (dev): `Frontend/tools/sync-receptor-anatomy-ux.py` +
 |------|----------|
 | **O que aconteceu agora** | Feed misturando `liveTrace` (passo) e logs SQL (banco) |
 | **Últimos eventos do banco** | Lista de logs com severidade; em erro/aviso do catálogo abre o modal |
-| **Saúde dos bancos** | Badge `connectionHealth` + lista compacta de `tableHealth` (status, idade, ms). Links **Tabelas →** e **Config →**. Clique na linha → `/monitores/{id}/tabelas/{key}` |
+| **Saúde dos bancos** | Badge `connectionHealth` + lista compacta de `tableHealth` (status, idade, ms). Links **Ver jornada dos lotes →** (`/tabelas/temporaria`), **Tabelas →** e **Config →**. Clique na linha → `/monitores/{id}/tabelas/{key}` |
 | **Avisos e saúde** | `snapshot.alerts` (processo, batida, backlog) |
 
 O card antigo **Configuração e lotes** (NSU / intervalo / temporária / lotes) foi **substituído** por **Saúde dos bancos**. NSU e filas continuam no painel (anatomia) e nas rotas Config/Tabelas.
 
-Sem `tableHealth` no snapshot: mensagem orientando a checar connection string / SQL do monitor.
+Sem `tableHealth` no snapshot: empty state com CTA **Ver jornada dos lotes →** e orientação de connection string / SQL.
+
+#### 8.2.1b Tabelas — detalhe e jornada (Fase 1)
+
+Rotas: `/monitores/{servico}/tabelas` e `/monitores/{servico}/tabelas/{key}`.
+
+| Item | Comportamento |
+|------|----------------|
+| Limite | Até **1000** linhas (`take`); rodapé mostra N linhas · filtros · máx. 1000 · sem XML |
+| Filtros | Por coluna no thead (debounce); sticky header; highlight de erro |
+| Temporária | Colunas de lote + **Origem / Estágio atual / Próximo / Situação** |
+| Jornada | **Inferida pelo serviço atual** na cadeia R→A→S→An→I→C (mapa estático no front). **Não** é rastreio por chave CT-e entre bancos |
+| Situação | Heurística: `hasError` → Com erro; fila > 0 → Enfileirado; senão → Na temp |
+| Log / Config | Filtros básicos nas colunas principais |
+| Índice SQL | Recomendado nas temps: `dtc_atualizacao DESC` (e equivalente em logs). Sem migration nesta fase |
+| In-process | Detalhe de tabelas no Orquestrador exige Monitor.Api via HTTP (`UseHttpFallback`); in-process sem SQL de tabelas retorna 404 |
+
+**Fase 2 (fora do escopo):** rastreio por chave de acesso CT-e entre temps/filas; XML no grid.
 
 #### 8.2.2 Catálogo de erros (linguagem clara)
 
@@ -472,6 +490,7 @@ Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 | 06/08/2026 | Mais informações: card **Saúde dos bancos** (conexão + `tableHealth`) no lugar de Configuração e lotes |
 | 06/08/2026 | Doc + UX: após **Desligar**, Fase Parada com **NA FILA** / backlog pendente é esperado (não limpa fila) |
 | 06/08/2026 | Catálogo `log-error-catalog` (215…) + **Copiar texto** no modal Ver erro |
+| 06/08/2026 | Tabelas: take até **1000**, filtros, jornada inferida (Origem/Estágio/Próximo); CTA jornada em Mais informações |
 
 ## 14. Dúvidas frequentes (operação)
 
@@ -502,7 +521,11 @@ Histórico de traduções: `Frontend/libs/shared-utils/src/lib/log-error-catalog
 Foi trocado de propósito pelo card **Saúde dos bancos** (conexão SQL + tabelas).  
 - **NSU / temporária / fila:** painel do serviço (anatomia) e chips de fila.  
 - **Configuração:** link **Config →** no card de saúde, ou menu Config do monitor.  
-- **Detalhe de tabelas/lotes:** **Tabelas →** ou `/monitores/{servico}/tabelas`.
+- **Detalhe de tabelas/lotes:** **Tabelas →**, **Ver jornada dos lotes →** ou `/monitores/{servico}/tabelas/temporaria` (até 1000 lotes, filtros, colunas de jornada).
+
+### As colunas Origem / Estágio / Próximo rastream a chave CT-e entre serviços?
+
+**Não (Fase 1).** Elas mostram onde o **serviço atual** está na cadeia (R→A→S→An→I→C), inferidas no front pelo `serviceId`. Não há JOIN entre temps nem coluna de chave de acesso no DTO. Rastreio por chave CT-e fica para Fase 2.
 
 ### O modal de erro tem “Copiar texto”?
 

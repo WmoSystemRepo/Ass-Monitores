@@ -17,7 +17,7 @@ export class ServiceMonitorApiService {
   logs(afterSeq = 0, take = 300): Observable<LogEntry[]> {
     return this.http.get<LogEntry[]>(`${this.base}/logs`, { params: { afterSeq, take } });
   }
-  tableDetail(key: string, take = 100): Observable<TableDetailDto> {
+  tableDetail(key: string, take = 1000): Observable<TableDetailDto> {
     return this.http.get<TableDetailDto>(`${this.base}/tables/${encodeURIComponent(key)}`, { params: { take } });
   }
   serviceStatus(): Observable<ServiceControlResult> { return this.http.get<ServiceControlResult>(`${this.base}/service/status`); }

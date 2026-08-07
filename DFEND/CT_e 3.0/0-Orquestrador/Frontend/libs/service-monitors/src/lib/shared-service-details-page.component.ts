@@ -136,8 +136,8 @@ const META: Record<string, ServiceDetailsMeta> = {
         <section class="details-card flex min-h-0 flex-col">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">O que aconteceu agora</h2>
-            <p class="text-[11px] text-slate-500">
-              Passos recentes (técnicos e do banco) — do mais novo para o mais antigo
+            <p class="text-[11px] leading-snug text-slate-500">
+              Veja o passo mais recente — use para saber se o serviço está andando
             </p>
           </div>
           <div class="min-h-0 flex-1 space-y-1 overflow-hidden">
@@ -159,7 +159,7 @@ const META: Record<string, ServiceDetailsMeta> = {
                 <span class="min-w-0 truncate text-slate-200">{{ row.text }}</span>
               </div>
             } @empty {
-              <p class="text-xs leading-relaxed text-slate-500">{{ meta().emptyFeed }}</p>
+              <p class="text-[11px] leading-relaxed text-slate-500">{{ meta().emptyFeed }}</p>
             }
           </div>
         </section>
@@ -167,9 +167,8 @@ const META: Record<string, ServiceDetailsMeta> = {
         <section class="details-card flex min-h-0 flex-col">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Últimos eventos do banco</h2>
-            <p class="text-[11px] text-slate-500">
-              Sucesso, aviso ou erro. Em erro/aviso mapeado, abra a explicação e o texto
-              original.
+            <p class="text-[11px] leading-snug text-slate-500">
+              Em erro ou aviso, abra a explicação — não precisa caçar no log cru
             </p>
           </div>
           <div class="min-h-0 flex-1 space-y-1 overflow-hidden">
@@ -207,7 +206,7 @@ const META: Record<string, ServiceDetailsMeta> = {
                 }
               </div>
             } @empty {
-              <p class="text-xs leading-relaxed text-slate-500">{{ meta().emptyEvents }}</p>
+              <p class="text-[11px] leading-relaxed text-slate-500">{{ meta().emptyEvents }}</p>
             }
           </div>
         </section>
@@ -216,11 +215,17 @@ const META: Record<string, ServiceDetailsMeta> = {
           <div class="mb-1.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
             <div>
               <h2 class="text-sm font-semibold text-slate-100">Saúde dos bancos</h2>
-              <p class="text-[11px] text-slate-500">
-                Conexão SQL e tabelas usadas por este serviço
+              <p class="text-[11px] leading-snug text-slate-500">
+                Confira conexão e tabelas — detalhe e jornada ficam em Tabelas
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+              <a
+                [routerLink]="'/monitores/' + serviceId() + '/tabelas/temporaria'"
+                class="text-[10px] font-medium hover:underline"
+                [ngClass]="meta().accentLink"
+                >Ver jornada dos lotes →</a
+              >
               <a
                 [routerLink]="'/monitores/' + serviceId() + '/tabelas'"
                 class="text-[10px] hover:underline"
@@ -271,10 +276,18 @@ const META: Record<string, ServiceDetailsMeta> = {
                 </span>
               </a>
             } @empty {
-              <p class="text-[11px] leading-relaxed text-slate-500">
-                Sem telemetria de tabelas ainda — confira connection string / SQL do
-                monitor.
-              </p>
+              <div class="space-y-2 text-[11px] leading-relaxed text-slate-500">
+                <p>
+                  Sem telemetria de tabelas ainda. Confira a connection string do monitor
+                  ou abra a Temporária para ver lotes da sessão.
+                </p>
+                <a
+                  [routerLink]="'/monitores/' + serviceId() + '/tabelas/temporaria'"
+                  class="inline-block font-medium hover:underline"
+                  [ngClass]="meta().accentLink"
+                  >Ver jornada dos lotes →</a
+                >
+              </div>
             }
           </div>
         </section>
@@ -282,8 +295,8 @@ const META: Record<string, ServiceDetailsMeta> = {
         <section class="details-card flex min-h-0 flex-col">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Avisos e saúde</h2>
-            <p class="text-[11px] text-slate-500">
-              Situações que pedem atenção (processo, fila, batida no banco)
+            <p class="text-[11px] leading-snug text-slate-500">
+              Priorize o que pede ação (processo parado, fila alta, batida atrasada)
             </p>
           </div>
           <div class="min-h-0 flex-1 space-y-1.5 overflow-hidden">
@@ -301,7 +314,7 @@ const META: Record<string, ServiceDetailsMeta> = {
                 <p class="mt-0.5 text-slate-100">{{ a.message }}</p>
               </div>
             } @empty {
-              <p class="text-xs leading-relaxed text-slate-500">
+              <p class="text-[11px] leading-relaxed text-slate-500">
                 Sem avisos no momento. Quando o serviço estiver parado ou a batida
                 atrasar, os alertas aparecem aqui.
               </p>

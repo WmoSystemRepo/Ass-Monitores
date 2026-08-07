@@ -10,16 +10,46 @@ import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap, timer, catchError, of } from 'rxjs';
-import { ServiceMonitorStore } from '../service-monitor.store';
-import { ServiceMonitorApiService } from '../service-monitor-api.service';
-import { TableDetailDto } from '@orquestrador/shared-data';
+import {
+  ConfigDetailRow,
+  LogEntry,
+  RecentDocument,
+  TableDetailDto,
+} from '@orquestrador/shared-data';
 import {
   formatDataAgeSeconds,
   summarizeLogMessage,
   tableHealthStatusLabel,
 } from '@orquestrador/shared-utils';
+import { ServiceMonitorStore } from '../service-monitor.store';
+import { ServiceMonitorApiService } from '../service-monitor-api.service';
+import { journeyForService, situacaoLote } from '../cte-journey';
+import {
+  MonitorDataGridComponent,
+  MonitorGridColumn,
+} from '../monitor-data-grid.component';
 
 const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as const;
+const TABLE_DETAIL_TAKE = 1000;
+
+interface TempRowView extends RecentDocument {
+  origem: string;
+  estagio: string;
+  proximo: string;
+  situacao: string;
+}
+
+function fmtDate(v?: string | null): string {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return '—';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm} ${hh}:${mi}:${ss}`;
+}
 
 @Component({
   selector: 'lib-tables-hub-page',
@@ -83,7 +113,7 @@ export class TablesHubPageComponent {
 @Component({
   selector: 'lib-table-detail-page',
   standalone: true,
-  imports: [DatePipe, NgClass, RouterLink],
+  imports: [DatePipe, NgClass, RouterLink, MonitorDataGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="flex flex-col gap-4">
@@ -136,7 +166,7 @@ export class TablesHubPageComponent {
       @if (key() === 'servico') {
         <div class="overflow-auto rounded border border-slate-700">
           <table class="min-w-full text-left text-sm">
-            <thead class="bg-slate-900 text-xs uppercase text-slate-500">
+            <thead class="sticky top-0 bg-slate-900 text-xs uppercase text-slate-500">
               <tr>
                 <th class="px-3 py-2">Serviço</th>
                 <th class="px-3 py-2">Servidor</th>
@@ -180,97 +210,35 @@ export class TablesHubPageComponent {
 
       <!-- Configuração -->
       @if (key() === 'configuracao') {
-        <div class="overflow-auto rounded border border-slate-700">
-          <table class="min-w-full text-left text-sm">
-            <thead class="bg-slate-900 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-3 py-2">Chave</th>
-                <th class="px-3 py-2">Valor</th>
-                <th class="px-3 py-2">Atualizado</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (r of detail()?.configRows ?? []; track r.key) {
-                <tr
-                  class="border-t border-slate-800"
-                  [ngClass]="r.key === 'Executar' ? 'bg-cyan-950/20' : ''"
-                >
-                  <td class="px-3 py-2 font-medium text-slate-200">{{ r.key }}</td>
-                  <td class="px-3 py-2 font-mono text-cyan-300">{{ r.value }}</td>
-                  <td class="px-3 py-2 text-slate-400">
-                    {{ r.dtcAtualizacao | date: 'dd/MM HH:mm:ss' }}
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="3" class="px-3 py-4 text-slate-500">Sem configurações do processo.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        <lib-monitor-data-grid
+          [rows]="configRows()"
+          [columns]="configColumns"
+          [takeApplied]="detail()?.takeApplied ?? 1000"
+          [emptyMessage]="'Sem configurações do processo.'"
+          [rowTrackId]="configTrackId"
+        />
       }
 
       <!-- Temporária -->
       @if (key() === 'temporaria') {
-        <p class="text-xs text-slate-500">
-          {{ (detail()?.tempRows ?? []).length }} lote(s) desta sessão (máx. 100) · sem XML
-        </p>
-        <div class="overflow-auto rounded border border-slate-700">
-          <table class="min-w-full text-left text-sm">
-            <thead class="bg-slate-900 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-3 py-2">NSU</th>
-                <th class="px-3 py-2">NSU final</th>
-                <th class="px-3 py-2">Qtd</th>
-                <th class="px-3 py-2">Documento</th>
-                <th class="px-3 py-2">Atualização</th>
-                <th class="px-3 py-2">Erro</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (r of detail()?.tempRows ?? []; track r.nsu) {
-                <tr
-                  class="border-t border-slate-800"
-                  [ngClass]="r.hasError ? 'bg-rose-950/20' : ''"
-                >
-                  <td class="px-3 py-2 font-mono text-cyan-300">{{ r.nsu }}</td>
-                  <td class="px-3 py-2 font-mono">{{ r.nsuFinal ?? '—' }}</td>
-                  <td class="px-3 py-2">{{ r.qtdDocumento }}</td>
-                  <td class="px-3 py-2">{{ r.dtcDocumento | date: 'dd/MM HH:mm:ss' }}</td>
-                  <td class="px-3 py-2">{{ r.dtcAtualizacao | date: 'dd/MM HH:mm:ss' }}</td>
-                  <td class="px-3 py-2 text-rose-300">{{ r.mensagemErro || '—' }}</td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="6" class="px-3 py-4 text-slate-500">
-                    Nenhum lote nesta sessão.
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        <lib-monitor-data-grid
+          [rows]="tempRows()"
+          [columns]="tempColumns"
+          [takeApplied]="detail()?.takeApplied ?? 1000"
+          [emptyMessage]="'Nenhum lote nesta sessão. Acompanhe a jornada em Mais informações.'"
+          [rowTrackId]="tempTrackId"
+        />
       }
 
       <!-- Log -->
       @if (key() === 'log') {
-        <div class="max-h-[70vh] overflow-auto rounded border border-slate-700 bg-slate-950/60 p-3">
-          @for (l of detail()?.logRows ?? []; track l.seqLog) {
-            <div class="border-b border-slate-800/80 py-2 text-xs last:border-0">
-              <span class="text-slate-500">{{ l.dtcLog | date: 'dd/MM HH:mm:ss' }}</span>
-              @if (l.threadId) {
-                <span class="ml-2 text-slate-400">Linha {{ l.threadId }}</span>
-              }
-              @if (l.cStat) {
-                <span class="ml-2 rounded bg-slate-800 px-1 text-cyan-300">cStat {{ l.cStat }}</span>
-              }
-              <p class="mt-0.5 text-slate-300">{{ summarize(l.mensagem, l.cStat) }}</p>
-            </div>
-          } @empty {
-            <p class="text-sm text-slate-500">Nenhum log nesta sessão.</p>
-          }
-        </div>
+        <lib-monitor-data-grid
+          [rows]="logRows()"
+          [columns]="logColumns"
+          [takeApplied]="detail()?.takeApplied ?? 1000"
+          [emptyMessage]="'Nenhum log nesta sessão.'"
+          [rowTrackId]="logTrackId"
+        />
       }
 
       <!-- Fila -->
@@ -296,7 +264,8 @@ export class TablesHubPageComponent {
               {{ fila.depthTrend.join(' → ') || '—' }}
             </p>
             <p class="mt-3 text-xs text-slate-500">
-              A fila não lista mensagens individuais — só a quantidade aguardando o Arquivador.
+              A fila não lista mensagens individuais — só a quantidade aguardando o próximo
+              serviço.
             </p>
           </div>
         }
@@ -307,6 +276,7 @@ export class TablesHubPageComponent {
 export class TableDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(ServiceMonitorApiService);
+  private readonly store = inject(ServiceMonitorStore);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly key = toSignal(
@@ -319,6 +289,168 @@ export class TableDetailPageComponent {
 
   readonly health = computed(() => this.detail()?.health ?? null);
 
+  readonly queueDepth = computed(
+    () => this.store.queues()?.serviceBrokerDepth ?? this.detail()?.fila?.depth ?? 0
+  );
+
+  readonly tempRows = computed((): TempRowView[] => {
+    const rows = this.detail()?.tempRows ?? [];
+    const j = journeyForService(this.store.serviceId());
+    const depth = this.queueDepth();
+    return rows.map((r) => ({
+      ...r,
+      origem: j.origem,
+      estagio: j.estagio,
+      proximo: j.proximo,
+      situacao: situacaoLote(r.hasError, depth),
+    }));
+  });
+
+  readonly configRows = computed(() => this.detail()?.configRows ?? []);
+  readonly logRows = computed(() => this.detail()?.logRows ?? []);
+
+  readonly tempColumns: MonitorGridColumn<TempRowView>[] = [
+    {
+      id: 'nsu',
+      header: 'NSU',
+      filterable: true,
+      filterPlaceholder: 'NSU',
+      mono: true,
+      value: (r) => String(r.nsu),
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'nsuFinal',
+      header: 'NSU final',
+      filterable: true,
+      filterPlaceholder: 'Final',
+      mono: true,
+      value: (r) => (r.nsuFinal != null ? String(r.nsuFinal) : '—'),
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'qtd',
+      header: 'Qtd',
+      filterable: true,
+      filterPlaceholder: 'Qtd',
+      value: (r) => String(r.qtdDocumento),
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'doc',
+      header: 'Documento',
+      filterable: true,
+      filterPlaceholder: 'Data',
+      value: (r) => fmtDate(r.dtcDocumento),
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'atualizacao',
+      header: 'Atualização',
+      filterable: true,
+      filterPlaceholder: 'Data',
+      value: (r) => fmtDate(r.dtcAtualizacao),
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'origem',
+      header: 'Origem',
+      filterable: true,
+      value: (r) => r.origem,
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'estagio',
+      header: 'Estágio atual',
+      filterable: true,
+      value: (r) => r.estagio,
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'proximo',
+      header: 'Próximo',
+      filterable: true,
+      value: (r) => r.proximo,
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'situacao',
+      header: 'Situação',
+      filterable: true,
+      value: (r) => r.situacao,
+      rowHighlight: (r) => r.hasError,
+    },
+    {
+      id: 'erro',
+      header: 'Erro',
+      filterable: true,
+      filterPlaceholder: 'Erro',
+      value: (r) => r.mensagemErro || '—',
+      cellClass: (r) => (r.hasError ? 'text-rose-300' : ''),
+      rowHighlight: (r) => r.hasError,
+    },
+  ];
+
+  readonly configColumns: MonitorGridColumn<ConfigDetailRow>[] = [
+    {
+      id: 'key',
+      header: 'Chave',
+      filterable: true,
+      filterPlaceholder: 'Chave',
+      value: (r) => r.key,
+    },
+    {
+      id: 'value',
+      header: 'Valor',
+      filterable: true,
+      filterPlaceholder: 'Valor',
+      mono: true,
+      value: (r) => r.value,
+    },
+    {
+      id: 'atualizado',
+      header: 'Atualizado',
+      filterable: true,
+      value: (r) => fmtDate(r.dtcAtualizacao),
+    },
+  ];
+
+  readonly logColumns: MonitorGridColumn<LogEntry>[] = [
+    {
+      id: 'data',
+      header: 'Data',
+      filterable: true,
+      filterPlaceholder: 'Data',
+      value: (r) => fmtDate(r.dtcLog),
+    },
+    {
+      id: 'thread',
+      header: 'Linha',
+      filterable: true,
+      filterPlaceholder: 'Thread',
+      value: (r) => (r.threadId != null ? String(r.threadId) : '—'),
+    },
+    {
+      id: 'cStat',
+      header: 'cStat',
+      filterable: true,
+      filterPlaceholder: 'cStat',
+      mono: true,
+      value: (r) => r.cStat || '—',
+    },
+    {
+      id: 'mensagem',
+      header: 'Mensagem',
+      filterable: true,
+      filterPlaceholder: 'Texto',
+      value: (r) => summarizeLogMessage(r.mensagem, r.cStat),
+    },
+  ];
+
+  readonly tempTrackId = (r: TempRowView) => `${r.nsu}-${r.nsuFinal ?? ''}-${r.dtcAtualizacao ?? ''}`;
+  readonly configTrackId = (r: ConfigDetailRow) => r.key;
+  readonly logTrackId = (r: LogEntry) => r.seqLog;
+
   constructor() {
     this.route.paramMap
       .pipe(
@@ -326,7 +458,7 @@ export class TableDetailPageComponent {
         switchMap((key) =>
           timer(0, 2000).pipe(
             switchMap(() =>
-              this.api.tableDetail(key, 100).pipe(
+              this.api.tableDetail(key, TABLE_DETAIL_TAKE).pipe(
                 map((d) => ({ key, d, err: null as string | null })),
                 catchError((err) =>
                   of({
@@ -366,7 +498,7 @@ export class TableDetailPageComponent {
       configuracao: 'Configuração',
       temporaria: 'Temporária',
       log: 'Log',
-      fila: 'Fila Arquivador',
+      fila: 'Fila',
     };
     return labels[k] ?? k;
   }

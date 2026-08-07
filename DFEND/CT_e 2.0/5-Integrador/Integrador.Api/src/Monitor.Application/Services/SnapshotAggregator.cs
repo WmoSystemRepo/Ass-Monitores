@@ -49,7 +49,7 @@ public sealed class MonitorOptions
     /// <summary>Opcional: caminho absoluto do monitor-live.log. Se vazio, resolve ao lado do DevHost.exe.</summary>
     public string LiveTracePath { get; set; } = string.Empty;
     public int LiveTraceTake { get; set; } = 80;
-    public int TableDetailTake { get; set; } = 100;
+    public int TableDetailTake { get; set; } = 1000;
 }
 
 public sealed class SnapshotAggregator : ISnapshotAggregator
@@ -539,7 +539,7 @@ public sealed class TableDetailService : ITableDetailService
     public async Task<TableDetailDto?> GetAsync(string key, int take, CancellationToken ct)
     {
         key = key.Trim().ToLowerInvariant();
-        take = take is > 0 and <= 100 ? take : _options.TableDetailTake;
+        take = Math.Clamp(take <= 0 ? _options.TableDetailTake : take, 1, 1000);
 
         var snapshot = await _aggregator.BuildSnapshotAsync(ct);
         var healthKey = key switch
@@ -572,7 +572,7 @@ public sealed class TableDetailService : ITableDetailService
 
         try
         {
-            return key switch
+            TableDetailDto? detail = key switch
             {
                 "servico" => await BuildServicoAsync(health, sessionStart, receptionOn, banner, take, ct),
                 "config" or "configuracao" => await BuildConfigAsync(health, sessionStart, receptionOn, banner, ct),
@@ -591,10 +591,11 @@ public sealed class TableDetailService : ITableDetailService
                     snapshot.Queues.DocVinculadoDepth, "Fila DocVinculado"),
                 _ => null
             };
+            return detail is null ? null : WithTakeMeta(detail, take);
         }
         catch (Exception)
         {
-            return new TableDetailDto(
+            return WithTakeMeta(new TableDetailDto(
                 health.Key,
                 health.Label,
                 sessionStart,
@@ -606,7 +607,7 @@ public sealed class TableDetailService : ITableDetailService
                 null,
                 null,
                 null,
-                null);
+                null), take);
         }
     }
 
@@ -781,6 +782,16 @@ public sealed class TableDetailService : ITableDetailService
             new FilaDetailView(depth, trend, _thresholds.FilaAlta, hint),
             null);
     }
+    private static TableDetailDto WithTakeMeta(TableDetailDto dto, int takeApplied) =>
+        dto with
+        {
+            TakeApplied = takeApplied,
+            RowCount = dto.TempRows?.Count
+                ?? dto.LogRows?.Count
+                ?? dto.ConfigRows?.Count
+                ?? dto.ServiceRows?.Count
+                ?? (dto.Fila is not null ? 1 : dto.ContextLogs?.Count ?? 0)
+        };
 }
 
 public sealed class ServiceControlService

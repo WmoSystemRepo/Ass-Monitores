@@ -88,7 +88,7 @@ Grid 2×2 sem scroll da página:
 |------|--------|
 | O que aconteceu agora | Passos + logs recentes |
 | Últimos eventos do banco | Severidade; **Ver erro** / **Ver detalhes** |
-| **Saúde dos bancos** | `connectionHealth` + `tableHealth`; links **Tabelas →** / **Config →** |
+| **Saúde dos bancos** | `connectionHealth` + `tableHealth`; **Ver jornada dos lotes →** / **Tabelas →** / **Config →** |
 | Avisos e saúde | `snapshot.alerts` (`BuildHealthAlerts`) |
 
 **Ver erro** abre explicação leiga (`log-error-catalog.ts`) + texto original; **Copiar texto** no modal.  

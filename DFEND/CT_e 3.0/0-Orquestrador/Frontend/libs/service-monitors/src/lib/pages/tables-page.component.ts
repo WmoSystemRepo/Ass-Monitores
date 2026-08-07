@@ -27,7 +27,7 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
   imports: [RouterLink, NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="flex flex-col gap-4">
+    <section class="flex flex-col gap-4" data-tour="tables-hub">
       <header>
         <h1 class="text-2xl font-semibold text-slate-50">Tabelas do banco</h1>
         <p class="text-sm text-slate-400">
@@ -39,6 +39,7 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
           <a
             [routerLink]="card.route"
             class="rounded-lg border border-slate-700 bg-slate-900/50 p-4 transition hover:border-cyan-500/40"
+            [attr.data-tour]="card.key === 'servico' ? 'nav-table-detail' : null"
           >
             <div class="flex items-center justify-between">
               <h2 class="font-medium text-slate-100">{{ card.label }}</h2>
@@ -54,7 +55,13 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
             <p class="mt-3 text-xs text-cyan-400">Ver dados →</p>
           </a>
         } @empty {
-          <p class="text-sm text-slate-500">Aguardando snapshot do monitor…</p>
+          <a
+            routerLink="servico"
+            class="rounded-lg border border-dashed border-slate-600 bg-slate-900/30 p-4 text-sm text-slate-400"
+            data-tour="nav-table-detail"
+          >
+            Abrir tabela Serviço (exemplo) →
+          </a>
         }
       </div>
     </section>
@@ -86,7 +93,7 @@ export class TablesHubPageComponent {
   imports: [DatePipe, NgClass, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="flex flex-col gap-4">
+    <section class="flex flex-col gap-4" data-tour="table-detail">
       <header class="flex flex-wrap items-end justify-between gap-3">
         <div>
           <a routerLink=".." class="text-xs text-cyan-400 hover:underline">← Tabelas</a>
@@ -100,17 +107,26 @@ export class TablesHubPageComponent {
             }
           </p>
         </div>
-        @if (health(); as h) {
-          <div class="text-right text-xs text-slate-400">
-            <span
-              class="rounded px-2 py-1 text-[10px] font-semibold uppercase"
-              [ngClass]="badgeClass(h.status)"
-            >
-              {{ statusLabel(h.status) }}
-            </span>
-            <p class="mt-1">Idade {{ formatAge(h.dataAgeSeconds) }} · Consulta {{ h.queryMs }}ms</p>
-          </div>
-        }
+        <div class="flex flex-wrap items-center gap-2">
+          <a
+            routerLink="../../threads"
+            class="rounded border border-slate-600 bg-slate-900/60 px-2.5 py-1 text-[11px] font-medium text-cyan-300 hover:bg-slate-800"
+            data-tour="nav-threads"
+          >
+            Linhas de trabalho →
+          </a>
+          @if (health(); as h) {
+            <div class="text-right text-xs text-slate-400">
+              <span
+                class="rounded px-2 py-1 text-[10px] font-semibold uppercase"
+                [ngClass]="badgeClass(h.status)"
+              >
+                {{ statusLabel(h.status) }}
+              </span>
+              <p class="mt-1">Idade {{ formatAge(h.dataAgeSeconds) }} · Consulta {{ h.queryMs }}ms</p>
+            </div>
+          }
+        </div>
       </header>
 
       @if (error(); as err) {

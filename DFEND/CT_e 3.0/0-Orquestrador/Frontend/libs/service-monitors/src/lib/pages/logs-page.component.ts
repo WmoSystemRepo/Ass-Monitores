@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, NgClass } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ServiceMonitorStore } from '../service-monitor.store';
@@ -23,11 +23,14 @@ import {
 @Component({
   selector: 'lib-logs-page',
   standalone: true,
-  imports: [FormsModule, DatePipe, NgClass],
+  imports: [FormsModule, DatePipe, NgClass, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="flex h-[calc(100vh-8rem)] flex-col gap-4">
-      <header class="flex flex-wrap items-end justify-between gap-3">
+      <header
+        class="flex flex-wrap items-end justify-between gap-3"
+        data-tour="logs-header"
+      >
         <div>
           <h1 class="text-2xl font-semibold text-slate-50">Histórico</h1>
           <p class="text-sm text-slate-400">
@@ -43,60 +46,73 @@ import {
           <button
             type="button"
             class="rounded border border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-900"
+            data-tour="logs-pause"
             (click)="togglePause()"
           >
             {{ paused() ? 'Retomar online' : 'Pausar' }}
           </button>
+          <a
+            routerLink="../config"
+            class="rounded border border-slate-600 bg-slate-900/60 px-3 py-1.5 text-sm text-cyan-200 hover:border-cyan-500"
+            data-tour="nav-config"
+          >
+            Configurações →
+          </a>
         </div>
       </header>
 
-      <div class="flex flex-wrap gap-2">
-        @for (f of filters; track f.id) {
-          <button
-            type="button"
-            class="rounded-full border px-3 py-1.5 text-xs transition"
-            [ngClass]="
-              kindFilter() === f.id
-                ? 'border-cyan-400 bg-cyan-950/50 text-cyan-200'
-                : 'border-slate-700 text-slate-400 hover:border-slate-500'
-            "
-            (click)="kindFilter.set(f.id)"
-          >
-            {{ f.label }}
-            <span class="ml-1 opacity-70">({{ countByKind(f.id) }})</span>
-          </button>
-        }
+      <div class="flex flex-col gap-3" data-tour="logs-filters">
+        <div class="flex flex-wrap gap-2">
+          @for (f of filters; track f.id) {
+            <button
+              type="button"
+              class="rounded-full border px-3 py-1.5 text-xs transition"
+              [ngClass]="
+                kindFilter() === f.id
+                  ? 'border-cyan-400 bg-cyan-950/50 text-cyan-200'
+                  : 'border-slate-700 text-slate-400 hover:border-slate-500'
+              "
+              (click)="kindFilter.set(f.id)"
+            >
+              {{ f.label }}
+              <span class="ml-1 opacity-70">({{ countByKind(f.id) }})</span>
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <label class="text-xs text-slate-400">
+            Linha de trabalho
+            <select
+              class="ml-1 rounded border border-slate-600 bg-slate-900 px-2 py-1"
+              [ngModel]="threadFilter()"
+              (ngModelChange)="threadFilter.set($event)"
+            >
+              <option [ngValue]="null">Todas</option>
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <option [ngValue]="n">Linha {{ n }}</option>
+              }
+            </select>
+          </label>
+          <label class="text-xs text-slate-400">
+            Buscar
+            <input
+              class="ml-1 min-w-[200px] rounded border border-slate-600 bg-slate-900 px-2 py-1"
+              placeholder="texto do evento…"
+              [ngModel]="textFilter()"
+              (ngModelChange)="textFilter.set($event)"
+            />
+          </label>
+          <p class="self-end text-xs text-slate-500">
+            Mostrando {{ visibleLogs().length }} de {{ sourceLogs().length }} eventos
+          </p>
+        </div>
       </div>
 
-      <div class="flex flex-wrap gap-3">
-        <label class="text-xs text-slate-400">
-          Linha de trabalho
-          <select
-            class="ml-1 rounded border border-slate-600 bg-slate-900 px-2 py-1"
-            [ngModel]="threadFilter()"
-            (ngModelChange)="threadFilter.set($event)"
-          >
-            <option [ngValue]="null">Todas</option>
-            @for (n of [1, 2, 3, 4, 5]; track n) {
-              <option [ngValue]="n">Linha {{ n }}</option>
-            }
-          </select>
-        </label>
-        <label class="text-xs text-slate-400">
-          Buscar
-          <input
-            class="ml-1 min-w-[200px] rounded border border-slate-600 bg-slate-900 px-2 py-1"
-            placeholder="texto do evento…"
-            [ngModel]="textFilter()"
-            (ngModelChange)="textFilter.set($event)"
-          />
-        </label>
-        <p class="self-end text-xs text-slate-500">
-          Mostrando {{ visibleLogs().length }} de {{ sourceLogs().length }} eventos
-        </p>
-      </div>
-
-      <div class="relative min-h-0 flex-1 overflow-auto rounded border border-slate-700 bg-slate-950/80 p-4">
+      <div
+        class="relative min-h-0 flex-1 overflow-auto rounded border border-slate-700 bg-slate-950/80 p-4"
+        data-tour="logs-timeline"
+      >
         <div class="absolute bottom-0 left-[1.65rem] top-4 w-px bg-gradient-to-b from-cyan-500/40 via-slate-700 to-transparent"></div>
         <div class="space-y-0">
           @for (l of visibleNewestFirst(); track l.seqLog; let i = $index) {

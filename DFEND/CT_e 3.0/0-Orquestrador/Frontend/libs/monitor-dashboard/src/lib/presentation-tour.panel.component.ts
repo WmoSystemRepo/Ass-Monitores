@@ -254,7 +254,7 @@ export class PresentationTourPanelComponent {
           block: 'nearest',
           inline: 'nearest',
         });
-      }, 100);
+      }, 220);
     });
   }
 

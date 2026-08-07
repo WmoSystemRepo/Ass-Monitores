@@ -107,7 +107,10 @@ const META: Record<string, ServiceDetailsMeta> = {
     <section
       class="details-fit flex h-[calc(100vh-3.25rem)] max-h-[calc(100vh-3.25rem)] flex-col gap-2 overflow-hidden"
     >
-      <header class="flex shrink-0 flex-wrap items-center justify-between gap-2">
+      <header
+        class="flex shrink-0 flex-wrap items-center justify-between gap-2"
+        data-tour="details-header"
+      >
         <div>
           <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500">
             {{ meta().eyebrow }}
@@ -133,7 +136,7 @@ const META: Record<string, ServiceDetailsMeta> = {
       <div
         class="grid min-h-0 flex-1 grid-cols-1 grid-rows-2 gap-2 overflow-hidden lg:grid-cols-2"
       >
-        <section class="details-card flex min-h-0 flex-col">
+        <section class="details-card flex min-h-0 flex-col" data-tour="details-feed">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">O que aconteceu agora</h2>
             <p class="text-[11px] text-slate-500">
@@ -164,7 +167,7 @@ const META: Record<string, ServiceDetailsMeta> = {
           </div>
         </section>
 
-        <section class="details-card flex min-h-0 flex-col">
+        <section class="details-card flex min-h-0 flex-col" data-tour="details-events">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Últimos eventos do banco</h2>
             <p class="text-[11px] text-slate-500">
@@ -212,7 +215,7 @@ const META: Record<string, ServiceDetailsMeta> = {
           </div>
         </section>
 
-        <section class="details-card flex min-h-0 flex-col">
+        <section class="details-card flex min-h-0 flex-col" data-tour="details-db-health">
           <div class="mb-1.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
             <div>
               <h2 class="text-sm font-semibold text-slate-100">Saúde dos bancos</h2>
@@ -225,6 +228,7 @@ const META: Record<string, ServiceDetailsMeta> = {
                 [routerLink]="'/monitores/' + serviceId() + '/tabelas'"
                 class="text-[10px] hover:underline"
                 [ngClass]="meta().accentLink"
+                data-tour="nav-tabelas"
                 >Tabelas →</a
               >
               <a
@@ -279,7 +283,7 @@ const META: Record<string, ServiceDetailsMeta> = {
           </div>
         </section>
 
-        <section class="details-card flex min-h-0 flex-col">
+        <section class="details-card flex min-h-0 flex-col" data-tour="details-alerts">
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Avisos e saúde</h2>
             <p class="text-[11px] text-slate-500">

@@ -12,6 +12,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { RecentDocument } from '@orquestrador/shared-data';
+import { ServiceQueueProofChipComponent } from '../service-queue-proof-chip.component';
 
 /** Estágios do ciclo (diagrama fluxo — 5 plataformas). */
 export type AnatomyStage = 'sefaz' | 'consulta' | 'temp' | 'broker' | 'arquivador';
@@ -27,7 +28,7 @@ export interface FlyingPacket {
 @Component({
   selector: 'lib-receptor-anatomy-flow',
   standalone: true,
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, ServiceQueueProofChipComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -213,6 +214,7 @@ export interface FlyingPacket {
                 >
                 <span class="anatomy-summary-value">{{ store.global()?.configuredThreads ?? '—' }}</span>
               </div>
+              <lib-service-queue-proof-chip />
             </div>
           </div>
         </div>

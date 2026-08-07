@@ -20,7 +20,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       </li>
       <li class="anatomy-legend-item">
         <span class="anatomy-legend-swatch anatomy-legend-running"></span>
-        Ativo
+        Ativo (sem fluxo)
       </li>
       <li class="anatomy-legend-item">
         <span class="anatomy-legend-swatch anatomy-legend-stopped"></span>

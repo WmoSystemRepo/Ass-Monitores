@@ -137,13 +137,37 @@ import { ChainAnatomyComponent } from './chain-anatomy.component';
           <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
           <span class="inline-flex items-baseline gap-1.5">
             <span class="text-slate-400">Com fila</span>
-            <span class="font-medium text-amber-300">{{ queueBusyCount() }}</span>
+            <span
+              class="font-medium"
+              [class.text-lime-300]="store.anyRunning()"
+              [class.text-amber-300]="!store.anyRunning()"
+              [attr.title]="
+                store.anyRunning()
+                  ? 'Serviços com backlog enquanto a cadeia está ligada (ativo)'
+                  : 'Backlog com cadeia parada — use Ligar as filas'
+              "
+            >
+              {{ queueBusyCount() }}
+            </span>
           </span>
           <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
           <span class="inline-flex items-baseline gap-1.5">
             <span class="text-slate-400">Arquivos</span>
-            <span class="font-medium text-sky-300">{{ totalQueueFiles() }}</span>
+            <span
+              class="font-medium"
+              [class.text-lime-300]="store.anyRunning()"
+              [class.text-amber-300]="!store.anyRunning()"
+            >
+              {{ totalQueueFiles() }}
+            </span>
           </span>
+          @if (store.anyRunning() && totalQueueFiles() === 0) {
+            <span class="hidden text-indigo-700 sm:inline" aria-hidden="true">·</span>
+            <span class="inline-flex items-baseline gap-1.5" title="Cadeia ligada e consumindo; nenhum CT-e na fila no momento">
+              <span class="text-slate-400">Fluxo</span>
+              <span class="font-medium text-lime-300">ativo · sem fila</span>
+            </span>
+          }
         }
       </div>
 

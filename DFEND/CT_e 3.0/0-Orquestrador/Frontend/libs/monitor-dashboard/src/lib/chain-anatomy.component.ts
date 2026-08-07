@@ -16,11 +16,17 @@ import {
   StationCardComponent,
   type StationBadge,
 } from './station-card.component';
+import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component';
 
 @Component({
   selector: 'lib-chain-anatomy',
   standalone: true,
-  imports: [DatePipe, StatusLegendComponent, StationCardComponent],
+  imports: [
+    DatePipe,
+    StatusLegendComponent,
+    StationCardComponent,
+    ChainQueueProofChipComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -100,7 +106,9 @@ import {
                           ? 'Executando · drenando fila'
                           : isStoppedWithBacklog()
                             ? 'Na fila · aguardando Ligar as filas'
-                            : 'Arquivos na fila aguardando consumo')
+                            : anyRunning()
+                              ? 'Backlog com cadeia ativa · aguardando consumo'
+                              : 'Arquivos na fila aguardando consumo')
                     }}
                   </p>
                 </div>
@@ -212,22 +220,45 @@ import {
               }
             </div>
 
-            @if (anyRunning() || hasQueueBusy()) {
-              <div class="anatomy-summary-bar anatomy-summary-bar-queue mt-3 shrink-0">
+            <div class="anatomy-summary-bar anatomy-summary-bar-queue mt-3 shrink-0">
+              @if (anyRunning() || hasQueueBusy()) {
                 <div>
                   <span class="anatomy-summary-label">Com fila</span>
-                  <span class="anatomy-summary-value">{{ queueBusyCount() }}</span>
+                  <span
+                    class="anatomy-summary-value"
+                    [class.anatomy-summary-value-live]="anyRunning()"
+                    [class.anatomy-summary-value-warn]="!anyRunning()"
+                  >{{ queueBusyCount() }}</span>
                 </div>
                 <div>
                   <span class="anatomy-summary-label">Arquivos na cadeia</span>
-                  <span class="anatomy-summary-value">{{ totalQueueFiles() }}</span>
+                  <span
+                    class="anatomy-summary-value"
+                    [class.anatomy-summary-value-live]="anyRunning()"
+                    [class.anatomy-summary-value-warn]="!anyRunning()"
+                  >{{ totalQueueFiles() }}</span>
                 </div>
                 <div>
                   <span class="anatomy-summary-label">Fase</span>
-                  <span class="anatomy-summary-value">{{ phaseLabel() }}</span>
+                  <span
+                    class="anatomy-summary-value"
+                    [class.anatomy-summary-value-live]="phaseLabel() === 'Em execução'"
+                    [class.anatomy-summary-value-wait]="
+                      phaseLabel() === 'Ligando' || phaseLabel() === 'Desligando'
+                    "
+                  >{{ phaseLabel() }}</span>
                 </div>
-              </div>
-            }
+                @if (anyRunning() && totalQueueFiles() === 0) {
+                  <div title="Cadeia ligada; nenhum CT-e aguardando no momento">
+                    <span class="anatomy-summary-label">Fluxo</span>
+                    <span class="anatomy-summary-value anatomy-summary-value-live"
+                      >ativo · sem fila</span
+                    >
+                  </div>
+                }
+              }
+              <lib-chain-queue-proof-chip />
+            </div>
           </div>
         </div>
       </div>
@@ -375,11 +406,17 @@ export class ChainAnatomyComponent {
     agora: boolean;
     hasQueueWork?: boolean;
     lastError?: string | null;
+    executar?: number | null;
   }): boolean {
     if (sys.agora || sys.hasQueueWork || this.isError(sys)) {
       return false;
     }
     if (this.isStarting()) {
+      return false;
+    }
+    // Ativo sem fluxo na fila deve continuar verde/legível — não esmaecer
+    // só porque outro serviço está drenando backlog.
+    if (this.isWorkActive(sys)) {
       return false;
     }
     if (this.hasQueueBusy() || this.errorSystems().length > 0) {
@@ -414,6 +451,7 @@ export class ChainAnatomyComponent {
     hasQueueWork?: boolean;
     agora: boolean;
     status: string | number;
+    executar?: number | null;
   }): string {
     if (this.store.openingSystemId() === sys.id) {
       return 'Preparando API + Angular…';
@@ -426,7 +464,13 @@ export class ChainAnatomyComponent {
     } else if (sys.agora) {
       parts.push('processando agora');
     } else if (sys.hasQueueWork) {
-      parts.push('há itens na fila');
+      parts.push(
+        this.anyRunning()
+          ? 'há itens na fila (cadeia ativa)'
+          : 'há itens na fila (cadeia parada)'
+      );
+    } else if (this.isWorkActive(sys)) {
+      parts.push('ativo · sem fluxo na fila');
     } else if (sys.hint) {
       parts.push(sys.hint);
     }

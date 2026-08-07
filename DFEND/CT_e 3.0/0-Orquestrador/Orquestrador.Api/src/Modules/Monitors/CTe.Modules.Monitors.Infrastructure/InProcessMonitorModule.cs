@@ -65,6 +65,7 @@ public sealed class InProcessMonitorModule : IMonitorModule
             "/api/monitores/{servico}/service/start",
             "/api/monitores/{servico}/service/stop",
             "/api/monitores/{servico}/health",
+            "/api/monitores/{servico}/queues/proof",
             "/api/monitores/{servico}/info"
         }
     });
@@ -208,6 +209,33 @@ public sealed class InProcessMonitorModule : IMonitorModule
         _httpFallback is not null
             ? _httpFallback.GetTableAsync(key, take, ct)
             : Task.FromResult<object?>(null);
+
+    public async Task<object?> GetQueueProofAsync(CancellationToken ct)
+    {
+        var proof = await MonitorTelemetrySql.ReadQueueProofAsync(
+            _options.ConnectionString,
+            _options.ServiceId,
+            _options.Domain,
+            _options.SqlTimeoutSeconds,
+            _logger,
+            ct);
+
+        return new
+        {
+            serviceId = proof.ServiceId,
+            domain = proof.Domain,
+            verifiedAtUtc = proof.VerifiedAtUtc,
+            tempTable = proof.TempTable,
+            brokerQueue = proof.BrokerQueue,
+            tempCount = proof.TempCount,
+            brokerCount = proof.BrokerCount,
+            tempErrorCount = proof.TempErrorCount,
+            isEmpty = proof.IsEmpty,
+            isClear = proof.IsClear,
+            ok = proof.Ok,
+            errors = proof.Errors
+        };
+    }
 
     /// <summary>
     /// Snapshot operacional + telemetria SQL (filas/docs/logs/config) para animações do pipeline

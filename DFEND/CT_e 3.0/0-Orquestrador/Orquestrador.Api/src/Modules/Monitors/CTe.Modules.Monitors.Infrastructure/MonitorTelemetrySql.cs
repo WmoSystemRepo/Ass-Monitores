@@ -143,30 +143,155 @@ internal static class MonitorTelemetrySql
                 "des_mensagem")
         };
 
+    /// <summary>
+    /// Temp + fila de entrada por domínio — alinhado ao SqlMonitorRepository CT_e 2.0
+    /// (âncora do cronômetro de “último lote” / queuesConsuming).
+    /// </summary>
+    private static (string TempTable, string? BrokerQueue) ResolveTempAndBroker(string domain) =>
+        domain.Trim().ToLowerInvariant() switch
+        {
+            "receptor" or "arquivador" => (
+                "tmp_documento_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_arquivador"),
+            "sintetizador" => (
+                "tmp_sintetizador_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_sintetizador"),
+            "analisador" => (
+                "tmp_analise_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_analisador"),
+            "integrador" or "carga" => (
+                "tmp_integracao_conhecimento_transporte_eletronico",
+                "fila_alvo_cte_integrador"),
+            _ => (
+                "tmp_documento_conhecimento_transporte_eletronico",
+                null)
+        };
+
+    /// <summary>
+    /// Contagem estrita (sem READPAST/NOLOCK) para validar fila/temporária vazia sob demanda.
+    /// </summary>
+    internal sealed record QueueProofResult(
+        string ServiceId,
+        string Domain,
+        DateTimeOffset VerifiedAtUtc,
+        string TempTable,
+        string? BrokerQueue,
+        long TempCount,
+        long BrokerCount,
+        long TempErrorCount,
+        bool IsEmpty,
+        bool IsClear,
+        bool Ok,
+        IReadOnlyList<string> Errors);
+
+    public static async Task<QueueProofResult> ReadQueueProofAsync(
+        string? connectionString,
+        string serviceId,
+        string domain,
+        int timeoutSeconds,
+        ILogger logger,
+        CancellationToken ct)
+    {
+        var (tempTable, brokerQueue) = ResolveTempAndBroker(domain);
+        var verifiedAt = DateTimeOffset.UtcNow;
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return new QueueProofResult(
+                serviceId,
+                domain,
+                verifiedAt,
+                tempTable,
+                brokerQueue,
+                TempCount: 0,
+                BrokerCount: 0,
+                TempErrorCount: 0,
+                IsEmpty: false,
+                IsClear: false,
+                Ok: false,
+                Errors: ["ConnectionString vazio — não é possível validar a fila."]);
+        }
+
+        try
+        {
+            await using var conn = new SqlConnection(connectionString);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            linked.CancelAfter(TimeSpan.FromSeconds(Math.Max(3, timeoutSeconds * 3)));
+            await conn.OpenAsync(linked.Token);
+
+            var tempSql = $"""
+                SELECT COUNT(1) AS total,
+                       SUM(CASE WHEN NULLIF(LTRIM(RTRIM(des_mensagem_erro)), '') IS NOT NULL THEN 1 ELSE 0 END) AS erros
+                FROM cte.{tempTable}
+                """;
+
+            long tempCount = 0;
+            long tempErrorCount = 0;
+            await using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandTimeout = Math.Max(1, timeoutSeconds);
+                cmd.CommandText = tempSql;
+                await using var reader = await cmd.ExecuteReaderAsync(linked.Token);
+                if (await reader.ReadAsync(linked.Token))
+                {
+                    tempCount = reader.IsDBNull(0) ? 0 : Convert.ToInt64(reader.GetValue(0));
+                    tempErrorCount = reader.IsDBNull(1) ? 0 : Convert.ToInt64(reader.GetValue(1));
+                }
+            }
+
+            long brokerCount = 0;
+            if (!string.IsNullOrWhiteSpace(brokerQueue))
+            {
+                var brokerSql = $"""
+                    SELECT COUNT(1)
+                    FROM {brokerQueue}
+                    """;
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandTimeout = Math.Max(1, timeoutSeconds);
+                cmd.CommandText = brokerSql;
+                var raw = await cmd.ExecuteScalarAsync(linked.Token);
+                brokerCount = raw is null or DBNull ? 0 : Convert.ToInt64(raw);
+            }
+
+            var isEmpty = tempCount == 0 && brokerCount == 0;
+            var isClear = isEmpty && tempErrorCount == 0;
+            return new QueueProofResult(
+                serviceId,
+                domain,
+                verifiedAt,
+                tempTable,
+                brokerQueue,
+                tempCount,
+                brokerCount,
+                tempErrorCount,
+                isEmpty,
+                isClear,
+                Ok: true,
+                Errors: Array.Empty<string>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Validação estrita de fila falhou para domain={Domain}", domain);
+            throw;
+        }
+    }
+
     private static async Task<(long Temp, long Broker, DateTimeOffset? Oldest)> ReadQueuesAsync(
         SqlConnection conn,
         string domain,
         int timeoutSeconds,
         CancellationToken ct)
     {
-        var (tempSql, brokerSql) = domain.Trim().ToLowerInvariant() switch
-        {
-            "receptor" or "arquivador" or "carga" => (
-                """
-                SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
-                FROM cte.tmp_documento_conhecimento_transporte_eletronico WITH (READPAST)
-                """,
-                """
+        var (tempTable, brokerQueue) = ResolveTempAndBroker(domain);
+        var tempSql = $"""
+            SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
+            FROM cte.{tempTable} WITH (READPAST)
+            """;
+        var brokerSql = brokerQueue is null
+            ? null
+            : $"""
                 SELECT COUNT(1)
-                FROM fila_alvo_cte_arquivador WITH (READPAST)
-                """),
-            _ => (
-                """
-                SELECT COUNT(1) AS total, MIN(dtc_atualizacao) AS oldest
-                FROM cte.tmp_sintetico_conhecimento_transporte_eletronico WITH (READPAST)
-                """,
-                (string?)null)
-        };
+                FROM {brokerQueue} WITH (READPAST)
+                """;
 
         long temp = 0;
         DateTimeOffset? oldest = null;
@@ -285,9 +410,7 @@ internal static class MonitorTelemetrySql
         int timeoutSeconds,
         CancellationToken ct)
     {
-        var table = domain.Trim().ToLowerInvariant() is "receptor" or "arquivador" or "carga"
-            ? "tmp_documento_conhecimento_transporte_eletronico"
-            : "tmp_sintetico_conhecimento_transporte_eletronico";
+        var (table, _) = ResolveTempAndBroker(domain);
 
         var list = new List<object>();
         try

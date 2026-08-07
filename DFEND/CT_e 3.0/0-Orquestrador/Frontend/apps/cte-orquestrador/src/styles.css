@@ -629,6 +629,39 @@ body {
   color: #e2e8f0;
 }
 
+.anatomy-summary-value-live {
+  color: var(--monitor-success);
+}
+
+.anatomy-summary-value-wait {
+  color: var(--monitor-wait);
+}
+
+.anatomy-summary-value-warn {
+  color: var(--monitor-queue);
+}
+
+/* Fila com cadeia ligada = trabalho saudável (verde), não “parado” em âmbar */
+.chain-anatomy.anatomy-poster-live .station-badge-fila {
+  border-color: rgba(163, 230, 53, 0.55);
+  background: linear-gradient(180deg, #365314, #3f6212);
+  color: #ecfccb;
+  box-shadow: 0 3px 10px rgba(163, 230, 53, 0.28);
+}
+
+.chain-anatomy.anatomy-poster-live .station-card-fila .station-body {
+  border-color: rgba(163, 230, 53, 0.55);
+  box-shadow:
+    0 0 0 2px rgba(163, 230, 53, 0.22),
+    0 8px 0 #365314,
+    0 12px 18px rgba(132, 204, 22, 0.22);
+}
+
+.chain-anatomy.anatomy-poster-live .anatomy-live-card-queue {
+  border-color: rgba(163, 230, 53, 0.45);
+  box-shadow: 0 0 16px rgba(163, 230, 53, 0.16);
+}
+
 /* Letter symbols R / A / S / An / I / C */
 .chain-anatomy .anatomy-iso {
   width: 3.5rem;

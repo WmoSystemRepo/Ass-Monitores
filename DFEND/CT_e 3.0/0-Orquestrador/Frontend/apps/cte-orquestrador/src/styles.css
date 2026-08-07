@@ -641,27 +641,6 @@ body {
   color: var(--monitor-queue);
 }
 
-/* Fila com cadeia ligada = trabalho saudável (verde), não “parado” em âmbar */
-.chain-anatomy.anatomy-poster-live .station-badge-fila {
-  border-color: rgba(163, 230, 53, 0.55);
-  background: linear-gradient(180deg, #365314, #3f6212);
-  color: #ecfccb;
-  box-shadow: 0 3px 10px rgba(163, 230, 53, 0.28);
-}
-
-.chain-anatomy.anatomy-poster-live .station-card-fila .station-body {
-  border-color: rgba(163, 230, 53, 0.55);
-  box-shadow:
-    0 0 0 2px rgba(163, 230, 53, 0.22),
-    0 8px 0 #365314,
-    0 12px 18px rgba(132, 204, 22, 0.22);
-}
-
-.chain-anatomy.anatomy-poster-live .anatomy-live-card-queue {
-  border-color: rgba(163, 230, 53, 0.45);
-  box-shadow: 0 0 16px rgba(163, 230, 53, 0.16);
-}
-
 /* Letter symbols R / A / S / An / I / C */
 .chain-anatomy .anatomy-iso {
   width: 3.5rem;
@@ -1369,5 +1348,20 @@ body {
   .chain-anatomy .anatomy-step-arrow-hot {
     animation: none !important;
   }
+}
+
+/* —— Modo Apresentação (spotlight) —— */
+body.presentation-tour-active [data-tour] {
+  transition: box-shadow 0.2s ease, outline 0.2s ease, filter 0.2s ease;
+}
+
+body.presentation-tour-active .tour-target-active {
+  position: relative;
+  z-index: 40;
+  outline: 2px solid rgba(165, 180, 252, 0.95);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.25), 0 0 28px rgba(99, 102, 241, 0.35);
+  border-radius: 0.5rem;
+  filter: none !important;
 }
 

@@ -2,10 +2,17 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ChainOrchestratorStore } from '@orquestrador/monitor-core';
 import { ConfirmDialogComponent } from '@orquestrador/shared-ui';
+import { PresentationTourPanelComponent } from '@orquestrador/monitor-dashboard';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmDialogComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ConfirmDialogComponent,
+    PresentationTourPanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
   template: `
@@ -25,6 +32,7 @@ import { ConfirmDialogComponent } from '@orquestrador/shared-ui';
               [routerLinkActiveOptions]="{ exact: l.path === '/' }"
               class="rounded px-2.5 py-1.5 text-indigo-200 hover:bg-indigo-900/70"
               [attr.title]="l.hint"
+              [attr.data-tour]="l.tour"
             >
               <span class="block">{{ l.label }}</span>
               <span class="block text-[10px] text-indigo-500">{{ l.hint }}</span>
@@ -58,6 +66,7 @@ import { ConfirmDialogComponent } from '@orquestrador/shared-ui';
       </main>
     </div>
     <lib-confirm-dialog />
+    <lib-presentation-tour-panel />
   `,
 })
 export class AppComponent {
@@ -83,7 +92,17 @@ export class AppComponent {
   });
 
   readonly links = [
-    { path: '/', label: 'Dashboard', hint: 'Ligar e acompanhar as filas CT-e' },
-    { path: '/resgate', label: 'Resgate CT-e', hint: 'Recuperar do AN' },
+    {
+      path: '/',
+      label: 'Dashboard',
+      hint: 'Ligar e acompanhar as filas CT-e',
+      tour: 'nav-dashboard',
+    },
+    {
+      path: '/resgate',
+      label: 'Resgate CT-e',
+      hint: 'Recuperar do AN',
+      tour: 'nav-resgate',
+    },
   ];
 }

@@ -17,6 +17,7 @@ import {
   type StationBadge,
 } from './station-card.component';
 import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component';
+import { PresentationTourStore } from './presentation-tour.store';
 
 @Component({
   selector: 'lib-chain-anatomy',
@@ -31,13 +32,14 @@ import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component
   template: `
     <div
       class="chain-anatomy anatomy-poster anatomy-poster-fill flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-indigo-900/80 shadow-md"
-      [class.anatomy-poster-live]="anyRunning() || hasQueueBusy()"
+      [class.anatomy-poster-live]="anyRunning()"
       [class.anatomy-poster-busy]="hasAgora() || hasQueueBusy()"
       [class.anatomy-poster-starting]="isStarting()"
       [class.anatomy-poster-idle]="isIdlePoster()"
+      data-tour="stations"
     >
       <div class="anatomy-poster-head flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 pt-3">
-        <div class="min-w-0">
+        <div class="min-w-0" data-tour="legend">
           <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300/90">
             Cadeia de serviços CT-e
           </p>
@@ -50,6 +52,11 @@ import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component
           <p class="text-[11px] text-slate-400">
             Clique no serviço para abrir o monitor
           </p>
+          @if (tour.isSimulating()) {
+            <p class="mt-1 text-[11px] font-semibold text-amber-300">
+              Apresentação · dados simulados
+            </p>
+          }
           <lib-status-legend />
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -76,7 +83,10 @@ import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component
       </div>
 
       @if (busySystems().length > 0) {
-        <div class="anatomy-live-rail anatomy-live-rail-sticky mx-4 mt-2 shrink-0">
+        <div
+          class="anatomy-live-rail anatomy-live-rail-sticky mx-4 mt-2 shrink-0"
+          data-tour="foco"
+        >
           <p class="anatomy-live-rail-title">Foco agora</p>
           @if (isStoppedWithBacklog()) {
             <p class="mt-0.5 text-[11px] leading-snug text-amber-200/90">
@@ -257,7 +267,7 @@ import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component
                   </div>
                 }
               }
-              <lib-chain-queue-proof-chip />
+              <lib-chain-queue-proof-chip data-tour="validate" />
             </div>
           </div>
         </div>
@@ -267,23 +277,46 @@ import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component
 })
 export class ChainAnatomyComponent {
   readonly store = inject(ChainOrchestratorStore);
+  readonly tour = inject(PresentationTourStore);
   private readonly router = inject(Router);
 
-  readonly systems = this.store.systems;
-  readonly lastLote = this.store.lastLote;
-  readonly beltMoving = this.store.beltMoving;
-  readonly anyRunning = this.store.anyRunning;
+  readonly systems = computed(
+    () => this.tour.simulation()?.systems ?? this.store.systems()
+  );
+  readonly lastLote = computed(() => {
+    const sim = this.tour.simulation();
+    if (sim) {
+      return {
+        nsu: 900001,
+        nsuFinal: 900008,
+        qtdDocumento: sim.lastLoteQtd,
+        at: new Date().toISOString(),
+      };
+    }
+    return this.store.lastLote();
+  });
+  readonly beltMoving = computed(
+    () => this.tour.simulation()?.beltMoving ?? this.store.beltMoving()
+  );
+  readonly anyRunning = computed(() => {
+    const mode = this.tour.simulation()?.mode;
+    if (mode === 'flow') return true;
+    if (mode === 'stoppedBacklog') return false;
+    return this.store.anyRunning();
+  });
 
   readonly hasAgora = computed(() => this.systems().some((s) => s.agora));
   readonly hasQueueBusy = computed(() =>
     this.systems().some((s) => s.agora || !!s.hasQueueWork)
   );
 
-  readonly isStarting = computed(
-    () => normalizePhase(this.store.cascadePhase()) === 'starting'
-  );
+  readonly isStarting = computed(() => {
+    if (this.tour.simulation()) return false;
+    return normalizePhase(this.store.cascadePhase()) === 'starting';
+  });
 
   readonly isIdlePoster = computed(() => {
+    if (this.tour.simulation()) return false;
     const phase = normalizePhase(this.store.cascadePhase());
     return (
       phase === 'idle' &&
@@ -295,6 +328,7 @@ export class ChainAnatomyComponent {
 
   /** Parada com backlog: Desligar não limpa fila — UI explica o estado. */
   readonly isStoppedWithBacklog = computed(() => {
+    if (this.tour.simulation()?.mode === 'stoppedBacklog') return true;
     const phase = normalizePhase(this.store.cascadePhase());
     return (
       phase === 'idle' &&
@@ -321,7 +355,9 @@ export class ChainAnatomyComponent {
   );
 
   readonly phaseLabel = computed(() => {
-    switch (normalizePhase(this.store.cascadePhase())) {
+    const simPhase = this.tour.simulation()?.cascadePhase;
+    const phase = normalizePhase(simPhase ?? this.store.cascadePhase());
+    switch (phase) {
       case 'starting':
         return 'Ligando';
       case 'stopping':

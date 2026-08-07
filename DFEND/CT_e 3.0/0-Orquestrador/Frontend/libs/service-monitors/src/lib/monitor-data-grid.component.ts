@@ -131,8 +131,9 @@ export class MonitorDataGridComponent<T extends object = Record<string, unknown>
       ?? '')
   );
 
-  readonly draftFilters = signal<Record<string, string>>({});
-  readonly appliedFilters = signal<Record<string, string>>({});
+  /** Partial: chave ausente é undefined em runtime (Record tipava string e gerava NG8102 no ??). */
+  readonly draftFilters = signal<Partial<Record<string, string>>>({});
+  readonly appliedFilters = signal<Partial<Record<string, string>>>({});
 
   private readonly filter$ = new Subject<{ id: string; value: string }>();
   private lastColumnKey = '';

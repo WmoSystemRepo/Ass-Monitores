@@ -43,75 +43,36 @@ const FIND_DELAY_MS = 120;
         </div>
       }
 
-      <div
-        class="presentation-tour-panel"
-        [class.presentation-tour-panel-top]="tour.panelPlacement() === 'top'"
-        [class.presentation-tour-panel-left]="tour.panelPlacement() === 'left'"
-        [class.presentation-tour-panel-right]="tour.panelPlacement() === 'right'"
-        role="dialog"
-        aria-label="Apresentação"
-      >
-        <div class="presentation-tour-meta">
-          <span class="presentation-tour-kicker">Apresentação guiada</span>
-          <span class="presentation-tour-count">Passo {{ tour.stepLabel() }}</span>
-        </div>
-
-        @if (tour.step(); as step) {
-          @if (step.spotlightLabel) {
-            <p class="presentation-tour-looking">
-              <span class="presentation-tour-looking-dot" aria-hidden="true"></span>
-              Olhe para:
-              <strong>{{ step.spotlightLabel }}</strong>
-            </p>
-          }
-
-          <h3 class="presentation-tour-title">{{ step.title }}</h3>
-
-          <ul class="presentation-tour-lines">
-            @for (line of step.lines; track $index) {
-              <li>{{ line }}</li>
-            }
-          </ul>
-
-          @if (tour.isSimulating()) {
-            <p class="presentation-tour-sim">
-              Demonstração visual — não são documentos reais.
-            </p>
-          }
-        }
-
-        <div class="presentation-tour-actions">
-          <button
-            type="button"
-            class="presentation-tour-btn presentation-tour-btn-ghost"
-            (click)="tour.exit()"
-          >
-            Sair
-          </button>
-          <button
-            type="button"
-            class="presentation-tour-btn"
-            (click)="tour.restart()"
-          >
-            Reiniciar
-          </button>
-          <button
-            type="button"
-            class="presentation-tour-btn"
-            [disabled]="!tour.canBack()"
-            (click)="tour.back()"
-          >
-            Voltar
-          </button>
-          @if (tour.isLastStep()) {
+      @if (tour.isSimulating()) {
+        <!-- Dock compacto: não cobre o simulador (cadeia / anatomia / tabelas / linhas). -->
+        <div
+          class="presentation-tour-dock"
+          role="dialog"
+          aria-label="Simulação da apresentação"
+          data-tour-sim-dock="1"
+        >
+          <p class="presentation-tour-dock-text">
+            <span class="presentation-tour-dock-step">{{ tour.stepLabel() }}</span>
+            {{
+              tour.step()?.lines?.[0] ||
+                'Está simulando o comportamento da tela dentro da área marcada.'
+            }}
+          </p>
+          <div class="presentation-tour-dock-actions">
+            <button type="button" class="presentation-tour-btn presentation-tour-btn-ghost" (click)="tour.exit()">
+              Sair
+            </button>
+            <button type="button" class="presentation-tour-btn" (click)="tour.restart()">
+              Reiniciar
+            </button>
             <button
               type="button"
-              class="presentation-tour-btn presentation-tour-btn-primary"
-              (click)="tour.exit()"
+              class="presentation-tour-btn"
+              [disabled]="!tour.canBack()"
+              (click)="tour.back()"
             >
-              Finalizar
+              Voltar
             </button>
-          } @else {
             <button
               type="button"
               class="presentation-tour-btn presentation-tour-btn-primary"
@@ -120,9 +81,80 @@ const FIND_DELAY_MS = 120;
             >
               Avançar
             </button>
-          }
+          </div>
         </div>
-      </div>
+      } @else {
+        <div
+          class="presentation-tour-panel"
+          [class.presentation-tour-panel-top]="tour.panelPlacement() === 'top'"
+          [class.presentation-tour-panel-left]="tour.panelPlacement() === 'left'"
+          [class.presentation-tour-panel-right]="tour.panelPlacement() === 'right'"
+          role="dialog"
+          aria-label="Apresentação"
+        >
+          <div class="presentation-tour-meta">
+            <span class="presentation-tour-kicker">Apresentação guiada</span>
+            <span class="presentation-tour-count">Passo {{ tour.stepLabel() }}</span>
+          </div>
+
+          @if (tour.step(); as step) {
+            @if (step.spotlightLabel) {
+              <p class="presentation-tour-looking">
+                <span class="presentation-tour-looking-dot" aria-hidden="true"></span>
+                Olhe para:
+                <strong>{{ step.spotlightLabel }}</strong>
+              </p>
+            }
+
+            <h3 class="presentation-tour-title">{{ step.title }}</h3>
+
+            <ul class="presentation-tour-lines">
+              @for (line of step.lines; track $index) {
+                <li>{{ line }}</li>
+              }
+            </ul>
+          }
+
+          <div class="presentation-tour-actions">
+            <button
+              type="button"
+              class="presentation-tour-btn presentation-tour-btn-ghost"
+              (click)="tour.exit()"
+            >
+              Sair
+            </button>
+            <button type="button" class="presentation-tour-btn" (click)="tour.restart()">
+              Reiniciar
+            </button>
+            <button
+              type="button"
+              class="presentation-tour-btn"
+              [disabled]="!tour.canBack()"
+              (click)="tour.back()"
+            >
+              Voltar
+            </button>
+            @if (tour.isLastStep()) {
+              <button
+                type="button"
+                class="presentation-tour-btn presentation-tour-btn-primary"
+                (click)="tour.exit()"
+              >
+                Finalizar
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="presentation-tour-btn presentation-tour-btn-primary"
+                [disabled]="!tour.canNext()"
+                (click)="tour.next()"
+              >
+                Avançar
+              </button>
+            }
+          </div>
+        </div>
+      }
     }
   `,
   styles: `
@@ -201,6 +233,60 @@ const FIND_DELAY_MS = 120;
     .presentation-tour-panel-right {
       left: auto;
       right: 1rem;
+    }
+    .presentation-tour-dock {
+      position: fixed;
+      left: 0.75rem;
+      bottom: 0.75rem;
+      z-index: 120;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      max-width: min(34rem, calc(100vw - 1.5rem));
+      padding: 0.5rem 0.65rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      background: rgba(8, 15, 30, 0.96);
+      box-shadow:
+        0 0 0 1px rgba(120, 53, 15, 0.35),
+        0 14px 28px rgba(2, 6, 23, 0.6);
+      color: #e2e8f0;
+      pointer-events: auto;
+    }
+    .presentation-tour-dock-text {
+      margin: 0;
+      flex: 1 1 12rem;
+      min-width: 0;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      color: #fde68a;
+    }
+    .presentation-tour-dock-step {
+      display: inline-block;
+      margin-right: 0.45rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 9999px;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.65rem;
+      color: #fcd34d;
+      white-space: nowrap;
+    }
+    .presentation-tour-dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: auto;
+    }
+    .presentation-tour-dock .presentation-tour-btn {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.72rem;
+    }
+    .presentation-tour-dock .presentation-tour-btn-ghost {
+      margin-right: 0;
     }
     .presentation-tour-meta {
       display: flex;

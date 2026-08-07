@@ -26,11 +26,17 @@ import {
 } from './anatomy-flow.component';
 import { PresentationTourStore } from '@orquestrador/monitor-dashboard';
 import type { RecentDocument } from '@orquestrador/shared-data';
+import { ServiceQueueProofChipComponent } from '../service-queue-proof-chip.component';
 
 @Component({
   selector: 'lib-receptor-dashboard-page',
   standalone: true,
-  imports: [DatePipe, ReceptorAnatomyFlowComponent, TableHealthCardsComponent],
+  imports: [
+    DatePipe,
+    ReceptorAnatomyFlowComponent,
+    TableHealthCardsComponent,
+    ServiceQueueProofChipComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="dashboard-fit flex h-full max-h-full flex-col gap-1.5 overflow-hidden">
@@ -83,6 +89,7 @@ import type { RecentDocument } from '@orquestrador/shared-data';
           >
             Desligar filas
           </button>
+          <lib-service-queue-proof-chip class="shrink-0" data-tour="anatomy-validate" />
         </div>
       </header>
 

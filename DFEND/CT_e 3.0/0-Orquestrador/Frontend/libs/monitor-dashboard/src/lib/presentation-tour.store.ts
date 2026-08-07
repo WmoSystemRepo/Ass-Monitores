@@ -138,7 +138,11 @@ export class PresentationTourStore {
   );
 
   readonly isSimulating = computed(() => {
-    const s = this.step()?.simulate ?? 'none';
+    const step = this.step();
+    if (!step) return false;
+    // Qualquer passo de simulação usa o dock compacto (não o card grande).
+    if ((step.id ?? '').startsWith('simulate-')) return true;
+    const s = step.simulate ?? 'none';
     return (
       s === 'flow' ||
       s === 'stoppedBacklog' ||

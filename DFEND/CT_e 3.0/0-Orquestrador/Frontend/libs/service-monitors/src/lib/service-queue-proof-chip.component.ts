@@ -19,6 +19,7 @@ import { ServiceMonitorApiService } from './service-monitor-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-queue-proof-chip
+      idleLabel="Validar filas"
       [state]="state()"
       [resultLabel]="resultLabel()"
       [title]="tooltip()"

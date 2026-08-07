@@ -18,7 +18,9 @@ Docs:
 
 - [0-Orquestrador/COMO-USAR.txt](DFEND/CT_e%203.0/0-Orquestrador/COMO-USAR.txt)
 - [0-Orquestrador/README.md](DFEND/CT_e%203.0/0-Orquestrador/README.md)
+- [Doc/Documentacao_Orquestrador_CTe.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/Documentacao_Orquestrador_CTe.md) (§8.5 modo Apresentação)
 - [Doc/DEV_PORTATIL.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/DEV_PORTATIL.md)
+- [Frontend/README.md](DFEND/CT_e%203.0/0-Orquestrador/Frontend/README.md)
 
 **Não** use clone com `Ass-Monitores\Ass-Monitores` nem projeto só na Lixeira.
 

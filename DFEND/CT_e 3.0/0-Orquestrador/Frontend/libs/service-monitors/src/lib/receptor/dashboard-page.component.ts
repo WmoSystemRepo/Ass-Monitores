@@ -24,6 +24,8 @@ import {
   type AnatomyStage,
   type FlyingPacket,
 } from './anatomy-flow.component';
+import { PresentationTourStore } from '@orquestrador/monitor-dashboard';
+import type { RecentDocument } from '@orquestrador/shared-data';
 
 @Component({
   selector: 'lib-receptor-dashboard-page',
@@ -194,11 +196,11 @@ import {
       <div class="min-h-0 flex-1 overflow-hidden">
         <lib-receptor-anatomy-flow
           class="block h-full"
-          [running]="isRunning()"
+          [running]="anatomyRunning()"
           [activeStage]="visualStage()"
           [caption]="flowCaption()"
-          [latest]="latestLote()"
-          [packets]="flyingPackets()"
+          [latest]="displayLatestLote()"
+          [packets]="displayPackets()"
         />
       </div>
     </section>
@@ -206,6 +208,7 @@ import {
 })
 export class ReceptorDashboardPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  readonly tour = inject(PresentationTourStore);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly service = this.store.service;
@@ -244,6 +247,11 @@ export class ReceptorDashboardPageComponent {
     const s = this.service();
     return !!s?.isRunning && s.executar === 1;
   });
+
+  /** Ligado real ou simulação da apresentação. */
+  readonly anatomyRunning = computed(
+    () => this.tour.isReceptorSimulating() || this.isRunning()
+  );
 
   readonly statusLabel = computed(() =>
     receptorStatusLabel(this.service()?.scmStatus, this.service()?.executar)
@@ -315,13 +323,43 @@ export class ReceptorDashboardPageComponent {
   });
 
   readonly visualStage = computed((): AnatomyStage | null => {
+    const sim = this.tour.simulation();
+    if (sim?.mode === 'receptorFlow' && sim.receptorStage) {
+      return sim.receptorStage;
+    }
     const journey = this.journeyStage();
     if (journey) return journey;
     return this.mapPipelineToAnatomy(this.liveActivity()?.stage ?? null);
   });
 
+  readonly displayPackets = computed((): FlyingPacket[] => {
+    const sim = this.tour.simulation();
+    if (sim?.mode === 'receptorFlow') {
+      return (sim.receptorPackets ?? []) as FlyingPacket[];
+    }
+    return this.flyingPackets();
+  });
+
+  readonly displayLatestLote = computed((): RecentDocument | null => {
+    const sim = this.tour.simulation();
+    if (sim?.mode === 'receptorFlow') {
+      return {
+        nsu: 900001,
+        nsuFinal: 900008,
+        qtdDocumento: sim.lastLoteQtd || 8,
+        dtcAtualizacao: new Date().toISOString(),
+        hasError: false,
+      };
+    }
+    return this.latestLote();
+  });
+
   /** Narrativa única — só no pôster (banner ficou só com cronômetros). */
   readonly flowCaption = computed(() => {
+    const sim = this.tour.simulation();
+    if (sim?.mode === 'receptorFlow' && sim.receptorCaption) {
+      return sim.receptorCaption;
+    }
     const stage = this.visualStage();
     const lote = this.latestLote();
     const act = this.liveActivity();

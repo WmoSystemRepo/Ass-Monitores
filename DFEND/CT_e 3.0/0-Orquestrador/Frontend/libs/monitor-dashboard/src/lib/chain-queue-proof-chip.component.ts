@@ -22,7 +22,7 @@ import type { ChainQueueProof } from '@orquestrador/shared-data';
   },
   template: `
     <lib-queue-proof-chip
-      idleLabel="Validar cadeia"
+      idleLabel="Validar filas"
       [state]="state()"
       [resultLabel]="resultLabel()"
       [title]="tooltip()"
@@ -50,13 +50,22 @@ export class ChainQueueProofChipComponent {
 
   readonly resultLabel = computed(() => {
     if (this.loading()) return null;
-    if (this.failedMessage()) return 'Falha na validação';
+    if (this.failedMessage()) {
+      const msg = this.failedMessage()!;
+      return msg.length > 48 ? 'Falha na validação — veja o detalhe' : msg;
+    }
     const p = this.proof();
     if (!p) return null;
-    if (!p.ok) return 'Falha na validação';
+    if (!p.ok) {
+      const first = p.errors?.[0];
+      if (p.tempCount + p.brokerCount > 0) {
+        return `Atenção · ${p.tempCount} temp / ${p.brokerCount} fila`;
+      }
+      return first && first.length <= 48 ? first : 'Falha na validação — veja o detalhe';
+    }
     if (p.isClear) {
       const t = formatLocalTime(p.verifiedAtUtc);
-      return t ? `Validada vazia · ${t}` : 'Validada vazia';
+      return t ? `Filas vazias · ${t}` : 'Filas vazias';
     }
     if (p.isEmpty && p.tempErrorCount > 0) {
       return `${p.tempErrorCount} com erro`;
@@ -69,12 +78,13 @@ export class ChainQueueProofChipComponent {
     if (err) return err;
     const p = this.proof();
     if (!p) {
-      return 'Valida temp + filas Service Broker dos 6 serviços (contagem estrita, sem READPAST).';
+      return 'Confere se as filas e temporárias dos 6 serviços estão vazias (contagem estrita no SQL).';
     }
     const perService = (p.services ?? [])
       .map(
         (s) =>
-          `${s.serviceId}: temp=${s.tempCount} fila=${s.brokerCount} erros=${s.tempErrorCount}`
+          `${s.serviceId}: temp=${s.tempCount} fila=${s.brokerCount} erros=${s.tempErrorCount}` +
+          (s.ok ? '' : ` · falhou: ${(s.errors ?? []).join(', ') || 'erro'}`)
       )
       .join('\n');
     return [
@@ -121,5 +131,5 @@ function extractHttpError(e: unknown): string {
     if (body?.message) return body.message;
   }
   if (e instanceof Error) return e.message;
-  return 'Não foi possível validar a cadeia.';
+  return 'Não foi possível validar as filas.';
 }

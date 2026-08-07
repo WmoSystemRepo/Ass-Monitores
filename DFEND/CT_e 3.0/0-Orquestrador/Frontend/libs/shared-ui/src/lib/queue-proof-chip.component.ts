@@ -42,6 +42,7 @@ export type QueueProofChipState =
     .queue-proof-chip {
       display: flex;
       flex-direction: column;
+      align-items: flex-end;
       gap: 0.15rem;
       min-width: 0;
     }
@@ -79,9 +80,11 @@ export type QueueProofChipState =
       color: var(--monitor-success, #a3e635);
     }
     .queue-proof-chip[data-state='empty_with_errors'] .queue-proof-result,
-    .queue-proof-chip[data-state='not_empty'] .queue-proof-result,
     .queue-proof-chip[data-state='failed'] .queue-proof-result {
       color: var(--monitor-error, #f87171);
+    }
+    .queue-proof-chip[data-state='not_empty'] .queue-proof-result {
+      color: var(--monitor-queue, #fbbf24);
     }
     .queue-proof-chip[data-state='loading'] .queue-proof-result {
       color: var(--monitor-queue, #fbbf24);

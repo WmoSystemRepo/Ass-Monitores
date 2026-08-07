@@ -17,10 +17,9 @@ namespace CTe.Modules.Monitors.Infrastructure;
 /// <b>Desligar filas</b> = <c>Executar=0</c> + parar processo. Não há estado “pausado” na cascata.
 /// </para>
 /// <para>
-/// Snapshot/logs/tables: paridade completa exigiria copiar o SqlMonitorRepository/SnapshotAggregator
-/// de cada Monitor.Infrastructure (schemas diferentes por serviço). Enquanto isso, devolvem um
-/// payload estruturado com status operacional + Executar (quando há ConnectionString), OU
-/// (opt-in, <c>Monitors:{id}:UseHttpFallback=true</c>) delegam para o Monitor.Api via HTTP.
+/// Snapshot/logs/tables: lê SQL in-process (schemas por domínio) com status operacional + Executar
+/// quando há ConnectionString; ou (opt-in, <c>Monitors:{id}:UseHttpFallback=true</c>) delega
+/// para o Monitor.Api via HTTP.
 /// </para>
 /// </summary>
 [SupportedOSPlatform("windows")]
@@ -205,10 +204,24 @@ public sealed class InProcessMonitorModule : IMonitorModule
         return logs;
     }
 
-    public Task<object?> GetTableAsync(string key, int take, CancellationToken ct) =>
-        _httpFallback is not null
-            ? _httpFallback.GetTableAsync(key, take, ct)
-            : Task.FromResult<object?>(null);
+    public async Task<object?> GetTableAsync(string key, int take, CancellationToken ct)
+    {
+        if (_httpFallback is not null)
+        {
+            return await _httpFallback.GetTableAsync(key, take, ct);
+        }
+
+        return await MonitorTelemetrySql.ReadTableDetailAsync(
+            _options.ConnectionString,
+            _options.Domain,
+            _options.CodServico,
+            _options.DisplayName,
+            key,
+            take,
+            _options.SqlTimeoutSeconds,
+            _logger,
+            ct);
+    }
 
     public async Task<object?> GetQueueProofAsync(CancellationToken ct)
     {
@@ -270,6 +283,79 @@ public sealed class InProcessMonitorModule : IMonitorModule
             .Select(kv => new { key = kv.Key, value = kv.Value })
             .ToList();
 
+        var ageSeconds = telemetry.Service?.DtcExecucao is DateTimeOffset batida
+            ? (int?)Math.Max(0, (DateTimeOffset.UtcNow - batida.ToUniversalTime()).TotalSeconds)
+            : null;
+        var nsuLabel = string.IsNullOrWhiteSpace(telemetry.Service?.MainNsu)
+            ? "Sem NSU"
+            : $"NSU {telemetry.Service.MainNsu}";
+        var tableHealth = new object[]
+        {
+            new
+            {
+                key = "servico",
+                label = "Serviço (NSU)",
+                status = telemetry.Service is null ? "Atencao" : "Ok",
+                primaryValue = nsuLabel,
+                dataAgeSeconds = ageSeconds,
+                queryMs = 0,
+                hint = "Linha de serviço / posição NSU.",
+                route = "/tabelas/servico"
+            },
+            new
+            {
+                key = "configuracao",
+                label = "Configuração",
+                status = telemetry.Configs.Count == 0 ? "Atencao" : "Ok",
+                primaryValue = telemetry.Configs.Count == 0
+                    ? "Sem configs"
+                    : $"{telemetry.Configs.Count} chave(s)",
+                dataAgeSeconds = ageSeconds,
+                queryMs = 0,
+                hint = "Chaves de processo ativas.",
+                route = "/tabelas/configuracao"
+            },
+            new
+            {
+                key = "temporaria",
+                label = "Temporária",
+                status = "Ok",
+                primaryValue = telemetry.TempBacklog == 0
+                    ? "Vazia"
+                    : $"{telemetry.TempBacklog} doc(s)",
+                dataAgeSeconds = ageSeconds,
+                queryMs = 0,
+                hint = "Documentos na tabela temporária.",
+                route = "/tabelas/temporaria"
+            },
+            new
+            {
+                key = "log",
+                label = "Log",
+                status = "Ok",
+                primaryValue = telemetry.Logs.Count == 0
+                    ? "Sem eventos"
+                    : $"{telemetry.Logs.Count} evento(s)",
+                dataAgeSeconds = ageSeconds,
+                queryMs = 0,
+                hint = "Eventos recentes da sessão.",
+                route = "/tabelas/log"
+            },
+            new
+            {
+                key = "fila",
+                label = "Fila",
+                status = "Ok",
+                primaryValue = telemetry.BrokerDepth == 0
+                    ? "Fila vazia"
+                    : $"Profundidade {telemetry.BrokerDepth}",
+                dataAgeSeconds = ageSeconds,
+                queryMs = 0,
+                hint = "Profundidade da fila Service Broker.",
+                route = "/tabelas/fila"
+            }
+        };
+
         return new
         {
             mode = hasSql ? "in-process" : "in-process-limited",
@@ -321,6 +407,7 @@ public sealed class InProcessMonitorModule : IMonitorModule
                 telemetry.Service?.DtcExecucao,
                 telemetry.Service?.NomServidor),
             config = configItems,
+            tableHealth,
             sessionStartUtc = (DateTimeOffset?)null
         };
     }
@@ -346,11 +433,17 @@ public sealed class InProcessMonitorModule : IMonitorModule
                 detectedAtUtc = now
             });
 
+        // Conexão SQL — sempre reporta (ok ou problema).
         if (!hasSql)
         {
             Add("SQL_CFG", "Alerta", "Sem connection string — filas e lotes não podem ser lidos.");
         }
+        else
+        {
+            Add("SQL_OK", "Info", "Conexão SQL disponível para ler tabelas e filas.");
+        }
 
+        // Processo / Executar — sempre reporta.
         if (!processUp)
         {
             Add("PROC_OFF", "Atenção", "Processo parado. Use Ligar o fluxo no monitor para começar a processar a fila.");
@@ -359,33 +452,57 @@ public sealed class InProcessMonitorModule : IMonitorModule
         {
             Add("EXEC_0", "Atenção", "Processo no ar, mas Executar=0 — a fila não está consumindo trabalho.");
         }
+        else
+        {
+            Add("PROC_ON", "Info", "Processo ligado e consumindo (Executar=1).");
+        }
 
+        // Batida no banco — sempre reporta quando houver telemetria.
+        var host = string.IsNullOrWhiteSpace(servidor) ? "servidor" : servidor;
         if (dtcExecucao is not null)
         {
             var age = now - dtcExecucao.Value.ToUniversalTime();
             if (age.TotalHours > 2)
             {
-                var host = string.IsNullOrWhiteSpace(servidor) ? "servidor" : servidor;
                 Add(
                     "SVC_STALE",
                     "Alerta",
                     $"Última batida em {host} desatualizada (há {(int)age.TotalHours}h). Verifique se o serviço está vivo.");
             }
+            else
+            {
+                var mins = Math.Max(0, (int)age.TotalMinutes);
+                Add(
+                    "SVC_OK",
+                    "Info",
+                    mins <= 1
+                        ? $"Batida recente em {host} (há menos de 1 min)."
+                        : $"Batida recente em {host} (há {mins} min).");
+            }
+        }
+        else if (hasSql)
+        {
+            Add("SVC_UNKNOWN", "Info", "Ainda sem registro de batida (dtc_execucao) neste snapshot.");
         }
 
+        // Temporária — sempre reporta (0 = limpo / >0 = backlog informativo).
         if (tempBacklog > 0)
         {
             Add("TEMP_BACKLOG", "Info", $"{tempBacklog} documento(s) na temporária aguardando.");
         }
+        else
+        {
+            Add("TEMP_EMPTY", "Info", "Temporária vazia — nenhum CT-e pendente nesta etapa.");
+        }
 
+        // Fila Service Broker — sempre reporta.
         if (brokerDepth > 0)
         {
             Add("FILA_BACKLOG", "Info", $"{brokerDepth} item(ns) na fila do Service Broker.");
         }
-
-        if (list.Count == 0 && processUp)
+        else
         {
-            Add("OK", "Info", "Sem alertas — serviço ligado e telemetria estável.");
+            Add("FILA_EMPTY", "Info", "Fila vazia — nenhum item aguardando o próximo serviço.");
         }
 
         return list;

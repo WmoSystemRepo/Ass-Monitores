@@ -13,6 +13,7 @@ import { map, switchMap, timer, catchError, of } from 'rxjs';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { ServiceMonitorApiService } from '../service-monitor-api.service';
 import { TableDetailDto } from '@orquestrador/shared-data';
+import { PresentationTourStore } from '@orquestrador/monitor-dashboard';
 import {
   formatDataAgeSeconds,
   summarizeLogMessage,
@@ -81,7 +82,13 @@ const TABLE_KEYS = ['servico', 'configuracao', 'temporaria', 'log', 'fila'] as c
 })
 export class TablesHubPageComponent {
   private readonly store = inject(ServiceMonitorStore);
-  readonly cards = computed(() => this.store.tableHealth());
+  private readonly tour = inject(PresentationTourStore);
+  readonly cards = computed(() => {
+    if (this.tour.isTablesSimulating()) {
+      return this.tour.simulation()?.tables?.tableHealth ?? [];
+    }
+    return this.store.tableHealth();
+  });
 
   /** Exemplos visíveis quando ainda não há telemetria — status + Ver dados. */
   readonly emptySamples = [
@@ -351,6 +358,7 @@ export class TablesHubPageComponent {
 export class TableDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(ServiceMonitorApiService);
+  private readonly tour = inject(PresentationTourStore);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly key = toSignal(
@@ -358,8 +366,20 @@ export class TableDetailPageComponent {
     { initialValue: '' }
   );
 
-  readonly detail = signal<TableDetailDto | null>(null);
-  readonly error = signal<string | null>(null);
+  private readonly apiDetail = signal<TableDetailDto | null>(null);
+  private readonly apiError = signal<string | null>(null);
+
+  readonly detail = computed(() => {
+    if (this.tour.isTablesSimulating()) {
+      return this.tour.simulation()?.tables?.detail ?? null;
+    }
+    return this.apiDetail();
+  });
+
+  readonly error = computed(() => {
+    if (this.tour.isTablesSimulating()) return null;
+    return this.apiError();
+  });
 
   readonly health = computed(() => this.detail()?.health ?? null);
 
@@ -369,9 +389,12 @@ export class TableDetailPageComponent {
         map((p) => (p.get('key') ?? '').toLowerCase()),
         switchMap((key) =>
           timer(0, 2000).pipe(
-            switchMap(() =>
-              this.api.tableDetail(key, 100).pipe(
-                map((d) => ({ key, d, err: null as string | null })),
+            switchMap(() => {
+              if (this.tour.isTablesSimulating()) {
+                return of({ key, d: null as TableDetailDto | null, err: null as string | null, skip: true });
+              }
+              return this.api.tableDetail(key, 100).pipe(
+                map((d) => ({ key, d, err: null as string | null, skip: false })),
                 catchError((err) =>
                   of({
                     key,
@@ -380,26 +403,28 @@ export class TableDetailPageComponent {
                       err instanceof Error
                         ? err.message
                         : 'Falha ao carregar dados da tabela',
+                    skip: false,
                   })
                 )
-              )
-            )
+              );
+            })
           )
         ),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(({ key, d, err }) => {
+      .subscribe(({ key, d, err, skip }) => {
+        if (skip) return;
         if (!TABLE_KEYS.includes(key as (typeof TABLE_KEYS)[number])) {
-          this.error.set(`Tabela "${key}" não existe.`);
-          this.detail.set(null);
+          this.apiError.set(`Tabela "${key}" não existe.`);
+          this.apiDetail.set(null);
           return;
         }
         if (err) {
-          this.error.set(err);
+          this.apiError.set(err);
           return;
         }
-        this.error.set(null);
-        this.detail.set(d);
+        this.apiError.set(null);
+        this.apiDetail.set(d);
       });
   }
 

@@ -1,6 +1,6 @@
 # Documentação do sistema Ass-Monitores (DFEND CT-e)
 
-Índice oficial do monorepo. Atualizado em **06/08/2026** após auditoria de documentação.
+Índice oficial do monorepo. Atualizado em **07/08/2026** (modo Apresentação do Orquestrador 3.0 + correções de QA).
 
 ## 1. O que é este repositório
 
@@ -56,8 +56,8 @@ Fonte do estado: `Worker → Banco → Monitor.Api → Orquestrador`.
 | Doc | Conteúdo |
 |-----|----------|
 | [CT_e 3.0/README.md](DFEND/CT_e%203.0/README.md) | Entrada da linha 3.0 |
-| [0-Orquestrador/README.md](DFEND/CT_e%203.0/0-Orquestrador/README.md) | Visão geral, one-click, Ligar/Desligar |
-| [Doc/Documentacao_Orquestrador_CTe.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/Documentacao_Orquestrador_CTe.md) | Contrato, ambientes, go-live |
+| [0-Orquestrador/README.md](DFEND/CT_e%203.0/0-Orquestrador/README.md) | Visão geral, one-click, Ligar/Desligar, Apresentação |
+| [Doc/Documentacao_Orquestrador_CTe.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/Documentacao_Orquestrador_CTe.md) | Contrato, ambientes, go-live, **§8.5 modo Apresentação** |
 | [Doc/ONBOARDING_MICROSERVICO.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/ONBOARDING_MICROSERVICO.md) | Plugar estágio novo |
 | [Doc/DEV_PORTATIL.md](DFEND/CT_e%203.0/0-Orquestrador/Doc/DEV_PORTATIL.md) | Paths portáteis / troubleshooting |
 | [Doc/Passo a passo…](DFEND/CT_e%203.0/0-Orquestrador/Doc/Passo%20a%20passo%20execução%20Orquestrador.md) | Runbook |
@@ -155,3 +155,8 @@ Ver README do módulo: API F5 + `npm.cmd start` no Frontend + **Ligar** pela UI 
 - Correção do README do `Analisador.Api`
 - Porta real da **Carga API = 5080** (não 5060) alinhada em docs + `Carga.Api/README`
 - Link do ONBOARDING 3.0 apontando para o contrato compartilhado (não mais Doc Receptor ausente)
+
+### Atualização 07/08/2026
+
+- Modo **Apresentação** documentado (tour guiado + simulação) em `Documentacao_Orquestrador_CTe.md` §8.5, `Frontend/README.md` e `0-Orquestrador/README.md`
+- QA: spotlight fixed, `panelPlacement`, Reiniciar, nomenclatura **Amarelo** (âmbar `#fbbf24`) para fila / NA FILA

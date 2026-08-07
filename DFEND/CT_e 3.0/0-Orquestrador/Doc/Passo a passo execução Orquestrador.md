@@ -61,7 +61,8 @@ API base: `public/config.json` → `http://localhost:5000`.
 4. **Clique em um estágio** → abre `/monitores/{servico}` no mesmo Angular (anatomia/animações CT_e 2.0; push SignalR + badge SignalR/REST)
 5. No monitor: Ligar/Desligar **daquele** serviço; threads/logs/tabelas/config/mais-informações nas rotas filhas
 6. Receptor → **Mais informações**: 4 cards (atividade, eventos, **Saúde dos bancos**, avisos); em erro SQL use **Ver erro** (frase clara + original)
-7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready). **Não limpa a fila**: se ainda houver documentos pendentes, a fase fica **Parada** com estágios em **NA FILA** (âmbar) e contadores “Com fila” / “Arquivos” > 0 — isso é normal. Religue com **Ligar as filas** para consumir o backlog.
+7. **Desligar filas** → confirmação modal → `Executar=0` + para processos na ordem inversa (sempre tenta parar; não depende de health/ready). **Não limpa a fila**: se ainda houver documentos pendentes, a fase fica **Parada** com estágios em **NA FILA** (âmbar / amarelo) e contadores “Com fila” / “Arquivos” > 0 — isso é normal. Religue com **Ligar as filas** para consumir o backlog.
+8. **Apresentação** (opcional, treino): botão no header ou `http://localhost:4220/?apresentacao=1` → flash card com Avançar/Voltar/**Reiniciar**/Sair; simulação visual sem CT-e real. Detalhes: [Documentacao_Orquestrador_CTe.md §8.5](Documentacao_Orquestrador_CTe.md).
 
 > Se engines não ficarem online no Ligar, a barra mostra a falha e **as filas daquele sistema não ligam**.  
 > Plugar outro sistema / Docker: [ONBOARDING_MICROSERVICO.md](ONBOARDING_MICROSERVICO.md).  

@@ -1,13 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { LogEntry } from '@orquestrador/shared-data';
+import { PresentationTourStore } from '@orquestrador/monitor-dashboard';
 import { ServiceMonitorStore } from './service-monitor.store';
 import {
   classifyLogKind,
@@ -26,8 +29,53 @@ import {
 
 const FEED_CAP = 12;
 const EVENT_CAP = 12;
-const ALERT_CAP = 8;
 const TABLE_HEALTH_CAP = 8;
+
+/** Catálogo fixo das tabelas consultáveis (GET …/tables/{key}?take=1000). */
+const BROWSEABLE_TABLES: ReadonlyArray<{
+  key: string;
+  label: string;
+  sqlName: string;
+  hint: string;
+  primaryValue: string;
+}> = [
+  {
+    key: 'servico',
+    label: 'Serviço (NSU)',
+    sqlName: 'servico_*_conhecimento_transporte_eletronico',
+    hint: 'Tabela de serviço — NSU e batida do processo',
+    primaryValue: 'NSU, servidor e última execução',
+  },
+  {
+    key: 'configuracao',
+    label: 'Configuração',
+    sqlName: 'configuracao_*_conhecimento_transporte_eletronico',
+    hint: 'Parâmetros ativos (sts_ativo=1)',
+    primaryValue: 'Chaves e valores de configuração',
+  },
+  {
+    key: 'temporaria',
+    label: 'Temporária',
+    sqlName: 'tmp_documento_conhecimento_transporte_eletronico',
+    hint: 'Lotes em trânsito neste serviço',
+    primaryValue: 'Documentos recentes na temporária',
+  },
+  {
+    key: 'log',
+    label: 'Log',
+    sqlName: 'log_*_conhecimento_transporte_eletronico',
+    hint: 'Eventos gravados no banco',
+    primaryValue: 'Eventos e mensagens recentes',
+  },
+  {
+    key: 'fila',
+    label: 'Fila',
+    sqlName: 'Service Broker / fila do próximo serviço',
+    hint: 'Profundidade da fila Service Broker',
+    primaryValue: 'Estado da fila e tendência',
+  },
+];
+
 
 interface ServiceDetailsMeta {
   label: string;
@@ -220,7 +268,7 @@ const META: Record<string, ServiceDetailsMeta> = {
             <div>
               <h2 class="text-sm font-semibold text-slate-100">Saúde dos bancos</h2>
               <p class="text-[11px] text-slate-500">
-                Conexão SQL e tabelas usadas por este serviço
+                Conexão SQL · abra uma tabela para ver até os últimos 1000 registros
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -247,39 +295,58 @@ const META: Record<string, ServiceDetailsMeta> = {
             >
               {{ connectionLabel() }}
             </span>
-          </div>
-          <div class="min-h-0 flex-1 space-y-1 overflow-hidden border-t border-slate-800/80 pt-2">
-            @for (card of tableHealthRows(); track card.key) {
-              <a
-                [routerLink]="['/monitores', serviceId(), 'tabelas', card.key]"
-                class="flex items-start gap-2 rounded-md border border-transparent px-1.5 py-1 text-[11px] leading-snug transition hover:border-slate-600/80 hover:bg-slate-900/50"
-                [attr.title]="card.hint"
+            @if (!hasLiveTableHealth()) {
+              <span class="text-[10px] text-slate-500"
+                >· catálogo padrão (status ao vivo ainda não chegou)</span
               >
-                <span
-                  class="mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold uppercase"
-                  [ngClass]="tableStatusBadge(card.status)"
-                >
-                  {{ tableStatusLabel(card.status) }}
-                </span>
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate font-medium text-slate-100">{{
-                    card.label
-                  }}</span>
-                  <span class="block truncate text-slate-400">{{
-                    card.primaryValue
-                  }}</span>
-                  <span class="text-slate-600"
-                    >Idade {{ formatAge(card.dataAgeSeconds) }} · Consulta
-                    {{ card.queryMs }}ms</span
-                  >
-                </span>
-              </a>
-            } @empty {
-              <p class="text-[11px] leading-relaxed text-slate-500">
-                Sem telemetria de tabelas ainda — confira connection string / SQL do
-                monitor.
-              </p>
             }
+          </div>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto border-t border-slate-800/80 pt-2"
+          >
+            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              @for (card of tableBrowseCards(); track card.key) {
+                <a
+                  [routerLink]="['/monitores', serviceId(), 'tabelas', card.key]"
+                  class="group flex min-h-0 flex-col rounded-md border px-2.5 py-2 transition hover:border-cyan-500/45 hover:bg-slate-900/70"
+                  [ngClass]="tableMiniBorder(card.status)"
+                  [attr.title]="card.hint"
+                >
+                  <div class="flex items-start justify-between gap-1">
+                    <span class="truncate text-[11px] font-semibold text-slate-100">{{
+                      card.label
+                    }}</span>
+                    <span
+                      class="shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold uppercase"
+                      [ngClass]="tableStatusBadge(card.status)"
+                    >
+                      {{ tableStatusLabel(card.status) }}
+                    </span>
+                  </div>
+                  <p
+                    class="mt-0.5 truncate font-mono text-[9px] text-slate-500"
+                    [attr.title]="card.sqlName"
+                  >
+                    {{ card.sqlName }}
+                  </p>
+                  <p class="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-400">
+                    {{ card.primaryValue }}
+                  </p>
+                  @if (card.hasTelemetry) {
+                    <p class="mt-1 text-[9px] text-slate-600">
+                      Idade {{ formatAge(card.dataAgeSeconds) }} · Consulta
+                      {{ card.queryMs }}ms
+                    </p>
+                  }
+                  <p
+                    class="mt-auto pt-1.5 text-[10px] font-medium"
+                    [ngClass]="meta().accentLink"
+                  >
+                    Ver últimos 1000 →
+                  </p>
+                </a>
+              }
+            </div>
           </div>
         </section>
 
@@ -287,16 +354,16 @@ const META: Record<string, ServiceDetailsMeta> = {
           <div class="mb-1.5 shrink-0">
             <h2 class="text-sm font-semibold text-slate-100">Avisos e saúde</h2>
             <p class="text-[11px] text-slate-500">
-              Situações que pedem atenção (processo, fila, batida no banco)
+              Todos os status: ok/info, atenção e alerta (processo, fila, batida, SQL)
             </p>
           </div>
-          <div class="min-h-0 flex-1 space-y-1.5 overflow-hidden">
-            @for (a of topAlerts(); track a.code + a.message) {
+          <div class="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
+            @for (a of allHealthNotices(); track a.code + a.message) {
               <div
                 class="rounded-md border px-2.5 py-1.5 text-[11px]"
-                [ngClass]="alertBorder(a.severity)"
+                [ngClass]="alertBorder(a.severity, a.code)"
               >
-                <span class="text-slate-500"
+                <span [ngClass]="alertSeverityTone(a.severity, a.code)"
                   >{{ severityLabel(a.severity) }}
                   @if (a.code) {
                     · {{ a.code }}
@@ -306,8 +373,7 @@ const META: Record<string, ServiceDetailsMeta> = {
               </div>
             } @empty {
               <p class="text-xs leading-relaxed text-slate-500">
-                Sem avisos no momento. Quando o serviço estiver parado ou a batida
-                atrasar, os alertas aparecem aqui.
+                Sem telemetria de avisos ainda — aguarde o snapshot do monitor.
               </p>
             }
           </div>
@@ -330,13 +396,50 @@ const META: Record<string, ServiceDetailsMeta> = {
     `,
   ],
 })
-export class SharedServiceDetailsPageComponent {
+export class SharedServiceDetailsPageComponent implements OnDestroy {
   readonly store = inject(ServiceMonitorStore);
+  readonly tour = inject(PresentationTourStore);
   private readonly confirmDialog = inject(ConfirmDialogService);
   readonly severityLabel = severityLabel;
   readonly summarize = summarizeLogMessage;
   readonly tableStatusLabel = tableHealthStatusLabel;
   readonly formatAge = formatDataAgeSeconds;
+
+  private lastErrorModalToken = 0;
+
+  constructor() {
+    effect(() => {
+      const sim = this.tour.simulation();
+      if (sim?.mode !== 'detailsFlow' || !sim.details) {
+        if (this.lastErrorModalToken > 0) {
+          this.confirmDialog.close(false);
+        }
+        this.lastErrorModalToken = 0;
+        return;
+      }
+      const token = sim.details.errorModalToken;
+      if (token === this.lastErrorModalToken) return;
+      this.lastErrorModalToken = token;
+
+      if (token <= 0) return;
+
+      // Ímpar = abrir modal do erro crítico; par = fechar.
+      if (token % 2 === 1) {
+        const critical = sim.details.logs.find(
+          (l) => l.seqLog === sim.details!.criticalErrorSeqLog
+        );
+        if (critical) this.openErrorDetail(critical);
+      } else {
+        this.confirmDialog.close(false);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.tour.isDetailsSimulating()) {
+      this.confirmDialog.close(false);
+    }
+  }
 
   readonly serviceId = computed(() => this.store.serviceId());
 
@@ -348,15 +451,89 @@ export class SharedServiceDetailsPageComponent {
     connectionHealthLabel(this.store.connectionHealth() ?? 'Down')
   );
 
-  readonly tableHealthRows = computed(() =>
-    this.store.tableHealth().slice(0, TABLE_HEALTH_CAP)
-  );
+  readonly hasLiveTableHealth = computed(() => {
+    if (this.tour.isDetailsSimulating()) return true;
+    return (this.store.tableHealth()?.length ?? 0) > 0;
+  });
 
-  readonly recentActivity = computed(() =>
-    [...this.store.logs()].slice(-EVENT_CAP).reverse()
-  );
+  /**
+   * Mini cards sempre disponíveis: com telemetria usa status real;
+   * sem telemetria ainda permite abrir os últimos 1000 registros.
+   */
+  readonly tableBrowseCards = computed(() => {
+    const live =
+      this.tour.simulation()?.mode === 'detailsFlow'
+        ? this.tour.simulation()?.details?.tableHealth ?? []
+        : this.store.tableHealth() ?? [];
+    const byKey = new Map(live.map((t) => [t.key.toLowerCase(), t]));
 
-  readonly topAlerts = computed(() => {
+    const fromCatalog = BROWSEABLE_TABLES.map((t) => {
+      const hit = byKey.get(t.key);
+      if (hit) {
+        return {
+          key: hit.key,
+          label: hit.label || t.label,
+          sqlName: t.sqlName,
+          status: hit.status || 'ok',
+          primaryValue: hit.primaryValue || t.primaryValue,
+          hint: hit.hint || t.hint,
+          dataAgeSeconds: hit.dataAgeSeconds,
+          queryMs: hit.queryMs ?? 0,
+          hasTelemetry: true,
+        };
+      }
+      return {
+        key: t.key,
+        label: t.label,
+        sqlName: t.sqlName,
+        status: 'ok',
+        primaryValue: t.primaryValue,
+        hint: t.hint,
+        dataAgeSeconds: null as number | null,
+        queryMs: 0,
+        hasTelemetry: false,
+      };
+    });
+
+    const known = new Set(BROWSEABLE_TABLES.map((t) => t.key));
+    const extras = live
+      .filter((t) => !known.has(t.key.toLowerCase()) && !known.has(t.key))
+      .slice(0, Math.max(0, TABLE_HEALTH_CAP - fromCatalog.length))
+      .map((hit) => ({
+        key: hit.key,
+        label: hit.label,
+        sqlName: hit.key,
+        status: hit.status || 'ok',
+        primaryValue: hit.primaryValue,
+        hint: hit.hint,
+        dataAgeSeconds: hit.dataAgeSeconds,
+        queryMs: hit.queryMs ?? 0,
+        hasTelemetry: true,
+      }));
+
+    return [...fromCatalog, ...extras].slice(0, TABLE_HEALTH_CAP);
+  });
+
+  tableMiniBorder(status: string): string {
+    switch ((status ?? '').toLowerCase()) {
+      case 'critico':
+        return 'border-rose-500/45 bg-rose-950/20';
+      case 'atencao':
+        return 'border-amber-500/40 bg-amber-950/15';
+      default:
+        return 'border-slate-700/80 bg-slate-900/45';
+    }
+  }
+
+  readonly recentActivity = computed(() => {
+    const logs =
+      this.tour.simulation()?.mode === 'detailsFlow'
+        ? this.tour.simulation()?.details?.logs ?? []
+        : this.store.logs();
+    return [...logs].slice(-EVENT_CAP).reverse();
+  });
+
+  readonly allHealthNotices = computed(() => {
     const rank = (severity: string | number): number => {
       const s = severityLabel(severity);
       if (s === 'Crítico' || s === 'Critico') return 0;
@@ -364,13 +541,24 @@ export class SharedServiceDetailsPageComponent {
       if (s === 'Atenção') return 2;
       return 3;
     };
-    return [...this.store.alerts()]
-      .sort((a, b) => rank(a.severity) - rank(b.severity))
-      .slice(0, ALERT_CAP);
+    const alerts =
+      this.tour.simulation()?.mode === 'detailsFlow'
+        ? this.tour.simulation()?.details?.alerts ?? []
+        : this.store.alerts();
+    return [...alerts].sort((a, b) => rank(a.severity) - rank(b.severity));
   });
 
+  readonly topAlerts = this.allHealthNotices;
+
   readonly flowFeed = computed(() => {
-    const debug = [...this.store.liveTrace()]
+    const simDetails =
+      this.tour.simulation()?.mode === 'detailsFlow'
+        ? this.tour.simulation()?.details
+        : null;
+    const liveTrace = simDetails?.liveTrace ?? this.store.liveTrace();
+    const logs = simDetails?.logs ?? this.store.logs();
+
+    const debug = [...liveTrace]
       .reverse()
       .slice(0, FEED_CAP)
       .map((t) => ({
@@ -382,7 +570,7 @@ export class SharedServiceDetailsPageComponent {
         kind: 'debug' as const,
       }));
 
-    const sql = [...this.store.logs()]
+    const sql = [...logs]
       .reverse()
       .slice(0, FEED_CAP)
       .map((l) => ({
@@ -518,8 +706,9 @@ export class SharedServiceDetailsPageComponent {
     }
   }
 
-  alertBorder(severity: string | number): string {
+  alertBorder(severity: string | number, code?: string | null): string {
     const s = severityLabel(severity);
+    const c = (code ?? '').toUpperCase();
     if (s === 'Crítico' || s === 'Critico') {
       return 'border-rose-500/50 bg-rose-950/30';
     }
@@ -529,6 +718,21 @@ export class SharedServiceDetailsPageComponent {
     if (s === 'Atenção') {
       return 'border-amber-500/40 bg-amber-950/20';
     }
-    return 'border-slate-600/70 bg-slate-900/40';
+    if (c.endsWith('_OK') || c.endsWith('_EMPTY') || c === 'OK' || c === 'PROC_ON') {
+      return 'border-emerald-500/35 bg-emerald-950/20';
+    }
+    return 'border-sky-600/40 bg-sky-950/20';
+  }
+
+  alertSeverityTone(severity: string | number, code?: string | null): string {
+    const s = severityLabel(severity);
+    const c = (code ?? '').toUpperCase();
+    if (s === 'Crítico' || s === 'Critico') return 'text-rose-300';
+    if (s === 'Alerta') return 'text-orange-300';
+    if (s === 'Atenção') return 'text-amber-300';
+    if (c.endsWith('_OK') || c.endsWith('_EMPTY') || c === 'OK' || c === 'PROC_ON') {
+      return 'text-emerald-300';
+    }
+    return 'text-sky-300';
   }
 }

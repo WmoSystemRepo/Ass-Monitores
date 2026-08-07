@@ -21,7 +21,7 @@ O Orquestrador é um **BFF**: não processa CT-e. Agrega saúde/telemetria dos m
 Não há estado **“pausado”** na cascata: processo no ar com filas ligadas = **Ativo**; desligado = **Parado**.  
 `service/start` e `service/stop` do módulo in-process seguem a mesma regra.
 
-**Desligar não esvazia as filas.** Os documentos/itens que já estavam aguardando continuam no backlog (SQL / Service Broker / temp). A tela pode mostrar **Fase: Parada** com **Com fila > 0** e estágios em laranja **NA FILA** — isso é esperado. Ao **Ligar as filas** de novo, a cadeia retoma e consome esse backlog.
+**Desligar não esvazia as filas.** Os documentos/itens que já estavam aguardando continuam no backlog (SQL / Service Broker / temp). A tela pode mostrar **Fase: Parada** com **Com fila > 0** e estágios em âmbar (**amarelo**) **NA FILA** — isso é esperado. Ao **Ligar as filas** de novo, a cadeia retoma e consome esse backlog.
 
 | Depois de Desligar (esperado) | Significado |
 |-------------------------------|-------------|
@@ -277,7 +277,8 @@ Componentes-chave:
 | `ChainAnatomyComponent` | 6 estações + idle hero + boot em cascata ao Ligar |
 | `StationCardComponent` | card clicável (badge AGORA / NA FILA / … + medidor) |
 | `QueueMeterComponent` | profundidade visual; animação `rising` / `draining` |
-| `StatusLegendComponent` | legenda Agora / Feito / Parado |
+| `StatusLegendComponent` | legenda Erro / Agora / Na fila / Ativo / Parado |
+| `PresentationTourStore` / `PresentationTourPanelComponent` | modo Apresentação (tour + simulação) |
 
 Ao **Ligar as filas**, cada estação anima com atraso (`--boot-delay`) enquanto `cascadePhase === starting`.  
 CTA “Ligar” fica **apenas no header** — o idle hero só orienta o usuário (sem segundo botão).
@@ -311,27 +312,77 @@ Script de sync de anatomia (dev): `Frontend/tools/sync-receptor-anatomy-ux.py` +
 
 | Código (ex.) | Quando |
 |--------------|--------|
-| `SQL_CFG` | sem connection string |
-| `PROC_OFF` | processo parado |
-| `EXEC_0` | processo no ar com `Executar=0` |
-| `SVC_STALE` | batida (`DtcExecucao`) atrasada (>2h) |
-| `TEMP_BACKLOG` / `FILA_BACKLOG` | profundidade > 0 |
-| `OK` | serviço ligado e sem outros alertas |
+| `SQL_CFG` / `SQL_OK` | sem connection string / conexão SQL ok |
+| `PROC_OFF` / `EXEC_0` / `PROC_ON` | processo parado · Executar=0 · ligado consumindo |
+| `SVC_STALE` / `SVC_OK` / `SVC_UNKNOWN` | batida atrasada · batida recente · sem batida ainda |
+| `TEMP_BACKLOG` / `TEMP_EMPTY` | documentos na temporária / temporária vazia |
+| `FILA_BACKLOG` / `FILA_EMPTY` | itens na fila Broker / fila vazia |
 
 Mensagens são **genéricas** (qualquer serviço da cadeia). O card “Avisos e saúde” consome `snapshot.alerts`. **Reinicie a API** após deploy.
 
 ### 8.4 Animações — o que existe (e o que não)
 
-Não há toggle `demoMode` / “fluxo de demonstração” no 2.0 nem no 3.0.  
-As animações de documento são a **jornada do lote** (`playLoteJourney` + chips CT-e voando + esteira), acionadas pela telemetria quando o serviço está ligado.
+Não há toggle `demoMode` legado do 2.0.  
+As animações de documento no uso normal são a **jornada do lote** (`playLoteJourney` + chips CT-e voando + esteira), acionadas pela telemetria quando o serviço está ligado.
 
-Extras de UX recentes:
+Extras de UX:
 
 - Medidor / plataforma **sobe** quando a fila enche e **diminui** quando drena
 - Cascata visual ao **Ligar** (cadeia e Receptor)
 - `prefers-reduced-motion` respeitado nos CSS (`styles.css`, `service-monitor-extras.css`)
+- **Modo Apresentação** (abaixo): simulação visual **sem CT-e real** (`flow` / `stoppedBacklog`)
 
-## 9. Como subir
+### 8.5 Modo Apresentação (tour guiado)
+
+Tour passo a passo no front único (`:4220`) para treinar operadores sem depender de telemetria real.
+
+| Item | Detalhe |
+|------|---------|
+| Como iniciar | Botão **Apresentação** no header do Dashboard · ou `/?apresentacao=1` |
+| Como sair | **Sair** no flash card · **Sair da apresentação** no header · tecla `Esc` |
+| Como reiniciar | Botão **Reiniciar** no flash card (a qualquer momento) |
+| Navegação | **Avançar** / **Voltar** · `→` / `Enter` / `←` |
+| Conteúdo | `Frontend/libs/monitor-dashboard/src/lib/presentation-steps.ts` (~45 passos) |
+| Store | `PresentationTourStore` — rota + simulação por passo |
+| Flash card | `PresentationTourPanelComponent` — `panelPlacement` `top` \| `bottom` \| `left` \| `right` |
+| Spotlight | Anel + título em `position: fixed` (não corta com `overflow: hidden`) |
+| Alvos | Atributos `data-tour="…"` nas telas (cadeia, Receptor, detalhes, tabelas, threads, logs, config, Resgate) |
+
+**Simulações (só no tour):**
+
+| Modo | O que mostra |
+|------|----------------|
+| `flow` | Destaque **AGORA** andando pelos 6 serviços + esteira |
+| `stoppedBacklog` | Cadeia parada com badge **NA FILA** (âmbar) e rail **Foco agora** |
+| `receptorFlow` | No monitor Receptor: **AGORA** em SEFAZ → consulta → temp → fila → Arquivador + esteira/chips |
+| `detailsFlow` | Em Mais informações: preenche os 4 painéis + abre/fecha sozinho o modal de erro crítico (cStat 215) |
+| `tablesFlow` | Em Tabelas → Serviço (NSU): preenche linha de serviço + eventos NSU/cStat de exemplo |
+| `threadsFlow` | Em Linhas de trabalho: preenche até 5 cartões (buscando / parada / arquivo / sem atividade) + resumo |
+
+**Cores na cópia do tour (alinhar com a UI):**
+
+| Nome no card | Cor na tela | Significado |
+|--------------|-------------|-------------|
+| Amarelo / âmbar (`#fbbf24`) | Badge **NA FILA**, “Com fila” parado | Backlog pendente |
+| Verde | Ativo / online | Saudável / ligado |
+| Azul | **AGORA** | Processando |
+| Cinza claro | **PARADO** | Sem processo / aguardando |
+| Vermelho | Erro | Atenção |
+
+O flash card sobe para o **topo**, ou vai para a **direita/esquerda**, quando o alvo precisa ficar livre (ex.: simulação do fluxo com card à direita para ver AGORA e a esteira).
+
+Bug de UX tratado: avanço/voltar rápido **não** deixa duas marcações ativas (token de geração + cancelamento de timer).
+
+#### Arquivos principais
+
+```text
+libs/monitor-dashboard/
+  presentation-steps.ts              # passos (texto + target + route + simulate + panelPlacement)
+  presentation-tour.store.ts         # start / restart / next / back / exit + simulação
+  presentation-tour.panel.component.ts  # flash card + anel fixed + teclado
+apps/cte-orquestrador/src/styles.css # overlay body.presentation-tour-active + pulse
+```
+
 
 ### 9.1 Development (Visual Studio)
 
@@ -410,10 +461,11 @@ SQL worker↔Monitor = integração **transitória**.
       src/styles.css                   # tokens + queue-meter + reduced-motion
       src/service-monitor-extras.css   # anatomia Receptor / plataformas / fila
     libs/
-      monitor-dashboard/               # Dashboard cadeia (station-card, queue-meter)
+      monitor-dashboard/               # Dashboard cadeia + modo Apresentação (presentation-*)
       service-monitors/                # Monitores ricos (receptor…carga)
       shared-ui/                       # ConfirmDialog (+ severity helpers)
       monitor-core/                    # ChainOrchestratorStore, getHubUrl()
+      shared-utils/                    # labels, catálogo de erro, tableHealthStatusLabel
   Orquestrador.Api/                    # BFF :5000 / Swagger :7100
     …/Realtime/                        # MonitorHub + push ~1s
     …/Monitors/.../InProcessMonitorModule.cs  # BuildHealthAlerts
@@ -431,7 +483,7 @@ SQL worker↔Monitor = integração **transitória**.
 ## 12. Paleta UI
 
 Indigo / violet / lime / fuchsia — distinta do Receptor (cyan) e do Arquivador (âmbar).  
-Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
+Fila / **NA FILA**: âmbar `#fbbf24` (na cópia do tour: **Amarelo**); AGORA: azul neon; parado: cinza claro `#94a3b8`; erro: rose.
 
 ## 13. Histórico recente (UX / realtime)
 
@@ -444,6 +496,8 @@ Fila / AGORA: âmbar e azul neon nos medidores; erro: rose.
 | 06/08/2026 | Padrão Receptor replicado nos 6 monitores: shared Mais informações, animações fila/boot, copy leiga, docs |
 | 06/08/2026 | Mais informações: card **Saúde dos bancos** (conexão + `tableHealth`) no lugar de Configuração e lotes |
 | 06/08/2026 | Doc + UX: após **Desligar**, Fase Parada com **NA FILA** / backlog pendente é esperado (não limpa fila) |
+| 07/08/2026 | Modo **Apresentação**: tour guiado + simulação visual (`presentation-steps` / store / panel) |
+| 07/08/2026 | QA apresentação: spotlight fixed (anel+título), `panelPlacement`, Reiniciar, textos/cores (Amarelo), sem marcações duplas |
 
 ## 14. Dúvidas frequentes (operação)
 

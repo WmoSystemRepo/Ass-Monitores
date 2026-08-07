@@ -54,7 +54,7 @@ Hub SignalR: `{apiBaseUrl}/hubs/monitor` (`getHubUrl()` em `@orquestrador/monito
 
 | Alias | Papel |
 |-------|--------|
-| `@orquestrador/monitor-dashboard` | Cadeia: Ligar/Desligar, `ChainAnatomy`, `StationCard`, `QueueMeter`, legenda |
+| `@orquestrador/monitor-dashboard` | Cadeia: Ligar/Desligar, `ChainAnatomy`, `StationCard`, `QueueMeter`, legenda, **modo Apresentação** |
 | `@orquestrador/monitor-core` | `ChainOrchestratorStore`, `getApiBaseUrl()`, `getHubUrl()` |
 | `@orquestrador/service-monitors` | Monitor rico por serviço (paridade **CT_e 2.0** + SignalR); `SharedServiceDetailsPageComponent` |
 | `@orquestrador/shared-ui` | `ConfirmDialog` (confirm / info com `detail` monoespaçado) |
@@ -62,7 +62,7 @@ Hub SignalR: `{apiBaseUrl}/hubs/monitor` (`getHubUrl()` em `@orquestrador/monito
 
 CSS de anatomia/animações:
 
-- `apps/cte-orquestrador/src/styles.css` — tokens, queue-meter, station-card, reduced-motion
+- `apps/cte-orquestrador/src/styles.css` — tokens, queue-meter, station-card, reduced-motion, **overlay do tour**
 - `apps/cte-orquestrador/src/service-monitor-extras.css` — pipeline Receptor (plataformas, fila sobe/desce, boot)
 
 ### Dados do monitor
@@ -79,12 +79,34 @@ CSS de anatomia/animações:
 - `QueueMeterComponent`: chips sobem ao encher (`rising`) e encolhem ao drenar (`draining`)
 - Ao **Ligar as filas**: estações animam em cascata (`booting` + `--boot-delay`)
 - CTA Ligar **só no header** (idle hero só explica)
+- Badge **NA FILA** = âmbar `#fbbf24` (na cópia do tour: **Amarelo**)
+
+### Modo Apresentação
+
+Tour guiado para treinar o uso do painel **sem CT-e real**.
+
+| Ação | Como |
+|------|------|
+| Iniciar | Botão **Apresentação** no header · ou `http://localhost:4220/?apresentacao=1` |
+| Navegar | **Avançar** / **Voltar** · teclas `→` `Enter` `←` |
+| Reiniciar | **Reiniciar** no flash card |
+| Sair | **Sair** no card · **Sair da apresentação** no header · `Esc` |
+
+Implementação (`libs/monitor-dashboard`):
+
+| Arquivo | Papel |
+|---------|--------|
+| `presentation-steps.ts` | Passos (texto, `target`, `route`, `simulate`, `panelPlacement`) |
+| `presentation-tour.store.ts` | Estado, rotas, simulações `flow` / `stoppedBacklog` |
+| `presentation-tour.panel.component.ts` | Flash card + anel/título fixed + teclado |
+
+O spotlight usa anel em `position: fixed` (não é cortado por `overflow: hidden`). Em alguns passos o card fica no **topo** para não cobrir a cadeia. Detalhes: [Doc §8.5](../Doc/Documentacao_Orquestrador_CTe.md).
 
 ### Receptor — Mais informações
 
 Grid 2×2 sem scroll da página: atividade · eventos · **Saúde dos bancos** (conexão SQL + `tableHealth`) · avisos.  
 Em eventos SQL de **erro**, botão **Ver erro** abre explicação leiga + texto original via `ConfirmDialog` (`mode: 'info'`, `detail`).  
-Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API). Links **Tabelas →** / **Config →** no card de saúde.
+Avisos vêm de `snapshot.alerts` (`BuildHealthAlerts` na API). Links **Tabelas →** / **Configuração →** no card de saúde.
 
 ### Padrão nos 6 monitores
 
@@ -97,4 +119,4 @@ Fonte única: `SharedServiceDetailsPageComponent` (meta por `serviceId`).
 - Cascata e snapshot da cadeia: `/api/orchestrator/*`
 - Operação principal **não** depende de micro-fronts `:4200`–`:42xx`
 - Auth usuário do dashboard ainda não existe; a proteção serviço-a-serviço é a API key interna no BFF ↔ engines
-- Não existe `demoMode`: animações de CT-e = jornada do lote + telemetria ao vivo
+- Animações de CT-e ao vivo = jornada do lote + telemetria; simulação visual só no **modo Apresentação**

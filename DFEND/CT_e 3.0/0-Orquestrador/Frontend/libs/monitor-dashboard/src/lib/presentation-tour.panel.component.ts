@@ -46,6 +46,8 @@ const FIND_DELAY_MS = 120;
       <div
         class="presentation-tour-panel"
         [class.presentation-tour-panel-top]="tour.panelPlacement() === 'top'"
+        [class.presentation-tour-panel-left]="tour.panelPlacement() === 'left'"
+        [class.presentation-tour-panel-right]="tour.panelPlacement() === 'right'"
         role="dialog"
         aria-label="Apresentação"
       >
@@ -101,14 +103,24 @@ const FIND_DELAY_MS = 120;
           >
             Voltar
           </button>
-          <button
-            type="button"
-            class="presentation-tour-btn presentation-tour-btn-primary"
-            [disabled]="!tour.canNext()"
-            (click)="tour.next()"
-          >
-            Avançar
-          </button>
+          @if (tour.isLastStep()) {
+            <button
+              type="button"
+              class="presentation-tour-btn presentation-tour-btn-primary"
+              (click)="tour.exit()"
+            >
+              Finalizar
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="presentation-tour-btn presentation-tour-btn-primary"
+              [disabled]="!tour.canNext()"
+              (click)="tour.next()"
+            >
+              Avançar
+            </button>
+          }
         </div>
       </div>
     }
@@ -158,8 +170,11 @@ const FIND_DELAY_MS = 120;
       left: 50%;
       bottom: 1.1rem;
       top: auto;
+      right: auto;
       z-index: 90;
       width: min(28rem, calc(100vw - 1.5rem));
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
       transform: translateX(-50%);
       border-radius: 1rem;
       border: 1px solid rgba(129, 140, 248, 0.65);
@@ -173,6 +188,19 @@ const FIND_DELAY_MS = 120;
     .presentation-tour-panel-top {
       top: 1.1rem;
       bottom: auto;
+    }
+    .presentation-tour-panel-left,
+    .presentation-tour-panel-right {
+      top: 50%;
+      bottom: auto;
+      left: 1rem;
+      right: auto;
+      width: min(22rem, calc(100vw - 2rem));
+      transform: translateY(-50%);
+    }
+    .presentation-tour-panel-right {
+      left: auto;
+      right: 1rem;
     }
     .presentation-tour-meta {
       display: flex;
@@ -361,7 +389,11 @@ export class PresentationTourPanelComponent implements OnDestroy {
     }
     if (ev.key === 'ArrowRight' || ev.key === 'Enter') {
       ev.preventDefault();
-      this.tour.next();
+      if (this.tour.isLastStep()) {
+        this.tour.exit();
+      } else {
+        this.tour.next();
+      }
       return;
     }
     if (ev.key === 'ArrowLeft') {
@@ -373,7 +405,7 @@ export class PresentationTourPanelComponent implements OnDestroy {
   private scheduleFind(
     selector: string,
     label: string,
-    placement: 'top' | 'bottom',
+    placement: 'top' | 'bottom' | 'left' | 'right',
     gen: number,
     attempt: number
   ): void {
@@ -391,8 +423,8 @@ export class PresentationTourPanelComponent implements OnDestroy {
       el.classList.add('tour-target-active');
       el.scrollIntoView({
         behavior: 'smooth',
-        block: placement === 'top' ? 'end' : 'nearest',
-        inline: 'nearest',
+        block: placement === 'top' ? 'end' : 'center',
+        inline: placement === 'left' || placement === 'right' ? 'nearest' : 'nearest',
       });
       this.attachViewportListeners();
       // Recalcula após o scroll começar a acomodar o card.

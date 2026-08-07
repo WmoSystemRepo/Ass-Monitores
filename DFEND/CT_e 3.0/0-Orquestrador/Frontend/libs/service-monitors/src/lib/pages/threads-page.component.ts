@@ -10,6 +10,7 @@ import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ServiceMonitorStore } from '../service-monitor.store';
 import { LogEntry, ThreadView } from '@orquestrador/shared-data';
+import { PresentationTourStore } from '@orquestrador/monitor-dashboard';
 import {
   awaitingReceptionStatus,
   computeNsuDelta,
@@ -354,26 +355,34 @@ interface ThreadCardVm {
 })
 export class ThreadsPageComponent {
   readonly store = inject(ServiceMonitorStore);
+  private readonly tour = inject(PresentationTourStore);
 
   private readonly nsuDeltaByThread = signal<Record<number, number | null>>({});
   private readonly prevNsu = signal<Record<number, string | null>>({});
   private readonly lastSnapAt = signal<string | null>(null);
 
   readonly receptionRunning = computed(() => {
+    if (this.tour.isThreadsSimulating()) return true;
     const service = this.store.service();
     return !!service?.isRunning && service.executar === 1;
   });
 
   readonly cards = computed((): ThreadCardVm[] => {
-    const threads = this.store.threads();
-    const logs = this.store.logs();
+    const simulating = this.tour.isThreadsSimulating();
+    const sim = this.tour.simulation()?.threads;
+    const threads = simulating ? sim?.threads ?? [] : this.store.threads();
+    const logs = simulating ? sim?.logs ?? [] : this.store.logs();
     const global = this.store.global();
     const service = this.store.service();
-    const deltas = this.nsuDeltaByThread();
-    const executar = service?.executar ?? 0;
-    const processRunning = !!service?.isRunning;
+    const deltas = simulating
+      ? sim?.nsuDeltas ?? {}
+      : this.nsuDeltaByThread();
+    const executar = simulating ? 1 : (service?.executar ?? 0);
+    const processRunning = simulating ? true : !!service?.isRunning;
     const running = processRunning && executar === 1;
-    const intervalo = global?.intervaloSeconds ?? 60;
+    const intervalo = simulating
+      ? sim?.intervaloSeconds ?? 60
+      : (global?.intervaloSeconds ?? 60);
 
     return threads.map((thread) => {
       const nsuDelta = running ? (deltas[thread.threadId] ?? null) : null;

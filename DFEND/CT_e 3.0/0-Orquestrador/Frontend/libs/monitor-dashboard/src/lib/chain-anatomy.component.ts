@@ -16,7 +16,6 @@ import {
   StationCardComponent,
   type StationBadge,
 } from './station-card.component';
-import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component';
 import { PresentationTourStore } from './presentation-tour.store';
 
 @Component({
@@ -26,7 +25,6 @@ import { PresentationTourStore } from './presentation-tour.store';
     DatePipe,
     StatusLegendComponent,
     StationCardComponent,
-    ChainQueueProofChipComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -267,7 +265,6 @@ import { PresentationTourStore } from './presentation-tour.store';
                   </div>
                 }
               }
-              <lib-chain-queue-proof-chip data-tour="validate" />
             </div>
           </div>
         </div>
@@ -280,12 +277,14 @@ export class ChainAnatomyComponent {
   readonly tour = inject(PresentationTourStore);
   private readonly router = inject(Router);
 
-  readonly systems = computed(
-    () => this.tour.simulation()?.systems ?? this.store.systems()
-  );
-  readonly lastLote = computed(() => {
+  readonly systems = computed(() => {
     const sim = this.tour.simulation();
-    if (sim) {
+    if (this.tour.isChainSimulating() && sim) return sim.systems;
+    return this.store.systems();
+  });
+  readonly lastLote = computed(() => {
+    if (this.tour.isChainSimulating()) {
+      const sim = this.tour.simulation()!;
       return {
         nsu: 900001,
         nsuFinal: 900008,
@@ -295,9 +294,12 @@ export class ChainAnatomyComponent {
     }
     return this.store.lastLote();
   });
-  readonly beltMoving = computed(
-    () => this.tour.simulation()?.beltMoving ?? this.store.beltMoving()
-  );
+  readonly beltMoving = computed(() => {
+    if (this.tour.isChainSimulating()) {
+      return !!this.tour.simulation()?.beltMoving;
+    }
+    return this.store.beltMoving();
+  });
   readonly anyRunning = computed(() => {
     const mode = this.tour.simulation()?.mode;
     if (mode === 'flow') return true;
@@ -311,12 +313,12 @@ export class ChainAnatomyComponent {
   );
 
   readonly isStarting = computed(() => {
-    if (this.tour.simulation()) return false;
+    if (this.tour.isChainSimulating()) return false;
     return normalizePhase(this.store.cascadePhase()) === 'starting';
   });
 
   readonly isIdlePoster = computed(() => {
-    if (this.tour.simulation()) return false;
+    if (this.tour.isChainSimulating()) return false;
     const phase = normalizePhase(this.store.cascadePhase());
     return (
       phase === 'idle' &&
@@ -329,6 +331,7 @@ export class ChainAnatomyComponent {
   /** Parada com backlog: Desligar não limpa fila — UI explica o estado. */
   readonly isStoppedWithBacklog = computed(() => {
     if (this.tour.simulation()?.mode === 'stoppedBacklog') return true;
+    if (this.tour.isChainSimulating()) return false;
     const phase = normalizePhase(this.store.cascadePhase());
     return (
       phase === 'idle' &&
@@ -355,7 +358,8 @@ export class ChainAnatomyComponent {
   );
 
   readonly phaseLabel = computed(() => {
-    const simPhase = this.tour.simulation()?.cascadePhase;
+    const sim = this.tour.simulation();
+    const simPhase = this.tour.isChainSimulating() ? sim?.cascadePhase : undefined;
     const phase = normalizePhase(simPhase ?? this.store.cascadePhase());
     switch (phase) {
       case 'starting':

@@ -1,5 +1,19 @@
 /** Passos do modo Apresentação (tour guiado + simulação visual). */
-export type PresentationSimulateMode = 'none' | 'flow' | 'stoppedBacklog';
+export type PresentationSimulateMode =
+  | 'none'
+  | 'flow'
+  | 'stoppedBacklog'
+  | 'receptorFlow'
+  | 'detailsFlow'
+  | 'tablesFlow'
+  | 'threadsFlow';
+
+export type PresentationReceptorStage =
+  | 'sefaz'
+  | 'consulta'
+  | 'temp'
+  | 'broker'
+  | 'arquivador';
 
 export interface PresentationStep {
   id: string;
@@ -12,10 +26,10 @@ export interface PresentationStep {
   target?: string;
   /** Rota opcional ao entrar no passo. */
   route?: string;
-  /** Overlay visual na cadeia. */
+  /** Overlay visual na cadeia ou no monitor. */
   simulate?: PresentationSimulateMode;
   /** Onde fixar o flash card para não cobrir o alvo. */
-  panelPlacement?: 'top' | 'bottom';
+  panelPlacement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
 /**
@@ -87,27 +101,14 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Cadeia de serviços',
     panelPlacement: 'top',
     lines: [
-      'Cada caixa é uma etapa do caminho do CT-e.',
+      'Cada caixa é uma fila de processamento do CT-e.',
       'A ordem é: Receptor → Arquivador → Sintetizador → Analisador → Integrador → Carga.',
-      'O número embaixo mostra quantos documentos estão naquela etapa.',
+      'No Receptor, o número embaixo é o último NSU (lote) gerado.',
+      'No Integrador, staging 0 = nenhum CT-e pendente nas tabelas de carga do Netezza.',
       'Os outros monitores são iguais ao Receptor — vamos abrir o Receptor como exemplo.',
     ],
     target: '[data-tour="stations"]',
     route: '/',
-  },
-  {
-    id: 'simulate-flow',
-    title: 'Como o CT-e caminha',
-    spotlightLabel: 'Simulação do fluxo',
-    panelPlacement: 'top',
-    lines: [
-      'Agora estamos só demonstrando — não é CT-e real.',
-      'Veja o destaque azul “AGORA” passando de etapa em etapa.',
-      'A esteira no meio mostra documentos em movimento.',
-    ],
-    target: '[data-tour="stations"]',
-    route: '/',
-    simulate: 'flow',
   },
   {
     id: 'stopped-backlog',
@@ -124,15 +125,30 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
   },
   {
     id: 'validate',
-    title: 'Botão Validar cadeia',
-    spotlightLabel: 'Validar cadeia',
+    title: 'Botão Validar filas',
+    spotlightLabel: 'Validar filas',
     lines: [
-      'Use quando quiser ter certeza de que a fila está vazia.',
-      'Se estiver tudo limpo, aparece “Validada vazia”.',
-      'Se ainda houver documentos na fila, ele mostra quantos sobraram.',
+      'Fica no topo, junto de Ligar / Desligar filas.',
+      'Confere se as filas e temporárias dos 6 serviços estão vazias.',
+      'Se estiver limpo, aparece “Filas vazias”. Se houver backlog, mostra quanto sobrou.',
     ],
     target: '[data-tour="validate"]',
     route: '/',
+  },
+  {
+    id: 'simulate-flow',
+    title: 'Como o CT-e caminha',
+    spotlightLabel: 'Simulação do fluxo',
+    panelPlacement: 'right',
+    lines: [
+      'Agora estamos só demonstrando — não é CT-e real.',
+      'Veja o destaque azul “AGORA” passando de etapa em etapa.',
+      'A esteira no meio mostra documentos em movimento.',
+      'Avançar abre o monitor do Receptor.',
+    ],
+    target: '[data-tour="stations"]',
+    route: '/',
+    simulate: 'flow',
   },
   {
     id: 'nav-monitor',
@@ -282,6 +298,21 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     route: '/monitores/receptor',
   },
   {
+    id: 'simulate-receptor',
+    title: 'Como o Receptor trabalha',
+    spotlightLabel: 'Simulação do monitor',
+    panelPlacement: 'right',
+    lines: [
+      'Demonstração visual — não é CT-e real.',
+      'Veja o “AGORA” andando: SEFAZ → consulta → temporária → fila → Arquivador.',
+      'A esteira e os chips mostram o documento em movimento neste monitor.',
+      'É o mesmo tipo de simulação da cadeia, agora por dentro do Receptor.',
+    ],
+    target: '[data-tour="anatomy"]',
+    route: '/monitores/receptor',
+    simulate: 'receptorFlow',
+  },
+  {
     id: 'nav-mais-informacoes',
     title: 'Próxima tela: Mais informações',
     spotlightLabel: 'Mais informações →',
@@ -337,7 +368,7 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     panelPlacement: 'top',
     lines: [
       'Diz se a conexão com o banco está ok.',
-      'Lista as tabelas deste serviço e o estado de cada uma.',
+      'Os mini cards são as tabelas consultáveis — clique para ver até os últimos 1000 registros.',
       'Daqui também dá para ir a Tabelas e Configuração.',
     ],
     target: '[data-tour="details-db-health"]',
@@ -349,11 +380,27 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     spotlightLabel: 'Avisos',
     panelPlacement: 'top',
     lines: [
-      'Aqui aparecem alertas que pedem atenção.',
-      'Se estiver vazio, normalmente está tudo bem.',
+      'Aqui entram todos os status: ok/info, atenção e alerta.',
+      'Exemplos: SQL ok, processo ligado, fila/temporária vazia ou com backlog, batida atrasada.',
+      'Verde/azul = informativo. Amarelo/laranja = precisa de olho.',
     ],
     target: '[data-tour="details-alerts"]',
     route: '/monitores/receptor/mais-informacoes',
+  },
+  {
+    id: 'simulate-details',
+    title: 'Como a tela Mais informações funciona',
+    spotlightLabel: 'Simulação da tela',
+    panelPlacement: 'right',
+    lines: [
+      'Demonstração automática — não é telemetria real.',
+      'Os 4 painéis recebem exemplos: passos, eventos (sucesso/aviso/erro), tabelas e avisos.',
+      'Em seguida o sistema abre sozinho o modal de um erro crítico (Ver detalhes).',
+      'É o mesmo tipo de simulação da cadeia e do Receptor.',
+    ],
+    target: '[data-tour="details-header"]',
+    route: '/monitores/receptor/mais-informacoes',
+    simulate: 'detailsFlow',
   },
   {
     id: 'nav-tabelas',
@@ -404,6 +451,20 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     route: '/monitores/receptor/tabelas/servico',
   },
   {
+    id: 'simulate-tables',
+    title: 'Como a tela Tabelas funciona',
+    spotlightLabel: 'Simulação da tabela',
+    panelPlacement: 'right',
+    lines: [
+      'Demonstração automática — não é telemetria real.',
+      'A tabela Serviço (NSU) recebe uma linha de exemplo e eventos NSU/cStat.',
+      'É o mesmo tipo de simulação da cadeia, do Receptor e de Mais informações.',
+    ],
+    target: '[data-tour="table-detail"]',
+    route: '/monitores/receptor/tabelas/servico',
+    simulate: 'tablesFlow',
+  },
+  {
     id: 'nav-threads',
     title: 'Próxima tela: Linhas de trabalho',
     spotlightLabel: 'Linhas de trabalho →',
@@ -449,6 +510,21 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
     ],
     target: '[data-tour="threads-cards"]',
     route: '/monitores/receptor/threads',
+  },
+  {
+    id: 'simulate-threads',
+    title: 'Como as Linhas de trabalho funcionam',
+    spotlightLabel: 'Simulação das linhas',
+    panelPlacement: 'right',
+    lines: [
+      'Demonstração automática — não é telemetria real.',
+      'Os cartões recebem exemplos: buscando, parada, arquivo local e sem atividade.',
+      'O resumo no topo conta quantas estão em cada situação.',
+      'É o mesmo tipo de simulação das telas anteriores.',
+    ],
+    target: '[data-tour="threads-cards"]',
+    route: '/monitores/receptor/threads',
+    simulate: 'threadsFlow',
   },
   {
     id: 'nav-historico',
@@ -562,12 +638,13 @@ export const PRESENTATION_STEPS: PresentationStep[] = [
   },
   {
     id: 'end',
-    title: 'Fim da apresentação',
-    spotlightLabel: 'Painel principal',
+    title: 'Obrigado — dúvida e opinião',
+    spotlightLabel: 'Agradecimento e suporte',
     lines: [
-      'Pronto — você conhece a cadeia e as telas do monitor.',
-      'Clique em Sair para voltar à tela ao vivo.',
-      'Para ver de novo, use Reiniciar neste card.',
+      'Obrigado por acompanhar esta apresentação do Orquestrador CT-e.',
+      'Se algo ficou dúbio, ou se quiser enviar opinião/sugestão, fale com o suporte.',
+      'Exemplo de contato (e-mail fictício): suporte.orquestrador.cte@assefaz.exemplo',
+      'Clique em Finalizar para desligar a apresentação e voltar à tela ao vivo.',
     ],
     target: '[data-tour="overview"]',
     route: '/',

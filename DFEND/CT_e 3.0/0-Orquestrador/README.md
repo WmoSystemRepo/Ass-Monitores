@@ -148,6 +148,7 @@ No Ligar (DEV): paths do registry sobem engines/DevHosts em silêncio. Em Docker
 - Dashboard: foco em **AGORA** e profundidade de fila; medidor sobe/desce; boot visual ao Ligar
 - **Todos os monitores** (R→C): textos para leigo; Mais informações unificado 2×2; **Ver erro**; alertas de saúde; fila sobe/desce + boot ao Ligar
 - Confirmações via `ConfirmDialog` (shared-ui)
+- **Modo Apresentação**: tour guiado no Dashboard (botão **Apresentação** ou `/?apresentacao=1`), flash card com **Reiniciar**, spotlight fixed e simulação visual sem CT-e real — ver [Doc §8.5](Doc/Documentacao_Orquestrador_CTe.md)
 
 Detalhes: [Doc/Documentacao_Orquestrador_CTe.md](Doc/Documentacao_Orquestrador_CTe.md) §8.
 

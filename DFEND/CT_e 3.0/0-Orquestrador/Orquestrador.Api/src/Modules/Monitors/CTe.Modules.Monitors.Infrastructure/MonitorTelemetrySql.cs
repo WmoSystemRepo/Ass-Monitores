@@ -14,7 +14,27 @@ internal static class MonitorTelemetrySql
         string? DesServico,
         string? NomServidor,
         DateTimeOffset? DtcExecucao,
+        DateTimeOffset? DtcAtualizacao,
         string? MainNsu);
+
+    private static readonly string[] ProcessConfigKeys =
+    [
+        "Executar",
+        "Intervalo",
+        "Threads",
+        "PacoteCompleto",
+        "ReBuscar",
+        "NSUAux",
+        "NSUAuxAut",
+        "NSUAuxDest",
+        "WSURL",
+        "WSTimeOut",
+        "WSVersao",
+        "WSTipoAmbiente",
+        "LogBanco",
+        "LogEvento",
+        "LogCompleto"
+    ];
 
     internal sealed record SnapshotTelemetry(
         long TempBacklog,
@@ -94,6 +114,277 @@ internal static class MonitorTelemetrySql
         {
             return Array.Empty<object>();
         }
+    }
+
+    /// <summary>
+    /// Detalhe de tabela (servico/configuracao/temporaria/log/fila) no shape do TableDetailDto do front.
+    /// Sem connection string ainda devolve payload vazio estruturado (não 404).
+    /// </summary>
+    public static async Task<object?> ReadTableDetailAsync(
+        string? connectionString,
+        string domain,
+        int codServico,
+        string displayName,
+        string key,
+        int take,
+        int timeoutSeconds,
+        ILogger logger,
+        CancellationToken ct)
+    {
+        key = (key ?? string.Empty).Trim().ToLowerInvariant();
+        take = Math.Clamp(take, 1, 1000);
+
+        var meta = ResolveTableMeta(key, domain);
+        if (meta is null)
+        {
+            return null;
+        }
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        IReadOnlyDictionary<string, string> configs =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        ServiceTelemetry? service = null;
+        long tempBacklog = 0;
+        long brokerDepth = 0;
+        IReadOnlyList<object> docs = Array.Empty<object>();
+        IReadOnlyList<object> logs = Array.Empty<object>();
+        IReadOnlyList<object> configRows = Array.Empty<object>();
+        var hasSql = !string.IsNullOrWhiteSpace(connectionString) && codServico > 0;
+
+        if (hasSql)
+        {
+            try
+            {
+                await using var conn = new SqlConnection(connectionString);
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                linked.CancelAfter(TimeSpan.FromSeconds(Math.Max(3, timeoutSeconds * 3)));
+                await conn.OpenAsync(linked.Token);
+
+                var schema = ResolveSchema(domain);
+                configs = await ReadConfigsAsync(conn, schema, codServico, timeoutSeconds, linked.Token);
+                service = await ReadServiceAsync(conn, schema, codServico, timeoutSeconds, linked.Token);
+                (tempBacklog, brokerDepth, _) = await ReadQueuesAsync(conn, domain, timeoutSeconds, linked.Token);
+
+                switch (key)
+                {
+                    case "servico":
+                    case "log":
+                        logs = await ReadLogsAsync(
+                            conn, schema, afterSeq: 0, take, timeoutSeconds, linked.Token);
+                        break;
+                    case "temporaria":
+                        docs = await ReadRecentDocsAsync(
+                            conn, domain, timeoutSeconds, linked.Token, take);
+                        break;
+                    case "configuracao":
+                        configRows = await ReadConfigDetailRowsAsync(
+                            conn, schema, codServico, timeoutSeconds, linked.Token);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Detalhe de tabela {Key} falhou para domain={Domain}", key, domain);
+            }
+        }
+
+        sw.Stop();
+        var queryMs = (int)Math.Min(int.MaxValue, sw.ElapsedMilliseconds);
+
+        int? executar = null;
+        if (configs.TryGetValue("Executar", out var exRaw) && int.TryParse(exRaw, out var executarVal))
+        {
+            executar = executarVal;
+        }
+
+        var receptionOn = executar is 1;
+        var banner = receptionOn
+            ? null
+            : "Recepção desligada — mostrando dados da última sessão (desde a última alteração de Executar).";
+
+        var ageSeconds = service?.DtcExecucao is DateTimeOffset batida
+            ? (int?)Math.Max(0, (DateTimeOffset.UtcNow - batida.ToUniversalTime()).TotalSeconds)
+            : null;
+
+        object? serviceRows = null;
+        object? tempRows = null;
+        object? logRows = null;
+        object? fila = null;
+        object? contextLogs = null;
+        var primaryValue = meta.Value.EmptyPrimary;
+        var status = hasSql ? "Ok" : "Atencao";
+        var hint = hasSql ? meta.Value.HintOk : "Sem connection string — não foi possível ler o SQL.";
+        var rowCount = 0;
+
+        switch (key)
+        {
+            case "servico":
+            {
+                if (service is not null)
+                {
+                    serviceRows = new[]
+                    {
+                        new
+                        {
+                            desServico = service.DesServico ?? displayName,
+                            nomServidor = service.NomServidor,
+                            nsu = service.MainNsu,
+                            dtcExecucao = service.DtcExecucao,
+                            dtcAtualizacao = service.DtcAtualizacao
+                        }
+                    };
+                    rowCount = 1;
+                    primaryValue = string.IsNullOrWhiteSpace(service.MainNsu)
+                        ? "Sem NSU"
+                        : $"NSU {service.MainNsu}";
+                }
+                else
+                {
+                    serviceRows = Array.Empty<object>();
+                    status = hasSql ? "Atencao" : status;
+                    hint = hasSql ? "Sem linha de serviço no SQL." : hint;
+                }
+
+                contextLogs = logs
+                    .OfType<object>()
+                    .Where(IsNsuOrCStatLog)
+                    .Take(take)
+                    .ToList();
+                break;
+            }
+            case "configuracao":
+            {
+                if (configRows.Count == 0 && configs.Count > 0)
+                {
+                    configRows = ProcessConfigKeys
+                        .Where(k => configs.ContainsKey(k))
+                        .Select(k => (object)new
+                        {
+                            key = k,
+                            value = configs[k],
+                            dtcAtualizacao = (DateTimeOffset?)null,
+                            isProcessKey = true
+                        })
+                        .ToList();
+                }
+
+                rowCount = configRows.Count;
+                primaryValue = rowCount == 0 ? "Sem configs" : $"{rowCount} chave(s)";
+                if (rowCount == 0 && hasSql)
+                {
+                    status = "Atencao";
+                    hint = "Nenhuma configuração de processo encontrada.";
+                }
+
+                break;
+            }
+            case "temporaria":
+            {
+                tempRows = docs;
+                rowCount = docs.Count;
+                primaryValue = tempBacklog > 0
+                    ? $"{tempBacklog} na temporária"
+                    : (rowCount == 0 ? "Vazia" : $"{rowCount} doc(s)");
+                break;
+            }
+            case "log":
+            {
+                logRows = logs.Reverse().Take(take).ToList();
+                rowCount = ((IReadOnlyList<object>)logRows).Count;
+                primaryValue = rowCount == 0 ? "Sem eventos" : $"{rowCount} evento(s)";
+                break;
+            }
+            case "fila":
+            {
+                fila = new
+                {
+                    depth = brokerDepth,
+                    depthTrend = Array.Empty<long>(),
+                    highThreshold = 50,
+                    trendHint = brokerDepth == 0
+                        ? "Fila vazia."
+                        : $"{brokerDepth} item(ns) aguardando."
+                };
+                rowCount = 1;
+                primaryValue = brokerDepth == 0 ? "Fila vazia" : $"Profundidade {brokerDepth}";
+                break;
+            }
+        }
+
+        if (ageSeconds is > 7200 && key is "servico")
+        {
+            status = "Atencao";
+            hint = "Última batida desatualizada (>2h).";
+        }
+
+        return new
+        {
+            key,
+            label = meta.Value.Label,
+            sessionStartUtc = (DateTimeOffset?)null,
+            receptionOn,
+            bannerMessage = banner,
+            health = new
+            {
+                key,
+                label = meta.Value.Label,
+                status,
+                primaryValue,
+                dataAgeSeconds = ageSeconds,
+                queryMs,
+                hint,
+                route = $"/tabelas/{key}"
+            },
+            serviceRows,
+            configRows = key == "configuracao" ? configRows : null,
+            tempRows,
+            logRows,
+            fila,
+            contextLogs,
+            takeApplied = take,
+            rowCount
+        };
+    }
+
+    private static (string Label, string EmptyPrimary, string HintOk)? ResolveTableMeta(string key, string domain)
+    {
+        var filaLabel = domain.Trim().ToLowerInvariant() switch
+        {
+            "receptor" => "Fila Arquivador",
+            "arquivador" => "Fila Sintetizador",
+            "sintetizador" => "Fila Analisador",
+            "analisador" => "Fila Integrador",
+            "integrador" or "carga" => "Fila saída",
+            _ => "Fila"
+        };
+
+        return key switch
+        {
+            "servico" => ("Serviço (NSU)", "Sem linha de serviço", "Linha de serviço / posição NSU."),
+            "configuracao" => ("Configuração", "Sem configs", "Chaves de processo ativas."),
+            "temporaria" => ("Temporária", "Vazia", "Documentos na tabela temporária."),
+            "log" => ("Log", "Sem eventos", "Eventos recentes da sessão."),
+            "fila" => (filaLabel, "Fila vazia", "Profundidade da fila Service Broker."),
+            _ => null
+        };
+    }
+
+    private static bool IsNsuOrCStatLog(object log)
+    {
+        // Anonymous log shape: mensagem / cStat via reflection-free ToString check is fragile;
+        // use dynamic dictionary-like via pattern on known anon type properties.
+        var type = log.GetType();
+        var cStatProp = type.GetProperty("cStat");
+        var msgProp = type.GetProperty("mensagem");
+        var cStat = cStatProp?.GetValue(log) as string;
+        if (!string.IsNullOrEmpty(cStat))
+        {
+            return true;
+        }
+
+        var msg = msgProp?.GetValue(log) as string;
+        return msg?.Contains("NSU", StringComparison.OrdinalIgnoreCase) == true
+            || msg?.Contains("nsu", StringComparison.OrdinalIgnoreCase) == true;
     }
 
     private static SnapshotTelemetry Empty() => new(
@@ -218,11 +509,18 @@ internal static class MonitorTelemetrySql
             linked.CancelAfter(TimeSpan.FromSeconds(Math.Max(3, timeoutSeconds * 3)));
             await conn.OpenAsync(linked.Token);
 
-            var tempSql = $"""
-                SELECT COUNT(1) AS total,
-                       SUM(CASE WHEN NULLIF(LTRIM(RTRIM(des_mensagem_erro)), '') IS NOT NULL THEN 1 ELSE 0 END) AS erros
-                FROM cte.{tempTable}
-                """;
+            // Integrador/Carga: temp sem des_mensagem_erro (paridade CT_e 2.0).
+            var errorColumn = ResolveTempErrorColumn(domain);
+            var tempSql = errorColumn is null
+                ? $"""
+                    SELECT COUNT(1) AS total, CAST(0 AS bigint) AS erros
+                    FROM cte.{tempTable}
+                    """
+                : $"""
+                    SELECT COUNT(1) AS total,
+                           SUM(CASE WHEN NULLIF(LTRIM(RTRIM({errorColumn})), '') IS NOT NULL THEN 1 ELSE 0 END) AS erros
+                    FROM cte.{tempTable}
+                    """;
 
             long tempCount = 0;
             long tempErrorCount = 0;
@@ -271,9 +569,32 @@ internal static class MonitorTelemetrySql
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Validação estrita de fila falhou para domain={Domain}", domain);
-            throw;
+            // Não propaga: a cadeia agrega por serviço; um domínio quebrado não derruba o HTTP.
+            return new QueueProofResult(
+                serviceId,
+                domain,
+                verifiedAt,
+                tempTable,
+                brokerQueue,
+                TempCount: 0,
+                BrokerCount: 0,
+                TempErrorCount: 0,
+                IsEmpty: false,
+                IsClear: false,
+                Ok: false,
+                Errors: [ex.Message]);
         }
     }
+
+    /// <summary>
+    /// Coluna de erro na temp — Integrador/Carga não têm <c>des_mensagem_erro</c>.
+    /// </summary>
+    private static string? ResolveTempErrorColumn(string domain) =>
+        domain.Trim().ToLowerInvariant() switch
+        {
+            "integrador" or "carga" => null,
+            _ => "des_mensagem_erro"
+        };
 
     private static async Task<(long Temp, long Broker, DateTimeOffset? Oldest)> ReadQueuesAsync(
         SqlConnection conn,
@@ -379,6 +700,7 @@ internal static class MonitorTelemetrySql
                   des_servico,
                   nom_servidor,
                   dtc_execucao,
+                  dtc_atualizacao,
                   num_sequencial_unico
                 FROM cte.{schema.ServiceTable} WITH (NOLOCK)
                 WHERE {schema.ServiceCodColumn} = @cod
@@ -396,6 +718,9 @@ internal static class MonitorTelemetrySql
                 reader["dtc_execucao"] is DateTime dtc
                     ? new DateTimeOffset(DateTime.SpecifyKind(dtc, DateTimeKind.Local))
                     : null,
+                reader["dtc_atualizacao"] is DateTime dtcUpd
+                    ? new DateTimeOffset(DateTime.SpecifyKind(dtcUpd, DateTimeKind.Local))
+                    : null,
                 reader["num_sequencial_unico"]?.ToString());
         }
         catch
@@ -404,13 +729,66 @@ internal static class MonitorTelemetrySql
         }
     }
 
+    private static async Task<IReadOnlyList<object>> ReadConfigDetailRowsAsync(
+        SqlConnection conn,
+        Schema schema,
+        int codServico,
+        int timeoutSeconds,
+        CancellationToken ct)
+    {
+        var processSet = new HashSet<string>(ProcessConfigKeys, StringComparer.OrdinalIgnoreCase);
+        var found = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandTimeout = Math.Max(1, timeoutSeconds);
+            cmd.CommandText = $"""
+                SELECT c.des_configuracao, c.nom_configuracao, c.dtc_atualizacao
+                FROM cte.{schema.ConfigTable} c WITH (READPAST)
+                WHERE c.sts_ativo = 1
+                  AND c.{schema.ConfigCodColumn} = @cod
+                """;
+            cmd.Parameters.AddWithValue("@cod", codServico);
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                var key = reader["des_configuracao"]?.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(key) || !processSet.Contains(key))
+                {
+                    continue;
+                }
+
+                found[key] = new
+                {
+                    key,
+                    value = reader["nom_configuracao"]?.ToString() ?? string.Empty,
+                    dtcAtualizacao = reader["dtc_atualizacao"] is DateTime dtc
+                        ? new DateTimeOffset(DateTime.SpecifyKind(dtc, DateTimeKind.Local))
+                        : (DateTimeOffset?)null,
+                    isProcessKey = true
+                };
+            }
+        }
+        catch
+        {
+            return Array.Empty<object>();
+        }
+
+        return ProcessConfigKeys
+            .Where(found.ContainsKey)
+            .Select(k => found[k])
+            .ToList();
+    }
+
     private static async Task<IReadOnlyList<object>> ReadRecentDocsAsync(
         SqlConnection conn,
         string domain,
         int timeoutSeconds,
-        CancellationToken ct)
+        CancellationToken ct,
+        int take = 12)
     {
         var (table, _) = ResolveTempAndBroker(domain);
+        take = Math.Clamp(take, 1, 1000);
 
         var list = new List<object>();
         try
@@ -418,7 +796,7 @@ internal static class MonitorTelemetrySql
             await using var cmd = conn.CreateCommand();
             cmd.CommandTimeout = Math.Max(1, timeoutSeconds);
             cmd.CommandText = $"""
-                SELECT TOP (12)
+                SELECT TOP (@take)
                   num_sequencial_unico AS nsu,
                   num_sequencial_unico_final AS nsuFinal,
                   qtd_documento AS qtdDocumento,
@@ -428,6 +806,7 @@ internal static class MonitorTelemetrySql
                 FROM cte.{table} WITH (READPAST)
                 ORDER BY dtc_atualizacao DESC
                 """;
+            cmd.Parameters.AddWithValue("@take", take);
             await using var reader = await cmd.ExecuteReaderAsync(ct);
             while (await reader.ReadAsync(ct))
             {

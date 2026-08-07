@@ -13,6 +13,7 @@ import {
 } from '@orquestrador/monitor-core';
 import { ConfirmDialogService } from '@orquestrador/shared-ui';
 import { ChainAnatomyComponent } from './chain-anatomy.component';
+import { ChainQueueProofChipComponent } from './chain-queue-proof-chip.component';
 import { PresentationTourStore } from './presentation-tour.store';
 
 @Component({
@@ -22,6 +23,7 @@ import { PresentationTourStore } from './presentation-tour.store';
     DatePipe,
     NgClass,
     ChainAnatomyComponent,
+    ChainQueueProofChipComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -87,6 +89,7 @@ import { PresentationTourStore } from './presentation-tour.store';
           >
             Desligar filas
           </button>
+          <lib-chain-queue-proof-chip class="shrink-0" />
         </div>
       </header>
 

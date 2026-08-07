@@ -51,6 +51,11 @@ public static class UnifiedMonitorEndpoints
                 .RequireAuthorization(MonitorAuthPolicies.MonitorRead)
                 .WithName($"Monitores_{tag}_Health");
 
+            group.MapGet("/queues/proof", (IMonitorModuleRegistry registry, CancellationToken ct) =>
+                    InvokeReadAsync(registry, servico, (m, c) => m.GetQueueProofAsync(c), ct))
+                .RequireAuthorization(MonitorAuthPolicies.MonitorRead)
+                .WithName($"Monitores_{tag}_QueuesProof");
+
             group.MapPost("/service/start", (HttpContext http, IMonitorModuleRegistry registry, CancellationToken ct) =>
                     InvokeActionAsync(registry, servico, "start", http, (m, c) => m.StartAsync(c), ct))
                 .RequireAuthorization(MonitorAuthPolicies.MonitorControl)

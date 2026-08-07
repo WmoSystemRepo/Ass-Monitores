@@ -253,3 +253,33 @@ export interface ServiceControlResult {
   status: string;
   message?: string | null;
 }
+
+/** Resposta de GET /api/monitores/{servico}/queues/proof */
+export interface QueueProof {
+  serviceId: string;
+  domain: string;
+  verifiedAtUtc: string;
+  tempTable: string;
+  brokerQueue?: string | null;
+  tempCount: number;
+  brokerCount: number;
+  tempErrorCount: number;
+  isEmpty: boolean;
+  isClear: boolean;
+  ok: boolean;
+  errors: string[];
+}
+
+/** Resposta de GET /api/orchestrator/queues/proof */
+export interface ChainQueueProof {
+  verifiedAtUtc: string;
+  tempCount: number;
+  brokerCount: number;
+  tempErrorCount: number;
+  isEmpty: boolean;
+  isClear: boolean;
+  ok: boolean;
+  errors: string[];
+  services: QueueProof[];
+}
+

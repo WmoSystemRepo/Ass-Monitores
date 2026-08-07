@@ -108,6 +108,9 @@ public sealed class HttpMonitorModule : IMonitorModule
             : GetJsonAsync(system.HealthLivePath(), ct);
     }
 
+    public Task<object?> GetQueueProofAsync(CancellationToken ct) =>
+        Task.FromResult<object?>(null);
+
     private OrchestratorSystemOptions? ResolveSystem() =>
         _options.Value.Systems.FirstOrDefault(s => s.Id.Equals(ServiceId, StringComparison.OrdinalIgnoreCase));
 

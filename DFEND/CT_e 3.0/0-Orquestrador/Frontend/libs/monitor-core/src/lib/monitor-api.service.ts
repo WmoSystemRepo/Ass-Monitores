@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CascadeControlResult, ChainSnapshot, EnsureStacksResult, SystemEnsureOpenResult } from '@orquestrador/shared-data';
+import { CascadeControlResult, ChainQueueProof, ChainSnapshot, EnsureStacksResult, SystemEnsureOpenResult } from '@orquestrador/shared-data';
 import { getApiBaseUrl } from './api-config';
 
 @Injectable({ providedIn: 'root' })
@@ -14,6 +14,10 @@ export class MonitorApiService {
 
   snapshot(): Observable<ChainSnapshot> {
     return this.http.get<ChainSnapshot>(`${this.base}/api/orchestrator/snapshot`);
+  }
+
+  chainQueueProof(): Observable<ChainQueueProof> {
+    return this.http.get<ChainQueueProof>(`${this.base}/api/orchestrator/queues/proof`);
   }
 
   status(): Observable<CascadeControlResult> {
